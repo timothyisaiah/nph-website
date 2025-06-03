@@ -7,11 +7,14 @@ import Publications from './pages/Publications';
 import Services from './pages/Services';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
+import ErrorPage from './pages/Error';
+import DataCanvas from './components/data/DataCanvas';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
@@ -41,8 +44,12 @@ export const router = createBrowserRouter([
         path: 'contact',
         element: <Contact />,
       },
+      {
+        path: 'data',
+        element: <DataCanvas />,
+      },
     ],
   },
 ], {
-  basename: '/nph-website' // Match this with your repository name
+  basename: '/' // Updated to match your GitHub Pages URL path
 });

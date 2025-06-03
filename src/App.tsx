@@ -1,8 +1,13 @@
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
+import { IndicatorProvider } from './context/IndicatorContext';
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <IndicatorProvider>
+      <RouterProvider router={router} />
+    </IndicatorProvider>
+  );
 }
 
 export default App;
