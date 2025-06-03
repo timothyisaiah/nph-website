@@ -1,76 +1,117 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export interface BlogPost {
-  id: string;
+interface Author {
+  name: string;
+  avatar?: string;
+}
+
+interface BlogCardProps {
   title: string;
   excerpt: string;
   date: string;
-  author: {
-    name: string;
-    avatar?: string;
-  };
+  author: string | Author;
+  image: string;
+  imageAlt: string;
   category: string;
   readTime: string;
-  imageUrl?: string;
+  slug: string;
 }
 
-const BlogCard: React.FC<BlogPost> = ({
-  id,
+const getAuthorName = (author: string | Author): string => {
+  if (typeof author === 'string') return author;
+  return author.name || 'Anonymous';
+};
+
+const getAuthorInitials = (author: string | Author): string => {
+  const authorName = getAuthorName(author);
+  if (!authorName) return 'A';
+  
+  return authorName
+    .split(' ')
+    .map(name => name[0])
+    .filter(initial => initial)
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getAuthorAvatar = (author: string | Author): string | null => {
+  if (typeof author === 'object' && author.avatar) {
+    return author.avatar;
+  }
+  return null;
+};
+
+const BlogCard: React.FC<BlogCardProps> = ({
   title,
   excerpt,
   date,
   author,
+  image,
+  imageAlt,
   category,
   readTime,
-  imageUrl,
+  slug
 }) => {
+  const authorName = getAuthorName(author);
+  const authorInitials = getAuthorInitials(author);
+  const authorAvatar = getAuthorAvatar(author);
+
   return (
-    <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      {imageUrl && (
-        <div className="relative h-48 overflow-hidden">
+    <Link to={`/blog/${slug}`} className="block group">
+      <article className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div className="relative h-48 md:h-64 overflow-hidden">
           <img
-            src={imageUrl}
-            alt={title}
-            className="w-full h-full object-cover"
+            src={image}
+            alt={imageAlt}
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-4 left-4">
-            <span className="px-3 py-1 text-sm bg-blue-600 text-white rounded-full">
+            <span className="inline-block bg-blue-600 text-white text-sm px-3 py-1 rounded-full">
               {category}
             </span>
           </div>
         </div>
-      )}
-      <div className="p-6">
-        <div className="flex items-center space-x-2 text-sm text-gray-500 mb-3">
-          <span>{date}</span>
-          <span>•</span>
-          <span>{readTime}</span>
-        </div>
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3 line-clamp-2 hover:text-blue-600">
-          <Link to={`/blog/${id}`}>{title}</Link>
-        </h2>
-        <p className="text-gray-600 mb-4 line-clamp-3">{excerpt}</p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {author.avatar && (
-              <img
-                src={author.avatar}
-                alt={author.name}
-                className="w-8 h-8 rounded-full"
-              />
-            )}
-            <span className="text-sm text-gray-600">{author.name}</span>
+        <div className="p-6">
+          <div className="flex items-center text-sm text-gray-500 mb-3">
+            <span>{date}</span>
+            <span className="mx-2">•</span>
+            <span>{readTime} read</span>
           </div>
-          <Link
-            to={`/blog/${id}`}
-            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-          >
-            Read More →
-          </Link>
+          <h3 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors duration-200">
+            {title}
+          </h3>
+          <p className="text-gray-600 mb-4 line-clamp-2">
+            {excerpt}
+          </p>
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <span className="sr-only">{authorName}</span>
+              {authorAvatar ? (
+                <img 
+                  src={authorAvatar} 
+                  alt={authorName}
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-600 font-medium">
+                    {authorInitials}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-800">{authorName}</p>
+              <div className="flex space-x-1 text-sm text-gray-500">
+                <span>Author</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 };
 
