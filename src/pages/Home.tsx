@@ -19,10 +19,10 @@ const Home: React.FC = () => {
   return (
     <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
       {/* Main Content Section with Globe */}
-      <div className="relative z-20 container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center md:items-start pt-16 md:pt-24">
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="flex flex-col md:flex-row items-center md:items-start pt-16 md:pt-24 z-0">
           {/* Globe Container */}
-          <div className="w-full md:w-1/2 h-[400px] md:h-[600px] order-2 md:order-1">
+          <div className="w-full md:w-1/2 aspect-square rounded-full overflow-hidden order-2 md:order-1">
             {error ? (
               <div className="flex items-center justify-center h-full">
                 <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-red-700 max-w-md text-center mx-4">
@@ -83,7 +83,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* Featured Images Section */}
-      <div className="relative z-20 bg-white py-16 md:py-24 mt-16 md:mt-24">
+      <div className="relative z-10 bg-white py-16 md:py-24 mt-16 md:mt-24">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Our Impact Areas</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">

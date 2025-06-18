@@ -11,10 +11,21 @@ const MainLayout: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const navItems = [
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' },
+    { name: 'Thematic Areas', path: '/thematic-areas' },
+    { name: 'Publications', path: '/publications' },
+    { name: 'Services', path: '/services' },
+    { name: 'Blog', path: '/blog' },
+    { name: 'Data', path: '/data' },
+    { name: 'Contact', path: '/contact' },
+  ];
+
   return (
     <div className={`min-h-screen flex flex-col ${!isHomePage ? 'bg-gray-50' : ''}`}>
       {/* Navigation */}
-      <nav className={`${isHomePage ? 'absolute top-0 left-0 right-0 z-20 bg-white bg-opacity-90 backdrop-blur-sm' : 'bg-white shadow-sm'}`}>
+      <nav className={`${isHomePage ? 'absolute top-0 left-0 right-0 z-50 bg-white bg-opacity-90 backdrop-blur-sm' : 'bg-white shadow-sm'}`}>
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="text-xl font-bold text-gray-800">
@@ -46,14 +57,15 @@ const MainLayout: React.FC = () => {
 
             {/* Desktop menu */}
             <div className="hidden md:flex space-x-6">
-              <Link to="/" className="text-gray-600 hover:text-gray-900 transition-colors">Home</Link>
-              <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors">About</Link>
-              <Link to="/thematic-areas" className="text-gray-600 hover:text-gray-900 transition-colors">Thematic Areas</Link>
-              <Link to="/publications" className="text-gray-600 hover:text-gray-900 transition-colors">Publications</Link>
-              <Link to="/services" className="text-gray-600 hover:text-gray-900 transition-colors">Services</Link>
-              <Link to="/blog" className="text-gray-600 hover:text-gray-900 transition-colors">Blog</Link>
-              <Link to="/data" className="text-gray-600 hover:text-gray-900 transition-colors">Data</Link>
-              <Link to="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -62,14 +74,16 @@ const MainLayout: React.FC = () => {
             className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'} bg-white py-4 px-2 rounded-lg mt-2 shadow-lg`}
           >
             <div className="flex flex-col space-y-3">
-              <Link to="/" className="px-3 py-2 rounded hover:bg-gray-100">Home</Link>
-              <Link to="/about" className="px-3 py-2 rounded hover:bg-gray-100">About</Link>
-              <Link to="/thematic-areas" className="px-3 py-2 rounded hover:bg-gray-100">Thematic Areas</Link>
-              <Link to="/publications" className="px-3 py-2 rounded hover:bg-gray-100">Publications</Link>
-              <Link to="/services" className="px-3 py-2 rounded hover:bg-gray-100">Services</Link>
-              <Link to="/blog" className="px-3 py-2 rounded hover:bg-gray-100">Blog</Link>
-              <Link to="/data" className="px-3 py-2 rounded hover:bg-gray-100">Data</Link>
-              <Link to="/contact" className="px-3 py-2 rounded hover:bg-gray-100">Contact</Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className="px-3 py-2 rounded hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
