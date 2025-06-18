@@ -6,28 +6,28 @@ interface Author {
   avatar?: string;
 }
 
-interface BlogCardProps {
+export interface BlogPost {
+  id: string;
   title: string;
   excerpt: string;
   date: string;
-  author: string | Author;
-  image: string;
-  imageAlt: string;
+  author: Author;
   category: string;
   readTime: string;
-  slug: string;
+  imageUrl: string;
 }
 
-const getAuthorName = (author: string | Author): string => {
-  if (typeof author === 'string') return author;
+// Make BlogCardProps extend BlogPost
+type BlogCardProps = BlogPost;
+
+const getAuthorName = (author: Author): string => {
   return author.name || 'Anonymous';
 };
 
-const getAuthorInitials = (author: string | Author): string => {
-  const authorName = getAuthorName(author);
-  if (!authorName) return 'A';
+const getAuthorInitials = (author: Author): string => {
+  if (!author.name) return 'A';
   
-  return authorName
+  return author.name
     .split(' ')
     .map(name => name[0])
     .filter(initial => initial)
@@ -36,35 +36,26 @@ const getAuthorInitials = (author: string | Author): string => {
     .slice(0, 2);
 };
 
-const getAuthorAvatar = (author: string | Author): string | null => {
-  if (typeof author === 'object' && author.avatar) {
-    return author.avatar;
-  }
-  return null;
-};
-
 const BlogCard: React.FC<BlogCardProps> = ({
+  id,
   title,
   excerpt,
   date,
   author,
-  image,
-  imageAlt,
+  imageUrl,
   category,
-  readTime,
-  slug
+  readTime
 }) => {
   const authorName = getAuthorName(author);
   const authorInitials = getAuthorInitials(author);
-  const authorAvatar = getAuthorAvatar(author);
 
   return (
-    <Link to={`/blog/${slug}`} className="block group">
+    <Link to={`/blog/${id}`} className="block group">
       <article className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
         <div className="relative h-48 md:h-64 overflow-hidden">
           <img
-            src={image}
-            alt={imageAlt}
+            src={imageUrl}
+            alt={title}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-4 left-4">
@@ -77,7 +68,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
           <div className="flex items-center text-sm text-gray-500 mb-3">
             <span>{date}</span>
             <span className="mx-2">•</span>
-            <span>{readTime} read</span>
+            <span>{readTime}</span>
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors duration-200">
             {title}
@@ -88,9 +79,9 @@ const BlogCard: React.FC<BlogCardProps> = ({
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <span className="sr-only">{authorName}</span>
-              {authorAvatar ? (
+              {author.avatar ? (
                 <img 
-                  src={authorAvatar} 
+                  src={author.avatar} 
                   alt={authorName}
                   className="h-10 w-10 rounded-full object-cover"
                 />

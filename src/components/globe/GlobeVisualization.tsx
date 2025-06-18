@@ -45,10 +45,11 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
     '#FF7043'  // Deep Orange
   ];
 
-  const generateRandomPosition = () => {
-    const lat = (Math.random() - 0.5) * 180;
-    const lng = (Math.random() - 0.5) * 360;
-    return [lat, lng] as [number, number];
+  const generateRandomPosition = (): [number, number] => {
+    // Ensure valid latitude (-90 to 90) and longitude (-180 to 180)
+    const lat = Math.min(Math.max((Math.random() - 0.5) * 180, -85), 85); // Limit latitude range slightly
+    const lng = Math.min(Math.max((Math.random() - 0.5) * 360, -180), 180);
+    return [lat, lng];
   };
 
   const fetchIndicators = useCallback(async () => {
@@ -64,12 +65,21 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
       // Process and limit indicators for visualization
       const processedIndicators = response.data.Data
         .slice(0, 12) // Show 12 indicators for better distribution
-        .map((indicator: Indicator, index: number) => ({
-          ...indicator,
-          color: colors[index % colors.length],
-          position: generateRandomPosition(),
-          size: 0.5 + Math.random() * 1.5 // Random size between 0.5 and 2
-        }));
+        .map((indicator: Indicator, index: number) => {
+          const position = generateRandomPosition();
+          return {
+            ...indicator,
+            color: colors[index % colors.length],
+            position,
+            size: 1 // Fixed size to prevent scaling issues
+          };
+        })
+        .filter((indicator: Indicator) => {
+          // Validate position data
+          return indicator.position && 
+                 !isNaN(indicator.position[0]) && 
+                 !isNaN(indicator.position[1]);
+        });
 
       setIndicators(processedIndicators);
     } catch (error) {
@@ -83,17 +93,18 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Initialize globe
+    // Initialize globe with safe defaults
     const globe = new Globe(containerRef.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundColor('#f8fafc')
       .width(containerRef.current.clientWidth)
       .height(containerRef.current.clientHeight)
-      .pointRadius('size')
+      .pointRadius(1) // Fixed radius instead of dynamic
       .pointColor('color')
-      .pointAltitude(0.1)
-      .pointsMerge(true)
+      .pointAltitude(0) // Set to 0 to prevent altitude-related issues
+      .pointsMerge(false) // Disable points merging to prevent geometry issues
+      .pointResolution(32) // Add point resolution for smoother geometries
       .pointLabel((d: any) => '')
       .onPointHover((point: any | null) => {
         setHoveredIndicator(point as Indicator | null);
@@ -200,13 +211,16 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute left-1/2 bottom-8 transform -translate-x-1/2 z-50"
+            className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
+            style={{
+              left: '50%',
+              bottom: '2rem',
+              transform: 'translateX(-50%)',
+              zIndex: 1000
+            }}
           >
-            <div className="bg-white bg-opacity-90 p-4 rounded-lg shadow-lg border border-gray-200 max-w-md">
-              <h3 className="font-bold text-gray-800 text-lg mb-2">{hoveredIndicator.Label}</h3>
-              <p className="text-gray-600">{hoveredIndicator.Definition}</p>
-              <p className="text-sm text-blue-600 mt-2">Click to explore data →</p>
-            </div>
+            <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.Label}</h3>
+            <p className="text-gray-600 text-sm">{hoveredIndicator.Definition}</p>
           </motion.div>
         )}
       </AnimatePresence>

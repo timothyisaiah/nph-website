@@ -1,5 +1,21 @@
 import type { BlogPost } from '../components/blog/BlogCard';
 
+// Import avatar images
+import sarahAvatar from '../assets/images/avatars/sarah.png';
+import michaelAvatar from '../assets/images/avatars/michael.png';
+import emilyAvatar from '../assets/images/avatars/emily.png';
+import jamesAvatar from '../assets/images/avatars/james.png';
+import robertAvatar from '../assets/images/avatars/robert.png';
+
+// Import blog images
+import globalHealthImg from '../assets/images/blog/global-health.png';
+import digitalHealthImg from '../assets/images/blog/digital-health.png';
+import communityHealthImg from '../assets/images/blog/community-health.png';
+import healthEquityImg from '../assets/images/blog/health-equity.png';
+
+// Placeholder for missing images
+const placeholderImage = 'https://placehold.co/600x400/e2e8f0/475569?text=Blog+Image';
+
 export const blogPosts: BlogPost[] = [
   {
     id: 'global-health-challenges-2024',
@@ -8,11 +24,11 @@ export const blogPosts: BlogPost[] = [
     date: 'March 15, 2024',
     author: {
       name: 'Dr. Sarah Johnson',
-      avatar: '/images/avatars/sarah.jpg'
+      avatar: sarahAvatar
     },
     category: 'Global Health',
     readTime: '8 min read',
-    imageUrl: '/images/blog/global-health.jpg'
+    imageUrl: globalHealthImg
   },
   {
     id: 'digital-health-innovations',
@@ -21,11 +37,11 @@ export const blogPosts: BlogPost[] = [
     date: 'March 10, 2024',
     author: {
       name: 'Michael Chen',
-      avatar: '/images/avatars/michael.jpg'
+      avatar: michaelAvatar
     },
     category: 'Technology',
     readTime: '6 min read',
-    imageUrl: '/images/blog/digital-health.jpg'
+    imageUrl: digitalHealthImg
   },
   {
     id: 'community-health-programs',
@@ -34,11 +50,11 @@ export const blogPosts: BlogPost[] = [
     date: 'March 5, 2024',
     author: {
       name: 'Dr. Emily Williams',
-      avatar: '/images/avatars/emily.jpg'
+      avatar: emilyAvatar
     },
     category: 'Community Health',
     readTime: '10 min read',
-    imageUrl: '/images/blog/community-health.jpg'
+    imageUrl: communityHealthImg
   },
   {
     id: 'health-equity-challenges',
@@ -47,11 +63,11 @@ export const blogPosts: BlogPost[] = [
     date: 'February 28, 2024',
     author: {
       name: 'James Wilson',
-      avatar: '/images/avatars/james.jpg'
+      avatar: jamesAvatar
     },
     category: 'Health Equity',
     readTime: '7 min read',
-    imageUrl: '/images/blog/health-equity.jpg'
+    imageUrl: healthEquityImg
   },
   {
     id: 'pandemic-preparedness',
@@ -60,10 +76,10 @@ export const blogPosts: BlogPost[] = [
     date: 'February 20, 2024',
     author: {
       name: 'Dr. Robert Kim',
-      avatar: '/images/avatars/robert.jpg'
+      avatar: robertAvatar
     },
     category: 'Preparedness',
     readTime: '9 min read',
-    imageUrl: '/images/blog/pandemic-prep.jpg'
+    imageUrl: placeholderImage // Using placeholder since pandemic-prep.jpg is missing
   }
 ]; 
