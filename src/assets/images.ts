@@ -32,9 +32,9 @@ export const images = {
   },
   // New images for thematic areas
   publicHealthResearch: {
-    url: 'https://images.unsplash.com/photo-1582560475093-ba66e482c7d4',
+    url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d',
     alt: 'Scientists conducting research in laboratory',
-    credit: 'Photo by CDC on Unsplash'
+    credit: 'Photo by National Cancer Institute on Unsplash'
   },
   healthSystems: {
     url: 'https://images.unsplash.com/photo-1516549655169-df83a0774514',

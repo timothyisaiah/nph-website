@@ -9,6 +9,7 @@ import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import ErrorPage from './pages/Error';
 import DataCanvas from './components/data/DataCanvas';
+import DataInsights from './pages/DataInsights';
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
       },
       {
         path: 'data',
+        element: <DataInsights />,
+      },
+      {
+        path: 'data-explorer',
         element: <DataCanvas />,
       },
     ],
