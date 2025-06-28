@@ -21,6 +21,7 @@ interface GlobePoint extends Indicator {
 interface GlobeVisualizationProps {
   onError?: (error: string) => void;
   onIndicatorSelect: (indicatorId: string) => void;
+  onCountrySelect?: (country: any) => void;
 }
 
 const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndicatorSelect }) => {

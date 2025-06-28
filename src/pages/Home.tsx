@@ -8,12 +8,24 @@ import companyLogo from '../assets/Company-logo.jpg';
 
 const Home: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [countryData, setCountryData] = useState<any>(null);
   const navigate = useNavigate();
   const { setSelectedIndicator } = useIndicator();
 
   const handleIndicatorSelect = (indicatorId: string) => {
     setSelectedIndicator(indicatorId);
     navigate(`/data?indicator=${indicatorId}`);
+  };
+
+  const handleCountrySelect = (country: any) => {
+    setSelectedCountry(country?.properties?.name || null);
+    // In a real implementation, you would fetch country-specific data here
+    setCountryData({
+      indicators: Math.floor(Math.random() * 50) + 10, // Mock data
+      surveys: Math.floor(Math.random() * 20) + 5,
+      lastUpdated: new Date().toLocaleDateString()
+    });
   };
 
   return (
@@ -37,7 +49,11 @@ const Home: React.FC = () => {
               </div>
             ) : (
               <div className="w-full h-full">
-                <GlobeVisualization onError={setError} onIndicatorSelect={handleIndicatorSelect} />
+                <GlobeVisualization 
+                  onError={setError} 
+                  onIndicatorSelect={handleIndicatorSelect}
+                  onCountrySelect={handleCountrySelect}
+                />
               </div>
             )}
           </div>
@@ -49,21 +65,44 @@ const Home: React.FC = () => {
                 <img 
                   src={companyLogo}
                   alt="NPH Solutions Logo" 
-                  className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-full shadow-lg"
+                  className="w-30 h-30 md:w-24 md:h-24 object-contain rounded-lg shadow-lg"
                 />
                 <div>
                   <h2 className="text-xl md:text-2xl font-bold text-gray-800">Narratives of Public Health Solutions LTD</h2>
-                  <p className="text-gray-600">Transforming Healthcare Through Data</p>
+                  <p className="text-gray-600">Unlocking health data for community and policy action</p>
                 </div>
               </div>
               
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 text-gray-800 leading-tight">
-                Visualizing Public Health<br />in Uganda
+                Narratives of Public Health Solutions LTD
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-10">
-                Explore key health indicators through an interactive global lens. Click on any indicator to dive deeper into the data.
+              <p className="text-lg md:text-xl text-gray-600 mb-6">
+                Unlocking health data for community and policy action
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              
+              {/* Services Bullet Points */}
+              <div className="mb-10">
+                <ul className="space-y-4 text-lg text-gray-700">
+                  <li className="flex items-start gap-4">
+                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                    <span className="font-medium">Public health research</span>
+                  </li>
+                  <li className="flex items-start gap-4">
+                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                    <span className="font-medium">Monitoring and evaluation of public health interventions</span>
+                  </li>
+                  <li className="flex items-start gap-4">
+                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                    <span className="font-medium">Data systems and analytics</span>
+                  </li>
+                  <li className="flex items-start gap-4">
+                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                    <span className="font-medium">Health promotion</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="flex flex-col gap-4 justify-center md:justify-start">
                 <button 
                   onClick={() => navigate('/data')}
                   className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg transform hover:scale-105 duration-200"
@@ -77,6 +116,32 @@ const Home: React.FC = () => {
                   Learn More
                 </button>
               </div>
+
+              {/* Dynamic Country Data Section */}
+              {selectedCountry && countryData && (
+                <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                  <h3 className="text-xl font-semibold text-blue-800 mb-4">
+                    📊 DHS Data for {selectedCountry}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{countryData.indicators}</div>
+                      <div className="text-gray-600">Health Indicators</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{countryData.surveys}</div>
+                      <div className="text-gray-600">Surveys Available</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-semibold text-blue-600">{countryData.lastUpdated}</div>
+                      <div className="text-gray-600">Last Updated</div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-3">
+                    Click on indicators above to explore detailed data for {selectedCountry}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
