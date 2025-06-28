@@ -17,37 +17,136 @@ const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect, onCountrySelect 
 ));
 
 const feedingTips = {
-  infant: {
-    title: "🍎 Infant Nutrition (0-6 months)",
+  breastfeedingBasics: {
+    title: "🤱 Breastfeeding Basics (0-6 months)",
     icon: "🍼",
     tips: [
-      "Exclusive breastfeeding provides optimal nutrition and immunity",
-      "Feed on demand, typically 8-12 times per day",
-      "Ensure proper latch and positioning",
-      "Monitor wet diapers (6+ per day) and weight gain",
-      "Avoid water, juice, or other foods before 6 months"
+      "Give only breastmilk for the first 6 months—no water, porridge, or herbal drinks.",
+      "Breastmilk contains all the nutrients your baby needs in the first 6 months.",
+      "Feed your baby on demand—at least 8 times a day including at night.",
+      "Avoid using feeding bottles—they are hard to clean and may cause infections.",
+      "In hot weather, breastmilk still provides all the water your baby needs."
     ]
   },
-  complementary: {
-    title: "🥕 Complementary Feeding (6-24 months)",
+  breastfeedingBest: {
+    title: "🤱 Breastfeeding Best Practices",
+    icon: "🍼",
+    tips: [
+      "Start breastfeeding within the first hour of birth to protect your baby from infections.",
+      "Skin-to-skin contact right after birth helps your baby start breastfeeding sooner.",
+      "Early breastfeeding improves bonding and boosts milk production.",
+      "Even C-section babies should be breastfed as soon as the mother is alert.",
+      "The first breastmilk (colostrum) is golden and full of antibodies—do not discard it."
+    ]
+  },
+  complementaryStart: {
+    title: "🥣 Starting Complementary Foods (6-24 months)",
     icon: "🥄",
     tips: [
-      "Introduce diverse foods gradually, one at a time",
-      "Include iron-rich foods like meat, fish, eggs",
-      "Offer fruits and vegetables with every meal",
-      "Continue breastfeeding alongside solid foods",
-      "Avoid added salt, sugar, and processed foods"
+      "Start giving mashed and soft foods at 6 months, while continuing breastfeeding.",
+      "Feed thick porridge, mashed fruits, soft vegetables, and small pieces of meat.",
+      "Introduce one new food at a time and watch for allergies.",
+      "Do not replace breastmilk; food complements it.",
+      "Ensure food is soft enough to avoid choking."
     ]
   },
-  youngChild: {
-    title: "🥛 Young Child Nutrition (2-5 years)",
+  complementaryVariety: {
+    title: "🥣 Complementary Feeding Variety",
+    icon: "🥄",
+    tips: [
+      "Feed your child from at least 5 food groups daily.",
+      "Include eggs, dairy, grains, fruits, and vegetables every day.",
+      "Colorful meals are more nutritious—use orange, green, red vegetables and fruits.",
+      "Use local foods—pumpkin, bananas, beans, greens—to add variety.",
+      "Diversity helps prevent micronutrient deficiencies."
+    ]
+  },
+  mealFrequency: {
+    title: "⏰ Meal Frequency & Growth",
     icon: "🍽️",
     tips: [
-      "Provide 3 meals and 2-3 snacks daily",
-      "Include whole grains, lean proteins, colorful vegetables",
-      "Limit sugary drinks and snacks",
-      "Encourage family meals and positive eating environment",
-      "Model healthy eating behaviors"
+      "Feed 6–8-month-olds at least 2–3 meals a day.",
+      "Feed 9–23-month-olds 3–4 meals + 1–2 snacks daily.",
+      "Children need small frequent meals due to small stomachs.",
+      "During illness, feed more often and offer favorite foods.",
+      "Extra feeding after sickness helps the child catch up in growth."
+    ]
+  },
+  foodSafety: {
+    title: "🧼 Food Safety & Hygiene",
+    icon: "🧽",
+    tips: [
+      "Wash hands with soap before preparing and feeding food.",
+      "Clean feeding utensils thoroughly with soap and water.",
+      "Serve freshly prepared food. Avoid keeping leftovers.",
+      "Boil water used for baby food preparation.",
+      "Avoid street food or uncovered food for children."
+    ]
+  },
+  healthyHabits: {
+    title: "🍏 Healthy Feeding Habits",
+    icon: "🥗",
+    tips: [
+      "Do not give soda, juice, or sugary drinks to children under 2.",
+      "Avoid giving sweets, biscuits, and chips—they displace healthy food.",
+      "Herbal teas and concoctions are not safe for babies.",
+      "Do not force-feed your child; encourage and offer with love.",
+      "Avoid distractions like screens during mealtime."
+    ]
+  },
+  nutritionDiversity: {
+    title: "🌽 Nutrition & Food Diversity",
+    icon: "🍠",
+    tips: [
+      "Offer fruits like banana, papaya, and avocado daily.",
+      "Include soft-cooked greens like amaranth or pumpkin leaves.",
+      "Fruits and vegetables build immunity and prevent disease.",
+      "Chop fruits finely or mash to avoid choking.",
+      "Serve vegetables in every meal starting at 6 months."
+    ]
+  },
+  proteinCalcium: {
+    title: "🥚 Protein, Iron & Calcium",
+    icon: "🥚",
+    tips: [
+      "Give eggs 3–4 times a week for protein and nutrients.",
+      "Add small pieces of meat, fish, or liver into meals.",
+      "Animal foods help prevent anemia in young children.",
+      "Yogurt and milk are great sources of calcium.",
+      "Mash or blend meat for easy swallowing."
+    ]
+  },
+  positiveFeeding: {
+    title: "😊 Positive Feeding Practices",
+    icon: "😊",
+    tips: [
+      "Make mealtime happy—talk and smile while feeding.",
+      "Be patient—offer food slowly and encourage your child.",
+      "Respect your child's hunger and fullness cues.",
+      "Feed your child in a quiet space with minimal distractions.",
+      "Involve older siblings in feeding to make it fun."
+    ]
+  },
+  illnessRecovery: {
+    title: "🤒 Illness & Recovery",
+    icon: "💊",
+    tips: [
+      "Offer food and fluids more frequently during illness.",
+      "Give small portions more often when appetite is low.",
+      "Continue breastfeeding during illness—it helps with recovery.",
+      "Use nutrient-dense, soft foods during recovery.",
+      "Extra feeding after illness helps regain lost weight."
+    ]
+  },
+  parentalSupport: {
+    title: "👨‍👩‍👧 Parental Support & Guidance",
+    icon: "👨‍👩‍👧",
+    tips: [
+      "Fathers should support feeding by helping with chores.",
+      "Join a mother support group for shared learning.",
+      "Ask health workers when unsure about feeding.",
+      "Encourage other caregivers to follow safe feeding practices.",
+      "Create a consistent feeding routine to help your child feel secure."
     ]
   }
 };

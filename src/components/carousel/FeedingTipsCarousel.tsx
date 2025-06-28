@@ -137,7 +137,7 @@ const FeedingTipsCarousel: React.FC<FeedingTipsCarouselProps> = ({ feedingTips }
           />
         ))}
       </div>
-      <div className="flex justify-center gap-2 mb-6">
+      {/* <div className="flex justify-center gap-2 mb-6">
         {tipCategories.map((category: string) => (
           <button
             key={category}
@@ -153,7 +153,7 @@ const FeedingTipsCarousel: React.FC<FeedingTipsCarouselProps> = ({ feedingTips }
              'Young Child (2-5y)'}
           </button>
         ))}
-      </div>
+      </div> */}
       {/* <button  className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium">
         Get Personalized Tips
       </button> */}
