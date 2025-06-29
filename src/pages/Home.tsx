@@ -399,8 +399,9 @@ const Home: React.FC = () => {
                   // Handle arc crossing 360/0 degrees
                   const arc = endAngle > startAngle ? endAngle - startAngle : 360 - startAngle + endAngle;
                   const angle = total === 1 ? (startAngle + arc / 2) % 360 : (startAngle + (arc / (total - 1)) * idx) % 360;
-                  // Calculate radius as 45% of container (to stay inside the circle)
-                  const radius = '900%';
+                  // Calculate radius for numbers and labels
+                  const numberRadius = '1000%';
+                  const labelRadius = '55%';
                   const colors = [
                     '#00A0DC', '#7AC36A', '#F15A60', '#9B5DE5', '#F5A623',
                     '#2CCCE4', '#FF66B2', '#5C6BC0', '#42B883', '#FF7043',
@@ -418,21 +419,39 @@ const Home: React.FC = () => {
                       style={{
                         left: '50%',
                         top: '50%',
-                        transform: `rotate(${angle}deg) translate(${radius}) rotate(${-angle}deg)`,
+                        transform: `rotate(${angle}deg) translate(${numberRadius}) rotate(${-angle}deg)`,
                         transformOrigin: 'center center',
                         zIndex: 40,
                       }}
                       onClick={() => setSelectedIdx(idx)}
                     >
+                      {/* Number */}
                       <span
                         className={classNames(
-                          'rounded-full w-8 h-8 flex items-center justify-center text-lg shadow border-2',
+                          'rounded-full w-8 h-8 flex items-center justify-center text-lg shadow border-2 mb-2',
                           selectedIdx === idx ? 'border-blue-600 bg-blue-100' : 'bg-white border-gray-300'
                         )}
                         style={{ color }}
                       >
                         {idx + 1}
                       </span>
+                      
+                      {/* Label */}
+                      <div
+                        className={classNames(
+                          'absolute whitespace-nowrap text-sm font-medium px-2 py-1 rounded shadow-sm',
+                          selectedIdx === idx ? 'bg-blue-100 text-blue-800' : 'bg-white text-gray-700'
+                        )}
+                        style={{
+                          left: '50%',
+                          top: '50%',
+                          transform: `rotate(${angle}deg) translate(${labelRadius}) rotate(${-angle}deg) translate(-50%, -50%)`,
+                          transformOrigin: 'center center',
+                          zIndex: 35,
+                        }}
+                      >
+                        {indicator.label}
+                      </div>
                     </div>
                   );
                 })}
