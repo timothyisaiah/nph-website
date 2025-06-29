@@ -1,19 +1,24 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import GlobeVisualization from '../components/globe/GlobeVisualization';
-import FeedingTipsCarousel from '../components/carousel/FeedingTipsCarousel';
-import { useIndicator } from '../context/IndicatorContext';
-import Footer from '../components/layout/Footer';
-import { images } from '../assets/images';
-import companyLogo from '../assets/Company-logo.jpg';
+import React, { useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import GlobeVisualization from "../components/globe/GlobeVisualization";
+import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
+import { useIndicator } from "../context/IndicatorContext";
+import Footer from "../components/layout/Footer";
+import { images } from "../assets/images";
+import companyLogo from "../assets/Company-logo.jpg";
+import { indicators as localIndicators } from "../data/indicators";
+import classNames from "classnames";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Helper to get tagline (first sentence of definition)
+const getTagline = (definition: string) => {
+  const match = definition.match(/^(.*?\.|\!|\?)(\s|$)/);
+  return match ? match[1] : definition;
+};
 
 // Memoized Globe Component to prevent unnecessary re-renders
-const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect, onCountrySelect }: any) => (
-  <GlobeVisualization 
-    onError={onError} 
-    onIndicatorSelect={onIndicatorSelect}
-    onCountrySelect={onCountrySelect}
-  />
+const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect }: any) => (
+  <GlobeVisualization onError={onError} onIndicatorSelect={onIndicatorSelect} />
 ));
 
 const feedingTips = {
@@ -25,8 +30,8 @@ const feedingTips = {
       "Breastmilk contains all the nutrients your baby needs in the first 6 months.",
       "Feed your baby on demand—at least 8 times a day including at night.",
       "Avoid using feeding bottles—they are hard to clean and may cause infections.",
-      "In hot weather, breastmilk still provides all the water your baby needs."
-    ]
+      "In hot weather, breastmilk still provides all the water your baby needs.",
+    ],
   },
   breastfeedingBest: {
     title: "🤱 Breastfeeding Best Practices",
@@ -36,8 +41,8 @@ const feedingTips = {
       "Skin-to-skin contact right after birth helps your baby start breastfeeding sooner.",
       "Early breastfeeding improves bonding and boosts milk production.",
       "Even C-section babies should be breastfed as soon as the mother is alert.",
-      "The first breastmilk (colostrum) is golden and full of antibodies—do not discard it."
-    ]
+      "The first breastmilk (colostrum) is golden and full of antibodies—do not discard it.",
+    ],
   },
   complementaryStart: {
     title: "🥣 Starting Complementary Foods (6-24 months)",
@@ -47,8 +52,8 @@ const feedingTips = {
       "Feed thick porridge, mashed fruits, soft vegetables, and small pieces of meat.",
       "Introduce one new food at a time and watch for allergies.",
       "Do not replace breastmilk; food complements it.",
-      "Ensure food is soft enough to avoid choking."
-    ]
+      "Ensure food is soft enough to avoid choking.",
+    ],
   },
   complementaryVariety: {
     title: "🥣 Complementary Feeding Variety",
@@ -58,8 +63,8 @@ const feedingTips = {
       "Include eggs, dairy, grains, fruits, and vegetables every day.",
       "Colorful meals are more nutritious—use orange, green, red vegetables and fruits.",
       "Use local foods—pumpkin, bananas, beans, greens—to add variety.",
-      "Diversity helps prevent micronutrient deficiencies."
-    ]
+      "Diversity helps prevent micronutrient deficiencies.",
+    ],
   },
   mealFrequency: {
     title: "⏰ Meal Frequency & Growth",
@@ -69,8 +74,8 @@ const feedingTips = {
       "Feed 9–23-month-olds 3–4 meals + 1–2 snacks daily.",
       "Children need small frequent meals due to small stomachs.",
       "During illness, feed more often and offer favorite foods.",
-      "Extra feeding after sickness helps the child catch up in growth."
-    ]
+      "Extra feeding after sickness helps the child catch up in growth.",
+    ],
   },
   foodSafety: {
     title: "🧼 Food Safety & Hygiene",
@@ -80,8 +85,8 @@ const feedingTips = {
       "Clean feeding utensils thoroughly with soap and water.",
       "Serve freshly prepared food. Avoid keeping leftovers.",
       "Boil water used for baby food preparation.",
-      "Avoid street food or uncovered food for children."
-    ]
+      "Avoid street food or uncovered food for children.",
+    ],
   },
   healthyHabits: {
     title: "🍏 Healthy Feeding Habits",
@@ -91,8 +96,8 @@ const feedingTips = {
       "Avoid giving sweets, biscuits, and chips—they displace healthy food.",
       "Herbal teas and concoctions are not safe for babies.",
       "Do not force-feed your child; encourage and offer with love.",
-      "Avoid distractions like screens during mealtime."
-    ]
+      "Avoid distractions like screens during mealtime.",
+    ],
   },
   nutritionDiversity: {
     title: "🌽 Nutrition & Food Diversity",
@@ -102,8 +107,8 @@ const feedingTips = {
       "Include soft-cooked greens like amaranth or pumpkin leaves.",
       "Fruits and vegetables build immunity and prevent disease.",
       "Chop fruits finely or mash to avoid choking.",
-      "Serve vegetables in every meal starting at 6 months."
-    ]
+      "Serve vegetables in every meal starting at 6 months.",
+    ],
   },
   proteinCalcium: {
     title: "🥚 Protein, Iron & Calcium",
@@ -113,8 +118,8 @@ const feedingTips = {
       "Add small pieces of meat, fish, or liver into meals.",
       "Animal foods help prevent anemia in young children.",
       "Yogurt and milk are great sources of calcium.",
-      "Mash or blend meat for easy swallowing."
-    ]
+      "Mash or blend meat for easy swallowing.",
+    ],
   },
   positiveFeeding: {
     title: "😊 Positive Feeding Practices",
@@ -124,8 +129,8 @@ const feedingTips = {
       "Be patient—offer food slowly and encourage your child.",
       "Respect your child's hunger and fullness cues.",
       "Feed your child in a quiet space with minimal distractions.",
-      "Involve older siblings in feeding to make it fun."
-    ]
+      "Involve older siblings in feeding to make it fun.",
+    ],
   },
   illnessRecovery: {
     title: "🤒 Illness & Recovery",
@@ -135,8 +140,8 @@ const feedingTips = {
       "Give small portions more often when appetite is low.",
       "Continue breastfeeding during illness—it helps with recovery.",
       "Use nutrient-dense, soft foods during recovery.",
-      "Extra feeding after illness helps regain lost weight."
-    ]
+      "Extra feeding after illness helps regain lost weight.",
+    ],
   },
   parentalSupport: {
     title: "👨‍👩‍👧 Parental Support & Guidance",
@@ -146,9 +151,9 @@ const feedingTips = {
       "Join a mother support group for shared learning.",
       "Ask health workers when unsure about feeding.",
       "Encourage other caregivers to follow safe feeding practices.",
-      "Create a consistent feeding routine to help your child feel secure."
-    ]
-  }
+      "Create a consistent feeding routine to help your child feel secure.",
+    ],
+  },
 };
 
 const Home: React.FC = () => {
@@ -156,27 +161,32 @@ const Home: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<any>(null);
   const [calculatorData, setCalculatorData] = useState({
-    age: '',
-    weight: '',
-    height: '',
-    gender: ''
+    age: "",
+    weight: "",
+    height: "",
+    gender: "",
   });
   const [zScoreResult, setZScoreResult] = useState<any>(null);
   const navigate = useNavigate();
   const { setSelectedIndicator } = useIndicator();
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [hoveredIndicator, setHoveredIndicator] = useState<any>(null);
 
   // Memoize globe event handlers
-  const handleIndicatorSelect = useCallback((indicatorId: string) => {
-    setSelectedIndicator(indicatorId);
-    navigate(`/data?indicator=${indicatorId}`);
-  }, [setSelectedIndicator, navigate]);
+  const handleIndicatorSelect = useCallback(
+    (indicatorId: string) => {
+      setSelectedIndicator(indicatorId);
+      navigate(`/data?indicator=${indicatorId}`);
+    },
+    [setSelectedIndicator, navigate]
+  );
 
   const handleCountrySelect = useCallback((country: any) => {
     setSelectedCountry(country?.properties?.name || null);
     setCountryData({
       indicators: Math.floor(Math.random() * 50) + 10,
       surveys: Math.floor(Math.random() * 20) + 5,
-      lastUpdated: new Date().toLocaleDateString()
+      lastUpdated: new Date().toLocaleDateString(),
     });
   }, []);
 
@@ -185,17 +195,17 @@ const Home: React.FC = () => {
   }, []);
 
   const handleCalculatorChange = (field: string, value: string) => {
-    setCalculatorData(prev => ({
+    setCalculatorData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const calculateZScore = () => {
     const { age, weight, height, gender } = calculatorData;
-    
+
     if (!age || !weight || !height || !gender) {
-      alert('Please fill in all fields');
+      alert("Please fill in all fields");
       return;
     }
 
@@ -203,163 +213,362 @@ const Home: React.FC = () => {
     const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
     const heightNum = parseFloat(height);
-    
+
     // Simplified mock calculation
-    const weightZScore = ((weightNum - 12) / 2) + (Math.random() - 0.5) * 0.5;
-    const heightZScore = ((heightNum - 85) / 5) + (Math.random() - 0.5) * 0.5;
-    
-    let weightStatus = 'Normal';
-    let heightStatus = 'Normal';
-    
-    if (weightZScore < -2) weightStatus = 'Underweight';
-    else if (weightZScore > 2) weightStatus = 'Overweight';
-    
-    if (heightZScore < -2) heightStatus = 'Stunted';
-    else if (heightZScore > 2) heightStatus = 'Tall';
-    
+    const weightZScore = (weightNum - 12) / 2 + (Math.random() - 0.5) * 0.5;
+    const heightZScore = (heightNum - 85) / 5 + (Math.random() - 0.5) * 0.5;
+
+    let weightStatus = "Normal";
+    let heightStatus = "Normal";
+
+    if (weightZScore < -2) weightStatus = "Underweight";
+    else if (weightZScore > 2) weightStatus = "Overweight";
+
+    if (heightZScore < -2) heightStatus = "Stunted";
+    else if (heightZScore > 2) heightStatus = "Tall";
+
     setZScoreResult({
       weightZScore: weightZScore.toFixed(2),
       heightZScore: heightZScore.toFixed(2),
       weightStatus,
       heightStatus,
-      recommendations: getRecommendations(weightStatus, heightStatus)
+      recommendations: getRecommendations(weightStatus, heightStatus),
     });
   };
 
   const getRecommendations = (weightStatus: string, heightStatus: string) => {
     const recommendations = [];
-    
-    if (weightStatus === 'Underweight') {
-      recommendations.push('Increase caloric intake with nutrient-dense foods');
-      recommendations.push('Consider nutritional supplements under medical supervision');
-    } else if (weightStatus === 'Overweight') {
-      recommendations.push('Focus on balanced nutrition and physical activity');
-      recommendations.push('Limit sugary drinks and processed foods');
+
+    if (weightStatus === "Underweight") {
+      recommendations.push("Increase caloric intake with nutrient-dense foods");
+      recommendations.push(
+        "Consider nutritional supplements under medical supervision"
+      );
+    } else if (weightStatus === "Overweight") {
+      recommendations.push("Focus on balanced nutrition and physical activity");
+      recommendations.push("Limit sugary drinks and processed foods");
     }
-    
-    if (heightStatus === 'Stunted') {
-      recommendations.push('Ensure adequate protein and micronutrient intake');
-      recommendations.push('Monitor for underlying health conditions');
+
+    if (heightStatus === "Stunted") {
+      recommendations.push("Ensure adequate protein and micronutrient intake");
+      recommendations.push("Monitor for underlying health conditions");
     }
-    
+
     if (recommendations.length === 0) {
-      recommendations.push('Continue with current healthy feeding practices');
-      recommendations.push('Regular growth monitoring recommended');
+      recommendations.push("Continue with current healthy feeding practices");
+      recommendations.push("Regular growth monitoring recommended");
     }
-    
+
     return recommendations;
   };
 
+  // Navigation handlers for details panel
+  const handleNext = () => {
+    if (selectedIdx === null) setSelectedIdx(0);
+    else setSelectedIdx((selectedIdx + 1) % localIndicators.length);
+  };
+  const handlePrev = () => {
+    if (selectedIdx === null) setSelectedIdx(localIndicators.length - 1);
+    else
+      setSelectedIdx(
+        (selectedIdx - 1 + localIndicators.length) % localIndicators.length
+      );
+  };
+  const handleClose = () => setSelectedIdx(null);
+
   return (
     <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
-      {/* Main Content Section with Globe */}
+      {/* Main Content Section with Content Row on Top */}
       <div className="relative z-10 container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center md:items-start pt-16 md:pt-24 z-0">
-          {/* Globe Container */}
-          <div className="w-full md:w-1/2 aspect-square rounded-full overflow-hidden order-2 md:order-1">
-            {error ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-red-700 max-w-md text-center mx-4">
-                  <p className="text-lg mb-4">{error}</p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors text-red-700"
-                  >
-                    Try Again
-                  </button>
+        {/* Content Section (logo, title, subtitle, services, buttons, dynamic country data) */}
+        <div className="w-full mb-12">
+          <div className="text-center md:text-left mb-12">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+              <img
+                src={companyLogo}
+                alt="NPH Solutions Logo"
+                className="w-30 h-30 md:w-24 md:h-24 object-contain rounded-lg shadow-lg"
+              />
+            </div>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 text-gray-800 leading-tight">
+              Narratives of Public Health Solutions LTD
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-6">
+              Unlocking health data for community and policy action
+            </p>
+            {/* Services Bullet Points */}
+            <div className="mb-10">
+              <ul className="space-y-4 text-base md:text-lg text-gray-700">
+                <li className="flex items-start gap-4">
+                  <span className="text-green-500 text-2xl font-bold mt-1">
+                    ✓
+                  </span>
+                  <span className="font-medium break-words leading-snug">
+                    Public health research
+                  </span>
+                </li>
+                <li className="flex items-start gap-4">
+                  <span className="text-green-500 text-2xl font-bold mt-1">
+                    ✓
+                  </span>
+                  <span className="font-medium break-words leading-snug">
+                    Monitoring and evaluation of public health interventions
+                  </span>
+                </li>
+                <li className="flex items-start gap-4">
+                  <span className="text-green-500 text-2xl font-bold mt-1">
+                    ✓
+                  </span>
+                  <span className="font-medium break-words leading-snug">
+                    Data systems and analytics
+                  </span>
+                </li>
+                <li className="flex items-start gap-4">
+                  <span className="text-green-500 text-2xl font-bold mt-1">
+                    ✓
+                  </span>
+                  <span className="font-medium break-words leading-snug">
+                    Health promotion
+                  </span>
+                </li>
+              </ul>
+            </div>
+            <div className="flex flex-col gap-4 justify-center md:justify-start">
+              <button
+                onClick={() => navigate("/data")}
+                className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg transform hover:scale-105 duration-200"
+              >
+                Explore All Data
+              </button>
+              <button
+                onClick={() => navigate("/about")}
+                className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-lg transform hover:scale-105 duration-200"
+              >
+                Learn More
+              </button>
+            </div>
+            {/* Dynamic Country Data Section */}
+            {selectedCountry && countryData && (
+              <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 className="text-xl font-semibold text-blue-800 mb-4">
+                  📊 DHS Data for {selectedCountry}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {countryData.indicators}
+                    </div>
+                    <div className="text-gray-600">Health Indicators</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {countryData.surveys}
+                    </div>
+                    <div className="text-gray-600">Surveys Available</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-semibold text-blue-600">
+                      {countryData.lastUpdated}
+                    </div>
+                    <div className="text-gray-600">Last Updated</div>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="w-full h-full">
-                <MemoizedGlobe 
-                  onError={handleError} 
-                  onIndicatorSelect={handleIndicatorSelect}
-                  onCountrySelect={handleCountrySelect}
-                />
+                <p className="text-xs text-gray-500 mt-3">
+                  Click on indicators above to explore detailed data for{" "}
+                  {selectedCountry}
+                </p>
               </div>
             )}
           </div>
-
-          {/* Content Section */}
-          <div className="w-full md:w-1/2 order-1 md:order-2 md:pl-12">
-            <div className="text-center md:text-left mb-12">
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
-                <img 
-                  src={companyLogo}
-                  alt="NPH Solutions Logo" 
-                  className="w-30 h-30 md:w-24 md:h-24 object-contain rounded-lg shadow-lg"
-                />
-              </div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 text-gray-800 leading-tight">
-                Narratives of Public Health Solutions LTD
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-6">
-                Unlocking health data for community and policy action
-              </p>
-              
-              {/* Services Bullet Points */}
-              <div className="mb-10">
-                <ul className="space-y-4 text-base md:text-lg text-gray-700">
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Public health research</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Monitoring and evaluation of public health interventions</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Data systems and analytics</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Health promotion</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div className="flex flex-col gap-4 justify-center md:justify-start">
-                <button 
-                  onClick={() => navigate('/data')}
-                  className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg transform hover:scale-105 duration-200"
-                >
-                  Explore All Data
-                </button>
-                <button 
-                  onClick={() => navigate('/about')}
-                  className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-lg transform hover:scale-105 duration-200"
-                >
-                  Learn More
-                </button>
-              </div>
-
-              {/* Dynamic Country Data Section */}
-              {selectedCountry && countryData && (
-                <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="text-xl font-semibold text-blue-800 mb-4">
-                    📊 DHS Data for {selectedCountry}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{countryData.indicators}</div>
-                      <div className="text-gray-600">Health Indicators</div>
+        </div>
+        {/* Globe and Indicator Row */}
+        <div className="flex flex-col md:flex-row items-center md:items-start z-0">
+          <div className="w-full md:w-1/2 aspect-square rounded-full order-2 md:order-1 md:pl-12 mt-8 md:mt-0 relative">
+            {/* Globe Visualization fills parent */}
+            <div className="w-full h-full">
+              <MemoizedGlobe
+                onError={handleError}
+                onIndicatorSelect={handleIndicatorSelect}
+              />
+              {/* Circular Numbers Overlay - now relative to globe container */}
+              <div className="absolute inset-0 pointer-events-none z-30">
+                {localIndicators.map((indicator, idx) => {
+                  const total = localIndicators.length;
+                  const startAngle = 300;
+                  const endAngle = 60;
+                  // Handle arc crossing 360/0 degrees
+                  const arc = endAngle > startAngle ? endAngle - startAngle : 360 - startAngle + endAngle;
+                  const angle = total === 1 ? (startAngle + arc / 2) % 360 : (startAngle + (arc / (total - 1)) * idx) % 360;
+                  // Calculate radius as 45% of container (to stay inside the circle)
+                  const radius = '900%';
+                  const colors = [
+                    '#00A0DC', '#7AC36A', '#F15A60', '#9B5DE5', '#F5A623',
+                    '#2CCCE4', '#FF66B2', '#5C6BC0', '#42B883', '#FF7043',
+                    '#FFD600', '#8D6E63', '#00B8D4', '#C51162', '#43A047',
+                    '#FF3D00', '#6D4C41', '#1DE9B6', '#D500F9', '#FFAB00',
+                  ];
+                  const color = colors[idx % colors.length];
+                  return (
+                    <div
+                      key={indicator.id}
+                      className={classNames(
+                        'absolute flex flex-col items-center transition cursor-pointer pointer-events-auto',
+                        selectedIdx === idx ? 'font-bold scale-125' : ''
+                      )}
+                      style={{
+                        left: '50%',
+                        top: '50%',
+                        transform: `rotate(${angle}deg) translate(${radius}) rotate(${-angle}deg)`,
+                        transformOrigin: 'center center',
+                        zIndex: 40,
+                      }}
+                      onClick={() => setSelectedIdx(idx)}
+                    >
+                      <span
+                        className={classNames(
+                          'rounded-full w-8 h-8 flex items-center justify-center text-lg shadow border-2',
+                          selectedIdx === idx ? 'border-blue-600 bg-blue-100' : 'bg-white border-gray-300'
+                        )}
+                        style={{ color }}
+                      >
+                        {idx + 1}
+                      </span>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{countryData.surveys}</div>
-                      <div className="text-gray-600">Surveys Available</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-blue-600">{countryData.lastUpdated}</div>
-                      <div className="text-gray-600">Last Updated</div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-3">
-                    Click on indicators above to explore detailed data for {selectedCountry}
-                  </p>
-                </div>
-              )}
+                  );
+                })}
+              </div>
             </div>
+            {/* Details/Story Panel */}
+            <AnimatePresence>
+              {selectedIdx !== null && localIndicators[selectedIdx] && (
+                <motion.div
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 100 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 p-8 flex flex-col"
+                >
+                  <button
+                    onClick={handleClose}
+                    className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4"
+                  >
+                    &times;
+                  </button>
+                  <h2 className="text-2xl font-bold mb-2">
+                    {localIndicators[selectedIdx].label}
+                  </h2>
+                  <p className="text-gray-700 mb-6">
+                    {localIndicators[selectedIdx].definition}
+                  </p>
+                  <div className="mt-auto flex justify-between">
+                    <button
+                      onClick={handlePrev}
+                      className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {/* Tooltip */}
+            <AnimatePresence>
+              {hoveredIndicator && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
+                  style={{
+                    left: "50%",
+                    bottom: "2rem",
+                    transform: "translateX(-50%)",
+                    zIndex: 1000,
+                  }}
+                >
+                  <h3 className="font-semibold text-lg mb-2">
+                    {hoveredIndicator.label}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {hoveredIndicator.definition}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          {/* Indicator List (vertical, right of globe on large screens, below on small) */}
+          <div className="w-full md:w-1/2 order-1 md:order-2 md:pl-12 mt-8 md:mt-0">
+            <h2 className="text-xl font-bold mb-4 text-gray-800">Indicators</h2>
+            <ol className="space-y-4">
+              {localIndicators.map((indicator, idx) => {
+                const colors = [
+                  "#00A0DC",
+                  "#7AC36A",
+                  "#F15A60",
+                  "#9B5DE5",
+                  "#F5A623",
+                  "#2CCCE4",
+                  "#FF66B2",
+                  "#5C6BC0",
+                  "#42B883",
+                  "#FF7043",
+                  "#FFD600",
+                  "#8D6E63",
+                  "#00B8D4",
+                  "#C51162",
+                  "#43A047",
+                  "#FF3D00",
+                  "#6D4C41",
+                  "#1DE9B6",
+                  "#D500F9",
+                  "#FFAB00",
+                ];
+                const color = colors[idx % colors.length];
+                return (
+                  <li
+                    key={indicator.id}
+                    className={classNames(
+                      "flex items-start space-x-3 cursor-pointer p-2 rounded transition",
+                      selectedIdx === idx
+                        ? "bg-blue-100 border-l-4 border-blue-500"
+                        : "hover:bg-gray-100"
+                    )}
+                    onClick={() => setSelectedIdx(idx)}
+                  >
+                    <span
+                      className={classNames(
+                        "font-bold text-lg w-8 flex-shrink-0 text-center",
+                        selectedIdx === idx ? "text-blue-600" : "text-gray-700"
+                      )}
+                      style={{ color }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <div
+                        className={classNames(
+                          "font-semibold",
+                          selectedIdx === idx
+                            ? "text-blue-700"
+                            : "text-gray-900"
+                        )}
+                      >
+                        {indicator.label}
+                      </div>
+                      <div className="text-gray-600 text-sm">
+                        {getTagline(indicator.definition)}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         </div>
       </div>
@@ -367,7 +576,9 @@ const Home: React.FC = () => {
       {/* Featured Images Section */}
       <div className="relative z-10 bg-white py-16 md:py-24 mt-16 md:mt-24">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Health Tools & Resources</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+            Health Tools & Resources
+          </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             {/* Left Box: Dynamic Health Feeding Tips */}
             <FeedingTipsCarousel feedingTips={feedingTips} />
@@ -375,55 +586,84 @@ const Home: React.FC = () => {
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800">Growth Z-Score Calculator</h3>
+                <h3 className="text-2xl font-bold text-gray-800">
+                  Growth Z-Score Calculator
+                </h3>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Age (months)</label>
-                    <input 
-                      type="number" 
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Age (months)
+                    </label>
+                    <input
+                      type="number"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="24"
                       value={calculatorData.age}
-                      onChange={(e) => handleCalculatorChange('age', e.target.value)}
+                      onChange={(e) =>
+                        handleCalculatorChange("age", e.target.value)
+                      }
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
-                    <input 
-                      type="number" 
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Weight (kg)
+                    </label>
+                    <input
+                      type="number"
                       step="0.1"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="12.5"
                       value={calculatorData.weight}
-                      onChange={(e) => handleCalculatorChange('weight', e.target.value)}
+                      onChange={(e) =>
+                        handleCalculatorChange("weight", e.target.value)
+                      }
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
-                    <input 
-                      type="number" 
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Height (cm)
+                    </label>
+                    <input
+                      type="number"
                       step="0.1"
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="85.2"
                       value={calculatorData.height}
-                      onChange={(e) => handleCalculatorChange('height', e.target.value)}
+                      onChange={(e) =>
+                        handleCalculatorChange("height", e.target.value)
+                      }
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Gender
+                    </label>
+                    <select
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       value={calculatorData.gender}
-                      onChange={(e) => handleCalculatorChange('gender', e.target.value)}
+                      onChange={(e) =>
+                        handleCalculatorChange("gender", e.target.value)
+                      }
                     >
                       <option value="">Select</option>
                       <option value="male">Male</option>
@@ -432,63 +672,93 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
-              <button 
+
+              <button
                 className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 onClick={calculateZScore}
               >
                 Calculate Z-Score
               </button>
-              
+
               {/* Results Section */}
               {zScoreResult && (
                 <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
-                  
+                  <h4 className="font-semibold text-gray-800 mb-3">
+                    📊 Growth Assessment Results
+                  </h4>
+
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div>
-                      <div className="text-xs text-gray-600">Weight Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${
-                        zScoreResult.weightStatus === 'Normal' ? 'bg-green-100 text-green-700' :
-                        zScoreResult.weightStatus === 'Underweight' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
+                      <div className="text-lg font-bold text-blue-600">
+                        {zScoreResult.weightZScore}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Weight Z-Score
+                      </div>
+                      <div
+                        className={`text-xs font-medium mt-1 px-2 py-1 rounded ${
+                          zScoreResult.weightStatus === "Normal"
+                            ? "bg-green-100 text-green-700"
+                            : zScoreResult.weightStatus === "Underweight"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
                         {zScoreResult.weightStatus}
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div>
-                      <div className="text-xs text-gray-600">Height Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${
-                        zScoreResult.heightStatus === 'Normal' ? 'bg-green-100 text-green-700' :
-                        zScoreResult.heightStatus === 'Stunted' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
+                      <div className="text-lg font-bold text-blue-600">
+                        {zScoreResult.heightZScore}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Height Z-Score
+                      </div>
+                      <div
+                        className={`text-xs font-medium mt-1 px-2 py-1 rounded ${
+                          zScoreResult.heightStatus === "Normal"
+                            ? "bg-green-100 text-green-700"
+                            : zScoreResult.heightStatus === "Stunted"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
                         {zScoreResult.heightStatus}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="border-t pt-3">
-                    <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
+                    <h5 className="font-medium text-gray-800 mb-2">
+                      💡 Recommendations:
+                    </h5>
                     <ul className="space-y-1">
-                      {zScoreResult.recommendations.map((rec: string, index: number) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                          <span className="text-green-500 mt-1">•</span>
-                          {rec}
-                        </li>
-                      ))}
+                      {zScoreResult.recommendations.map(
+                        (rec: string, index: number) => (
+                          <li
+                            key={index}
+                            className="text-sm text-gray-600 flex items-start gap-2"
+                          >
+                            <span className="text-green-500 mt-1">•</span>
+                            {rec}
+                          </li>
+                        )
+                      )}
                     </ul>
                   </div>
                 </div>
               )}
-              
+
               {/* Feedback Section */}
               {!zScoreResult && (
                 <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-2">📊 Growth Assessment</h4>
-                  <p className="text-sm text-gray-600">Enter the child's measurements above to get personalized growth feedback and recommendations.</p>
+                  <h4 className="font-semibold text-gray-800 mb-2">
+                    📊 Growth Assessment
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Enter the child's measurements above to get personalized
+                    growth feedback and recommendations.
+                  </p>
                 </div>
               )}
             </div>
@@ -502,4 +772,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home; 
+export default Home;

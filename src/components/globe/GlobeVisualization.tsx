@@ -3,6 +3,7 @@ import { indicators as localIndicators } from '../../data/indicators';
 import type { Indicator } from '../../data/indicators';
 import { motion, AnimatePresence } from 'framer-motion';
 import Globe from 'globe.gl';
+import classNames from 'classnames';
 
 interface GlobeVisualizationProps {
   onError?: (error: string) => void;
@@ -20,6 +21,12 @@ const generateRandomPosition = (): [number, number] => {
   const lat = Math.min(Math.max((Math.random() - 0.5) * 180, -85), 85);
   const lng = Math.min(Math.max((Math.random() - 0.5) * 360, -180), 180);
   return [lat, lng];
+};
+
+// Helper to get tagline (first sentence of definition)
+const getTagline = (definition: string) => {
+  const match = definition.match(/^(.*?\.|\!|\?)(\s|$)/);
+  return match ? match[1] : definition;
 };
 
 const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndicatorSelect }) => {
@@ -54,6 +61,7 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
       .backgroundColor('#f8fafc')
       .width(containerRef.current.clientWidth)
       .height(containerRef.current.clientHeight)
+      .enablePointerInteraction(true)
       .pointRadius(1)
       .pointColor('color')
       .pointAltitude(0)
@@ -72,9 +80,37 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
         }
       });
 
+    // Set fixed camera position to prevent zooming
+    globe.pointOfView({ lat: 5, lng: 0, altitude: 2.5 });
+
+    // Disable zoom controls directly
+    if (globe.controls()) {
+      globe.controls().enableZoom = false;
+      // globe.controls().enablePan = false;
+      // globe.controls().enableRotate = false;
+    }
+
     // Touch support
     if (containerRef.current) {
       containerRef.current.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      
+      // Prevent wheel events (zoom)
+      containerRef.current.addEventListener('wheel', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      
+      // Prevent pinch zoom on touch devices
+      containerRef.current.addEventListener('gesturestart', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      
+      containerRef.current.addEventListener('gesturechange', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+      
+      containerRef.current.addEventListener('gestureend', (e) => {
         e.preventDefault();
       }, { passive: false });
     }
@@ -144,6 +180,48 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
 
   return (
     <div className="relative w-full h-full">
+      {/* Overlay Indicator List
+      <div
+        className={classNames(
+          'absolute z-20 bg-white bg-opacity-80 rounded-lg shadow-lg p-6',
+          'transition-all duration-300',
+          'flex flex-col',
+          'overflow-y-auto',
+          'backdrop-blur',
+          'indicator-list-overlay',
+          'lg:top-1/2 lg:right-8 lg:transform lg:-translate-y-1/2 lg:w-96', // right of globe on large screens
+          'w-full left-0 bottom-0 lg:bottom-auto lg:left-auto', // below globe on small screens
+        )}
+        style={{ maxHeight: '80vh' }}
+      >
+        <h2 className="text-xl font-bold mb-4 text-gray-800">Indicators</h2>
+        <ol className="space-y-4">
+          {indicators.map((indicator, idx) => (
+            <li
+              key={indicator.id}
+              className={classNames(
+                'flex items-start space-x-3 cursor-pointer p-2 rounded transition',
+                selectedIdx === idx ? 'bg-blue-100 border-l-4 border-blue-500' : 'hover:bg-gray-100',
+              )}
+              onClick={() => setSelectedIdx(idx)}
+            >
+              <span className={classNames(
+                'font-bold text-lg',
+                selectedIdx === idx ? 'text-blue-600' : 'text-gray-700')
+              }>{idx + 1}</span>
+              <div>
+                <div className={classNames(
+                  'font-semibold',
+                  selectedIdx === idx ? 'text-blue-700' : 'text-gray-900')
+                }>{indicator.label}</div>
+                <div className="text-gray-600 text-sm">{getTagline(indicator.definition)}</div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div> */}
+
+      {/* Globe Container */}
       <div 
         ref={containerRef} 
         className="w-full h-full"
