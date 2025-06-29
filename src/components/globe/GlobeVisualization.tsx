@@ -1,127 +1,78 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Globe from 'globe.gl';
-import * as THREE from 'three';
-import axios from 'axios';
+import { indicators as localIndicators } from '../../data/indicators';
+import type { Indicator } from '../../data/indicators';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Indicator {
-  IndicatorId: string;
-  Label: string;
-  Definition: string;
-  color?: string;
-  position?: [number, number]; // [latitude, longitude]
-  size?: number;
-}
-
-interface GlobePoint extends Indicator {
-  [key: string]: any;
-}
+import Globe from 'globe.gl';
 
 interface GlobeVisualizationProps {
   onError?: (error: string) => void;
-  onIndicatorSelect: (indicatorId: string) => void;
-  onCountrySelect?: (country: any) => void;
+  onIndicatorSelect?: (indicatorId: string) => void;
 }
+
+const colors = [
+  '#00A0DC', '#7AC36A', '#F15A60', '#9B5DE5', '#F5A623',
+  '#2CCCE4', '#FF66B2', '#5C6BC0', '#42B883', '#FF7043',
+  '#FFD600', '#8D6E63', '#00B8D4', '#C51162', '#43A047',
+  '#FF3D00', '#6D4C41', '#1DE9B6', '#D500F9', '#FFAB00'
+];
+
+const generateRandomPosition = (): [number, number] => {
+  const lat = Math.min(Math.max((Math.random() - 0.5) * 180, -85), 85);
+  const lng = Math.min(Math.max((Math.random() - 0.5) * 360, -180), 180);
+  return [lat, lng];
+};
 
 const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndicatorSelect }) => {
   const globeRef = useRef<any>();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [indicators, setIndicators] = useState<Indicator[]>([]);
+  const [indicators, setIndicators] = useState<(Indicator & { color: string; lat: number; lng: number; size: number; })[]>([]);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [hoveredIndicator, setHoveredIndicator] = useState<Indicator | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // Vibrant color palette
-  const colors = [
-    '#00A0DC', // Bright Blue
-    '#7AC36A', // Fresh Green
-    '#F15A60', // Coral Red
-    '#9B5DE5', // Purple
-    '#F5A623', // Orange
-    '#2CCCE4', // Turquoise
-    '#FF66B2', // Pink
-    '#5C6BC0', // Indigo
-    '#42B883', // Vue Green
-    '#FF7043'  // Deep Orange
-  ];
-
-  const generateRandomPosition = (): [number, number] => {
-    // Ensure valid latitude (-90 to 90) and longitude (-180 to 180)
-    const lat = Math.min(Math.max((Math.random() - 0.5) * 180, -85), 85); // Limit latitude range slightly
-    const lng = Math.min(Math.max((Math.random() - 0.5) * 360, -180), 180);
-    return [lat, lng];
-  };
-
-  const fetchIndicators = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get('https://api.dhsprogram.com/rest/dhs/indicators', {
-        params: {
-          returnFields: 'IndicatorId,Label,Definition,MeasurementType,DataType',
-          f: 'json'
-        }
-      });
-
-      // Process and limit indicators for visualization
-      const processedIndicators = response.data.Data
-        .slice(0, 12) // Show 12 indicators for better distribution
-        .map((indicator: Indicator, index: number) => {
-          const position = generateRandomPosition();
-          return {
-            ...indicator,
-            color: colors[index % colors.length],
-            position,
-            size: 1 // Fixed size to prevent scaling issues
-          };
-        })
-        .filter((indicator: Indicator) => {
-          // Validate position data
-          return indicator.position && 
-                 !isNaN(indicator.position[0]) && 
-                 !isNaN(indicator.position[1]);
-        });
-
-      setIndicators(processedIndicators);
-    } catch (error) {
-      console.error('Error fetching indicators:', error);
-      onError?.('Failed to load indicators. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [onError]);
+  // Prepare indicators with color and position
+  useEffect(() => {
+    const processed = localIndicators.map((indicator, idx) => {
+      const [lat, lng] = generateRandomPosition();
+      return {
+        ...indicator,
+        color: colors[idx % colors.length],
+        lat,
+        lng,
+        size: 1
+      };
+    });
+    setIndicators(processed);
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    // Initialize globe with safe defaults
     const globe = new Globe(containerRef.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundColor('#f8fafc')
       .width(containerRef.current.clientWidth)
       .height(containerRef.current.clientHeight)
-      .pointRadius(1) // Fixed radius instead of dynamic
+      .pointRadius(1)
       .pointColor('color')
-      .pointAltitude(0) // Set to 0 to prevent altitude-related issues
-      .pointsMerge(false) // Disable points merging to prevent geometry issues
-      .pointResolution(32) // Add point resolution for smoother geometries
+      .pointAltitude(0)
+      .pointsMerge(false)
+      .pointResolution(32)
       .pointLabel((d: any) => '')
       .onPointHover((point: any | null) => {
         setHoveredIndicator(point as Indicator | null);
-        if (point) {
-          document.body.style.cursor = 'pointer';
-        } else {
-          document.body.style.cursor = 'default';
-        }
+        document.body.style.cursor = point ? 'pointer' : 'default';
       })
       .onPointClick((point: any) => {
-        if (point?.IndicatorId) {
-          onIndicatorSelect(point.IndicatorId);
+        if (point && point.id) {
+          const idx = indicators.findIndex(ind => ind.id === point.id);
+          setSelectedIdx(idx);
+          onIndicatorSelect?.(point.id);
         }
       });
 
-    // Enable touch support
+    // Touch support
     if (containerRef.current) {
       containerRef.current.addEventListener('touchstart', (e) => {
         e.preventDefault();
@@ -130,7 +81,7 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
 
     globeRef.current = globe;
 
-    // Handle window resize
+    // Resize
     const handleResize = () => {
       if (containerRef.current && globeRef.current) {
         globeRef.current
@@ -140,45 +91,56 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
     };
     window.addEventListener('resize', handleResize);
 
-    // Start rotation animation with slower speed
+    // Rotation
     const rotationSpeed = 0.05;
     let lastTime = 0;
     let currentRotation = 0;
-
     const animate = (time: number) => {
-      const frame = requestAnimationFrame(animate);
+      requestAnimationFrame(animate);
       const deltaTime = time - lastTime;
       lastTime = time;
-      
       if (globeRef.current) {
         currentRotation += rotationSpeed * (deltaTime / 16.67);
         globeRef.current.pointOfView({ lat: 5, lng: currentRotation % 360 });
       }
     };
-    
     requestAnimationFrame(animate);
 
-    // Fetch indicators
-    fetchIndicators();
+    // Set points
+    if (indicators.length > 0) {
+      globe.pointsData(indicators);
+    }
 
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (globeRef.current) {
-        globeRef.current = null;
-      }
+      if (globeRef.current) globeRef.current = null;
       if (containerRef.current) {
         containerRef.current.removeEventListener('touchstart', () => {});
       }
     };
-  }, [fetchIndicators, onIndicatorSelect]);
+    // eslint-disable-next-line
+  }, [indicators, onIndicatorSelect]);
 
-  // Update points when indicators change
+  // Highlight selected indicator
   useEffect(() => {
-    if (globeRef.current && indicators.length > 0) {
-      globeRef.current.pointsData(indicators);
+    if (globeRef.current && selectedIdx !== null && indicators[selectedIdx]) {
+      globeRef.current.pointsData(indicators.map((ind, idx) =>
+        idx === selectedIdx ? { ...ind, color: '#FFD600', size: 1.5 } : { ...ind, size: 1 }
+      ));
     }
-  }, [indicators]);
+  }, [selectedIdx, indicators]);
+
+  // Navigation handlers
+  const handleNext = () => {
+    if (selectedIdx === null) setSelectedIdx(0);
+    else setSelectedIdx((selectedIdx + 1) % indicators.length);
+  };
+  const handlePrev = () => {
+    if (selectedIdx === null) setSelectedIdx(indicators.length - 1);
+    else setSelectedIdx((selectedIdx - 1 + indicators.length) % indicators.length);
+  };
+  const handleClose = () => setSelectedIdx(null);
 
   return (
     <div className="relative w-full h-full">
@@ -205,6 +167,27 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
         )}
       </AnimatePresence>
 
+      {/* Details/Story Panel */}
+      <AnimatePresence>
+        {selectedIdx !== null && indicators[selectedIdx] && (
+          <motion.div
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 p-8 flex flex-col"
+          >
+            <button onClick={handleClose} className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4">&times;</button>
+            <h2 className="text-2xl font-bold mb-2">{indicators[selectedIdx].label}</h2>
+            <p className="text-gray-700 mb-6">{indicators[selectedIdx].definition}</p>
+            <div className="mt-auto flex justify-between">
+              <button onClick={handlePrev} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
+              <button onClick={handleNext} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Tooltip */}
       <AnimatePresence>
         {hoveredIndicator && (
@@ -220,8 +203,8 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
               zIndex: 1000
             }}
           >
-            <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.Label}</h3>
-            <p className="text-gray-600 text-sm">{hoveredIndicator.Definition}</p>
+            <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.label}</h3>
+            <p className="text-gray-600 text-sm">{hoveredIndicator.definition}</p>
           </motion.div>
         )}
       </AnimatePresence>
