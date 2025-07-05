@@ -29,6 +29,8 @@ const getTagline = (definition: string) => {
   return match ? match[1] : definition;
 };
 
+
+
 const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndicatorSelect }) => {
   const globeRef = useRef<any>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -180,47 +182,6 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
 
   return (
     <div className="relative w-full h-full">
-      {/* Overlay Indicator List
-      <div
-        className={classNames(
-          'absolute z-20 bg-white bg-opacity-80 rounded-lg shadow-lg p-6',
-          'transition-all duration-300',
-          'flex flex-col',
-          'overflow-y-auto',
-          'backdrop-blur',
-          'indicator-list-overlay',
-          'lg:top-1/2 lg:right-8 lg:transform lg:-translate-y-1/2 lg:w-96', // right of globe on large screens
-          'w-full left-0 bottom-0 lg:bottom-auto lg:left-auto', // below globe on small screens
-        )}
-        style={{ maxHeight: '80vh' }}
-      >
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Indicators</h2>
-        <ol className="space-y-4">
-          {indicators.map((indicator, idx) => (
-            <li
-              key={indicator.id}
-              className={classNames(
-                'flex items-start space-x-3 cursor-pointer p-2 rounded transition',
-                selectedIdx === idx ? 'bg-blue-100 border-l-4 border-blue-500' : 'hover:bg-gray-100',
-              )}
-              onClick={() => setSelectedIdx(idx)}
-            >
-              <span className={classNames(
-                'font-bold text-lg',
-                selectedIdx === idx ? 'text-blue-600' : 'text-gray-700')
-              }>{idx + 1}</span>
-              <div>
-                <div className={classNames(
-                  'font-semibold',
-                  selectedIdx === idx ? 'text-blue-700' : 'text-gray-900')
-                }>{indicator.label}</div>
-                <div className="text-gray-600 text-sm">{getTagline(indicator.definition)}</div>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div> */}
-
       {/* Globe Container */}
       <div 
         ref={containerRef} 
@@ -245,26 +206,6 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
         )}
       </AnimatePresence>
 
-      {/* Details/Story Panel */}
-      <AnimatePresence>
-        {selectedIdx !== null && indicators[selectedIdx] && (
-          <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 p-8 flex flex-col"
-          >
-            <button onClick={handleClose} className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4">&times;</button>
-            <h2 className="text-2xl font-bold mb-2">{indicators[selectedIdx].label}</h2>
-            <p className="text-gray-700 mb-6">{indicators[selectedIdx].definition}</p>
-            <div className="mt-auto flex justify-between">
-              <button onClick={handlePrev} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
-              <button onClick={handleNext} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Tooltip */}
       <AnimatePresence>

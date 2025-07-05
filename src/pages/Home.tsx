@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobeVisualization from "../components/globe/GlobeVisualization";
 import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
@@ -9,11 +9,29 @@ import companyLogo from "../assets/Company-logo.jpg";
 import { indicators as localIndicators } from "../data/indicators";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
+import "./Home.css";
 
 // Helper to get tagline (first sentence of definition)
 const getTagline = (definition: string) => {
   const match = definition.match(/^(.*?\.|\!|\?)(\s|$)/);
   return match ? match[1] : definition;
+};
+
+// Calculate arc positions for indicators (true C arc, 90° to 270° clockwise)
+const calculateArcPositions = (count: number, radius: number = 520) => {
+  const positions: { x: number; y: number }[] = [];
+  const startAngle = 270;   // Top (12 o'clock)
+  const endAngle = 90;    // Bottom (6 o'clock)
+  const totalArc = endAngle - startAngle; // -180
+  const angleStep = totalArc / (count - 1); // negative
+  for (let i = 0; i < count; i++) {
+    const angle = startAngle - i * angleStep; // 90, 80, ..., 270
+    const rad = (angle * Math.PI) / 180;
+    const x = radius * Math.cos(rad);
+    const y = radius * Math.sin(rad);
+    positions.push({ x, y });
+  }
+  return positions;
 };
 
 // Memoized Globe Component to prevent unnecessary re-renders
@@ -171,6 +189,7 @@ const Home: React.FC = () => {
   const { setSelectedIndicator } = useIndicator();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [hoveredIndicator, setHoveredIndicator] = useState<any>(null);
+  const [arcPositions, setArcPositions] = useState<{ x: number; y: number }[]>([]);
 
   // Memoize globe event handlers
   const handleIndicatorSelect = useCallback(
@@ -192,6 +211,11 @@ const Home: React.FC = () => {
 
   const handleError = useCallback((errorMessage: string) => {
     setError(errorMessage);
+  }, []);
+
+  // Calculate arc positions for indicators
+  useEffect(() => {
+    setArcPositions(calculateArcPositions(localIndicators.length, 380));
   }, []);
 
   const handleCalculatorChange = (field: string, value: string) => {
@@ -382,213 +406,204 @@ const Home: React.FC = () => {
           </div>
         </div>
         {/* Globe and Indicator Row */}
-        <div className="flex flex-col md:flex-row items-center md:items-start z-0">
-          <div className="w-full md:w-1/2 aspect-square rounded-full order-2 md:order-1 md:pl-12 mt-8 md:mt-0 relative">
-            {/* Globe Visualization fills parent */}
-            <div className="w-full h-full">
-              <MemoizedGlobe
-                onError={handleError}
-                onIndicatorSelect={handleIndicatorSelect}
-              />
-              {/* Circular Numbers Overlay - now relative to globe container */}
-              <div className="absolute inset-0 pointer-events-none z-30">
-                {localIndicators.map((indicator, idx) => {
-                  const total = localIndicators.length;
-                  const startAngle = 300;
-                  const endAngle = 60;
-                  // Handle arc crossing 360/0 degrees
-                  const arc = endAngle > startAngle ? endAngle - startAngle : 360 - startAngle + endAngle;
-                  const angle = total === 1 ? (startAngle + arc / 2) % 360 : (startAngle + (arc / (total - 1)) * idx) % 360;
-                  // Calculate radius for numbers and labels
-                  const numberRadius = '1000%';
-                  const labelRadius = '55%';
-                  const colors = [
-                    '#00A0DC', '#7AC36A', '#F15A60', '#9B5DE5', '#F5A623',
-                    '#2CCCE4', '#FF66B2', '#5C6BC0', '#42B883', '#FF7043',
-                    '#FFD600', '#8D6E63', '#00B8D4', '#C51162', '#43A047',
-                    '#FF3D00', '#6D4C41', '#1DE9B6', '#D500F9', '#FFAB00',
-                  ];
-                  const color = colors[idx % colors.length];
-                  return (
-                    <div
-                      key={indicator.id}
-                      className={classNames(
-                        'absolute flex flex-col items-center transition cursor-pointer pointer-events-auto',
-                        selectedIdx === idx ? 'font-bold scale-125' : ''
-                      )}
-                      style={{
-                        left: '50%',
-                        top: '50%',
-                        transform: `rotate(${angle}deg) translate(${numberRadius}) rotate(${-angle}deg)`,
-                        transformOrigin: 'center center',
-                        zIndex: 40,
-                      }}
-                      onClick={() => setSelectedIdx(idx)}
-                    >
-                      {/* Number */}
-                      <span
-                        className={classNames(
-                          'rounded-full w-8 h-8 flex items-center justify-center text-lg shadow border-2 mb-2',
-                          selectedIdx === idx ? 'border-blue-600 bg-blue-100' : 'bg-white border-gray-300'
-                        )}
-                        style={{ color }}
+        <div className="relative w-full h-auto mt-8 md:mt-0">
+          {/* Globe Visualization - main component */}
+          <div className="w-full h-[600px] md:h-[900px] rounded-lg overflow-hidden relative">
+            <MemoizedGlobe
+              onError={handleError}
+              onIndicatorSelect={handleIndicatorSelect}
+            />
+            
+            {/* Arc-based Indicator Overlay */}
+            <div className="home-arc-overlay">
+              {/* Large Screen Arc Layout */}
+              <div className="hidden lg:block relative w-full h-full">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="relative">
+                    {/* Arc Container */}
+                    <div className="relative">
+                      {/* Arc Path Indicator (subtle visual guide) */}
+                      <svg 
+                        className="absolute inset-0 w-full h-full pointer-events-none opacity-10"
+                        style={{ transform: 'translateX(-50%)' }}
                       >
-                        {idx + 1}
-                      </span>
-                      
-                      {/* Label */}
-                      <div
-                        className={classNames(
-                          'absolute whitespace-nowrap text-sm font-medium px-2 py-1 rounded shadow-sm',
-                          selectedIdx === idx ? 'bg-blue-100 text-blue-800' : 'bg-white text-gray-700'
-                        )}
-                        style={{
-                          left: '50%',
-                          top: '50%',
-                          transform: `rotate(${angle}deg) translate(${labelRadius}) rotate(${-angle}deg) translate(-50%, -50%)`,
-                          transformOrigin: 'center center',
-                          zIndex: 35,
-                        }}
-                      >
-                        {indicator.label}
-                      </div>
+                        <path
+                          d={`M ${-380} 0 A 380 380 0 0 1 ${380} 0`}
+                          stroke="#3b82f6"
+                          strokeWidth="1.5"
+                          fill="none"
+                          strokeDasharray="3,3"
+                        />
+                        {/* Arc endpoints for visual reference */}
+                        <circle cx="-380" cy="0" r="3" fill="#3b82f6" opacity="0.5" />
+                        <circle cx="380" cy="0" r="3" fill="#3b82f6" opacity="0.5" />
+                      </svg>
+                      <ul className="home-arc-list">
+                        {localIndicators.map((indicator, idx) => {
+                          const colors = [
+                            '#00A0DC', '#7AC36A', '#F15A60', '#9B5DE5', '#F5A623',
+                            '#2CCCE4', '#FF66B2', '#5C6BC0', '#42B883', '#FF7043',
+                            '#FFD600', '#8D6E63', '#00B8D4', '#C51162', '#43A047',
+                            '#FF3D00', '#6D4C41', '#1DE9B6', '#D500F9', '#FFAB00',
+                          ];
+                          const color = colors[idx % colors.length];
+                          const pos = arcPositions[idx] || { x: 0, y: 0 };
+                          return (
+                            <li
+                              key={indicator.id}
+                              className="home-arc-item"
+                              style={{
+                                position: 'absolute',
+                                left: '50%',
+                                top: '50%',
+                                transform: `translate(-50%, -50%) translate(${pos.x}px, ${pos.y}px)`
+                              }}
+                            >
+                              <motion.div
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={classNames(
+                                  'home-arc-card',
+                                  selectedIdx === idx && 'selected'
+                                )}
+                                onClick={() => setSelectedIdx(idx)}
+                              >
+                                {/* Indicator Number */}
+                                <div 
+                                  className="home-arc-number"
+                                  style={{ borderColor: color }}
+                                >
+                                  {idx + 1}
+                                </div>
+                                
+                                {/* Indicator Content */}
+                                <div className="home-arc-content">
+                                  <div className="home-arc-title">
+                                    {indicator.label}
+                                  </div>
+                                  <div className="home-arc-description">
+                                    {indicator.shortDescription}
+                                  </div>
+                                </div>
+                                
+                                {/* Arrow Icon */}
+                                <div className="home-arc-arrow">
+                                  →
+                                </div>
+                              </motion.div>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     </div>
-                  );
-                })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Small/Medium Screen Grid Layout */}
+              <div className="lg:hidden home-mobile-overlay">
+                <h2 className="text-lg font-bold mb-3 text-gray-800">Health Indicators</h2>
+                <div className="home-mobile-grid">
+                  {localIndicators.map((indicator, idx) => {
+                    const colors = [
+                      '#00A0DC', '#7AC36A', '#F15A60', '#9B5DE5', '#F5A623',
+                      '#2CCCE4', '#FF66B2', '#5C6BC0', '#42B883', '#FF7043',
+                      '#FFD600', '#8D6E63', '#00B8D4', '#C51162', '#43A047',
+                      '#FF3D00', '#6D4C41', '#1DE9B6', '#D500F9', '#FFAB00',
+                    ];
+                    const color = colors[idx % colors.length];
+                    return (
+                      <motion.div
+                        key={indicator.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={classNames(
+                          'home-mobile-item',
+                          selectedIdx === idx && 'selected'
+                        )}
+                        onClick={() => setSelectedIdx(idx)}
+                      >
+                        <span 
+                          className="home-mobile-number"
+                          style={{ color }}
+                        >
+                          {idx + 1}
+                        </span>
+                        <div className="home-mobile-title">
+                          {indicator.label}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-            {/* Details/Story Panel */}
-            <AnimatePresence>
-              {selectedIdx !== null && localIndicators[selectedIdx] && (
-                <motion.div
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 100 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 p-8 flex flex-col"
+          </div>
+
+          {/* Details/Story Panel */}
+          <AnimatePresence>
+            {selectedIdx !== null && localIndicators[selectedIdx] && (
+              <motion.div
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 100 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 p-8 flex flex-col"
+              >
+                <button
+                  onClick={handleClose}
+                  className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4"
                 >
+                  &times;
+                </button>
+                <h2 className="text-2xl font-bold mb-2">
+                  {localIndicators[selectedIdx].label}
+                </h2>
+                <p className="text-gray-700 mb-6">
+                  {localIndicators[selectedIdx].definition}
+                </p>
+                <div className="mt-auto flex justify-between">
                   <button
-                    onClick={handleClose}
-                    className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4"
+                    onClick={handlePrev}
+                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                   >
-                    &times;
+                    Previous
                   </button>
-                  <h2 className="text-2xl font-bold mb-2">
-                    {localIndicators[selectedIdx].label}
-                  </h2>
-                  <p className="text-gray-700 mb-6">
-                    {localIndicators[selectedIdx].definition}
-                  </p>
-                  <div className="mt-auto flex justify-between">
-                    <button
-                      onClick={handlePrev}
-                      className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={handleNext}
-                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {/* Tooltip */}
-            <AnimatePresence>
-              {hoveredIndicator && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
-                  style={{
-                    left: "50%",
-                    bottom: "2rem",
-                    transform: "translateX(-50%)",
-                    zIndex: 1000,
-                  }}
-                >
-                  <h3 className="font-semibold text-lg mb-2">
-                    {hoveredIndicator.label}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {hoveredIndicator.definition}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          {/* Indicator List (vertical, right of globe on large screens, below on small) */}
-          <div className="w-full md:w-1/2 order-1 md:order-2 md:pl-12 mt-8 md:mt-0">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">Indicators</h2>
-            <ol className="space-y-4">
-              {localIndicators.map((indicator, idx) => {
-                const colors = [
-                  "#00A0DC",
-                  "#7AC36A",
-                  "#F15A60",
-                  "#9B5DE5",
-                  "#F5A623",
-                  "#2CCCE4",
-                  "#FF66B2",
-                  "#5C6BC0",
-                  "#42B883",
-                  "#FF7043",
-                  "#FFD600",
-                  "#8D6E63",
-                  "#00B8D4",
-                  "#C51162",
-                  "#43A047",
-                  "#FF3D00",
-                  "#6D4C41",
-                  "#1DE9B6",
-                  "#D500F9",
-                  "#FFAB00",
-                ];
-                const color = colors[idx % colors.length];
-                return (
-                  <li
-                    key={indicator.id}
-                    className={classNames(
-                      "flex items-start space-x-3 cursor-pointer p-2 rounded transition",
-                      selectedIdx === idx
-                        ? "bg-blue-100 border-l-4 border-blue-500"
-                        : "hover:bg-gray-100"
-                    )}
-                    onClick={() => setSelectedIdx(idx)}
+                  <button
+                    onClick={handleNext}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                   >
-                    <span
-                      className={classNames(
-                        "font-bold text-lg w-8 flex-shrink-0 text-center",
-                        selectedIdx === idx ? "text-blue-600" : "text-gray-700"
-                      )}
-                      style={{ color }}
-                    >
-                      {idx + 1}
-                    </span>
-                    <div>
-                      <div
-                        className={classNames(
-                          "font-semibold",
-                          selectedIdx === idx
-                            ? "text-blue-700"
-                            : "text-gray-900"
-                        )}
-                      >
-                        {indicator.label}
-                      </div>
-                      <div className="text-gray-600 text-sm">
-                        {getTagline(indicator.definition)}
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
+                    Next
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Tooltip */}
+          <AnimatePresence>
+            {hoveredIndicator && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
+                style={{
+                  left: "50%",
+                  bottom: "2rem",
+                  transform: "translateX(-50%)",
+                  zIndex: 1000,
+                }}
+              >
+                <h3 className="font-semibold text-lg mb-2">
+                  {hoveredIndicator.label}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {hoveredIndicator.definition}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
