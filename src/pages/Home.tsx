@@ -1,11 +1,18 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import GlobeVisualization from '../components/globe/GlobeVisualization';
-import FeedingTipsCarousel from '../components/carousel/FeedingTipsCarousel';
-import { useIndicator } from '../context/IndicatorContext';
-import Footer from '../components/layout/Footer';
-import { images } from '../assets/images';
-import companyLogo from '../assets/Company-logo.jpg';
+// Home.tsx
+// Main landing page for NPH Solutions website
+// Features: Globe visualization, responsive indicator lists, details panel, health tools, and more
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import GlobeVisualization from "../components/globe/GlobeVisualization";
+import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
+import { useIndicator } from "../context/IndicatorContext";
+import Footer from "../components/layout/Footer";
+import companyLogo from "../assets/Company-logo.jpg";
+import { indicators as localIndicators } from "../data/indicators";
+import classNames from "classnames";
+import { motion, AnimatePresence } from "framer-motion";
+import "./Home.css";
 
 // Memoized Globe Component to prevent unnecessary re-renders
 const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect }: any) => (
@@ -15,6 +22,30 @@ const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect }: any) => (
   />
 ));
 
+// Helper: Get tagline (first sentence of definition)
+const getTagline = (definition: string) => {
+  const match = definition.match(/^(.*?\.|\!|\?)(\s|$)/);
+  return match ? match[1] : definition;
+};
+
+// Calculate arc positions for indicators (for future arc overlays)
+const calculateArcPositions = (count: number, radius: number = 380) => {
+  const positions: { x: number; y: number }[] = [];
+  const startAngle = 260; // Top (12 o'clock)
+  const endAngle = 70; // Bottom (6 o'clock)
+  const totalArc = endAngle - startAngle; // -180
+  const angleStep = totalArc / (count - 1); // negative
+  for (let i = 0; i < count; i++) {
+    const angle = startAngle - i * angleStep;
+    const rad = (angle * Math.PI) / 180;
+    const x = radius * Math.cos(rad);
+    const y = radius * Math.sin(rad);
+    positions.push({ x, y });
+  }
+  return positions;
+};
+
+// Feeding tips data for carousel (used in Health Tools section)
 const feedingTips = {
   breastfeedingBasics: {
     title: "🤱 Breastfeeding Basics (0-6 months)",
@@ -24,8 +55,8 @@ const feedingTips = {
       "Breastmilk contains all the nutrients your baby needs in the first 6 months.",
       "Feed your baby on demand—at least 8 times a day including at night.",
       "Avoid using feeding bottles—they are hard to clean and may cause infections.",
-      "In hot weather, breastmilk still provides all the water your baby needs."
-    ]
+      "In hot weather, breastmilk still provides all the water your baby needs.",
+    ],
   },
   breastfeedingBest: {
     title: "🤱 Breastfeeding Best Practices",
@@ -35,8 +66,8 @@ const feedingTips = {
       "Skin-to-skin contact right after birth helps your baby start breastfeeding sooner.",
       "Early breastfeeding improves bonding and boosts milk production.",
       "Even C-section babies should be breastfed as soon as the mother is alert.",
-      "The first breastmilk (colostrum) is golden and full of antibodies—do not discard it."
-    ]
+      "The first breastmilk (colostrum) is golden and full of antibodies—do not discard it.",
+    ],
   },
   complementaryStart: {
     title: "🥣 Starting Complementary Foods (6-24 months)",
@@ -46,8 +77,8 @@ const feedingTips = {
       "Feed thick porridge, mashed fruits, soft vegetables, and small pieces of meat.",
       "Introduce one new food at a time and watch for allergies.",
       "Do not replace breastmilk; food complements it.",
-      "Ensure food is soft enough to avoid choking."
-    ]
+      "Ensure food is soft enough to avoid choking.",
+    ],
   },
   complementaryVariety: {
     title: "🥣 Complementary Feeding Variety",
@@ -57,8 +88,8 @@ const feedingTips = {
       "Include eggs, dairy, grains, fruits, and vegetables every day.",
       "Colorful meals are more nutritious—use orange, green, red vegetables and fruits.",
       "Use local foods—pumpkin, bananas, beans, greens—to add variety.",
-      "Diversity helps prevent micronutrient deficiencies."
-    ]
+      "Diversity helps prevent micronutrient deficiencies.",
+    ],
   },
   mealFrequency: {
     title: "⏰ Meal Frequency & Growth",
@@ -68,8 +99,8 @@ const feedingTips = {
       "Feed 9–23-month-olds 3–4 meals + 1–2 snacks daily.",
       "Children need small frequent meals due to small stomachs.",
       "During illness, feed more often and offer favorite foods.",
-      "Extra feeding after sickness helps the child catch up in growth."
-    ]
+      "Extra feeding after sickness helps the child catch up in growth.",
+    ],
   },
   foodSafety: {
     title: "🧼 Food Safety & Hygiene",
@@ -79,8 +110,8 @@ const feedingTips = {
       "Clean feeding utensils thoroughly with soap and water.",
       "Serve freshly prepared food. Avoid keeping leftovers.",
       "Boil water used for baby food preparation.",
-      "Avoid street food or uncovered food for children."
-    ]
+      "Avoid street food or uncovered food for children.",
+    ],
   },
   healthyHabits: {
     title: "🍏 Healthy Feeding Habits",
@@ -90,8 +121,8 @@ const feedingTips = {
       "Avoid giving sweets, biscuits, and chips—they displace healthy food.",
       "Herbal teas and concoctions are not safe for babies.",
       "Do not force-feed your child; encourage and offer with love.",
-      "Avoid distractions like screens during mealtime."
-    ]
+      "Avoid distractions like screens during mealtime.",
+    ],
   },
   nutritionDiversity: {
     title: "🌽 Nutrition & Food Diversity",
@@ -101,8 +132,8 @@ const feedingTips = {
       "Include soft-cooked greens like amaranth or pumpkin leaves.",
       "Fruits and vegetables build immunity and prevent disease.",
       "Chop fruits finely or mash to avoid choking.",
-      "Serve vegetables in every meal starting at 6 months."
-    ]
+      "Serve vegetables in every meal starting at 6 months.",
+    ],
   },
   proteinCalcium: {
     title: "🥚 Protein, Iron & Calcium",
@@ -112,8 +143,8 @@ const feedingTips = {
       "Add small pieces of meat, fish, or liver into meals.",
       "Animal foods help prevent anemia in young children.",
       "Yogurt and milk are great sources of calcium.",
-      "Mash or blend meat for easy swallowing."
-    ]
+      "Mash or blend meat for easy swallowing.",
+    ],
   },
   positiveFeeding: {
     title: "😊 Positive Feeding Practices",
@@ -123,8 +154,8 @@ const feedingTips = {
       "Be patient—offer food slowly and encourage your child.",
       "Respect your child's hunger and fullness cues.",
       "Feed your child in a quiet space with minimal distractions.",
-      "Involve older siblings in feeding to make it fun."
-    ]
+      "Involve older siblings in feeding to make it fun.",
+    ],
   },
   illnessRecovery: {
     title: "🤒 Illness & Recovery",
@@ -134,8 +165,8 @@ const feedingTips = {
       "Give small portions more often when appetite is low.",
       "Continue breastfeeding during illness—it helps with recovery.",
       "Use nutrient-dense, soft foods during recovery.",
-      "Extra feeding after illness helps regain lost weight."
-    ]
+      "Extra feeding after illness helps regain lost weight.",
+    ],
   },
   parentalSupport: {
     title: "👨‍👩‍👧 Parental Support & Guidance",
@@ -145,12 +176,13 @@ const feedingTips = {
       "Join a mother support group for shared learning.",
       "Ask health workers when unsure about feeding.",
       "Encourage other caregivers to follow safe feeding practices.",
-      "Create a consistent feeding routine to help your child feel secure."
-    ]
-  }
+      "Create a consistent feeding routine to help your child feel secure.",
+    ],
+  },
 };
 
 const Home: React.FC = () => {
+  // State for error, selected country, indicator, and calculator
   const [error, setError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<any>(null);
@@ -170,31 +202,38 @@ const Home: React.FC = () => {
   const [bmiResult, setBmiResult] = useState<any>(null);
   const navigate = useNavigate();
   const { setSelectedIndicator } = useIndicator();
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [hoveredIndicator, setHoveredIndicator] = useState<any>(null);
+  const [arcPositions, setArcPositions] = useState<{ x: number; y: number }[]>([]);
 
-  // Memoize globe event handlers
-  const handleIndicatorSelect = useCallback((indicatorId: string) => {
-    setSelectedIndicator(indicatorId);
-    navigate(`/data?indicator=${indicatorId}`);
-  }, [setSelectedIndicator, navigate]);
-
+  // Memoized event handlers for globe
+  const handleIndicatorSelect = useCallback(
+    (indicatorId: string) => {
+      setSelectedIndicator(indicatorId);
+      navigate(`/data?indicator=${indicatorId}`);
+    },
+    [setSelectedIndicator, navigate]
+  );
   const handleCountrySelect = useCallback((country: any) => {
     setSelectedCountry(country?.properties?.name || null);
     setCountryData({
       indicators: Math.floor(Math.random() * 50) + 10,
       surveys: Math.floor(Math.random() * 20) + 5,
-      lastUpdated: new Date().toLocaleDateString()
+      lastUpdated: new Date().toLocaleDateString(),
     });
   }, []);
-
   const handleError = useCallback((errorMessage: string) => {
     setError(errorMessage);
   }, []);
 
+  // Calculate arc positions (for future arc overlays)
+  useEffect(() => {
+    setArcPositions(calculateArcPositions(localIndicators.length, 300));
+  }, []);
+
+  // Calculator input change handler
   const handleCalculatorChange = (field: string, value: string) => {
-    setCalculatorData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setCalculatorData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleBmiChange = (field: string, value: string) => {
@@ -206,13 +245,10 @@ const Home: React.FC = () => {
 
   const calculateZScore = () => {
     const { age, weight, height, gender } = calculatorData;
-    
     if (!age || !weight || !height || !gender) {
-      alert('Please fill in all fields');
+      alert("Please fill in all fields");
       return;
     }
-
-    // Mock Z-Score calculation (in real implementation, use WHO growth standards)
     const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
     const heightNum = parseFloat(height);
@@ -308,18 +344,16 @@ const Home: React.FC = () => {
 
   const getRecommendations = (weightStatus: string, heightStatus: string, wastingStatus: string) => {
     const recommendations = [];
-    
-    if (weightStatus === 'Underweight') {
-      recommendations.push('Increase caloric intake with nutrient-dense foods');
-      recommendations.push('Consider nutritional supplements under medical supervision');
-    } else if (weightStatus === 'Overweight') {
-      recommendations.push('Focus on balanced nutrition and physical activity');
-      recommendations.push('Limit sugary drinks and processed foods');
+    if (weightStatus === "Underweight") {
+      recommendations.push("Increase caloric intake with nutrient-dense foods");
+      recommendations.push("Consider nutritional supplements under medical supervision");
+    } else if (weightStatus === "Overweight") {
+      recommendations.push("Focus on balanced nutrition and physical activity");
+      recommendations.push("Limit sugary drinks and processed foods");
     }
-    
-    if (heightStatus === 'Stunted') {
-      recommendations.push('Ensure adequate protein and micronutrient intake');
-      recommendations.push('Monitor for underlying health conditions');
+    if (heightStatus === "Stunted") {
+      recommendations.push("Ensure adequate protein and micronutrient intake");
+      recommendations.push("Monitor for underlying health conditions");
     }
     
     if (wastingStatus === 'Wasted') {
@@ -328,379 +362,524 @@ const Home: React.FC = () => {
     }
     
     if (recommendations.length === 0) {
-      recommendations.push('Continue with current healthy feeding practices');
-      recommendations.push('Regular growth monitoring recommended');
+      recommendations.push("Continue with current healthy feeding practices");
+      recommendations.push("Regular growth monitoring recommended");
     }
-    
     return recommendations;
   };
 
+  // Details panel navigation handlers
+  const handleNext = () => {
+    if (selectedIdx === null) setSelectedIdx(0);
+    else setSelectedIdx((selectedIdx + 1) % localIndicators.length);
+  };
+  const handlePrev = () => {
+    if (selectedIdx === null) setSelectedIdx(localIndicators.length - 1);
+    else setSelectedIdx((selectedIdx - 1 + localIndicators.length) % localIndicators.length);
+  };
+  const handleClose = () => setSelectedIdx(null);
+
   return (
-    <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
-      {/* Main Content Section with Globe */}
-      <div className="relative z-10 container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center md:items-start pt-16 md:pt-24 z-0">
-          {/* Globe Container */}
-          <div className="w-full md:w-1/2 aspect-square rounded-full overflow-hidden order-2 md:order-1">
-            {error ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="bg-red-50 border border-red-200 p-6 rounded-lg text-red-700 max-w-md text-center mx-4">
-                  <p className="text-lg mb-4">{error}</p>
+    <>
+      {/* Main Page Container */}
+      <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
+        {/* Header, Logo, and Intro Section */}
+        <div className="max-w-screen-lg mx-auto pt-10">
+          <div className="relative z-10 container mx-auto px-4 mt-12">
+            {/* Company Logo and Title */}
+            <div className="w-full mb-12 flex flex-col justify-center">
+              <div className="text-center md:text-left mb-12">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+                  <img
+                    src={companyLogo}
+                    alt="NPH Solutions Logo"
+                    className="w-30 h-30 md:w-24 md:h-24 object-contain rounded-lg shadow-lg"
+                  />
+                </div>
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 text-gray-800 leading-tight">
+                  Narratives of Public Health Solutions LTD
+                </h1>
+                <p className="text-lg md:text-xl text-gray-600 mb-6">
+                  Unlocking health data for community and policy action
+                </p>
+                {/* Services Bullet Points */}
+                <div className="mb-10">
+                  <ul className="space-y-4 text-base md:text-lg text-gray-700">
+                    <li className="flex items-start gap-4">
+                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                      <span className="font-medium break-words leading-snug">Public health research</span>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                      <span className="font-medium break-words leading-snug">Monitoring and evaluation of public health interventions</span>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                      <span className="font-medium break-words leading-snug">Data systems and analytics</span>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
+                      <span className="font-medium break-words leading-snug">Health promotion</span>
+                    </li>
+                  </ul>
+                </div>
+                {/* Navigation Buttons */}
+                <div className="flex flex-col gap-4 justify-center md:justify-start">
                   <button
-                    onClick={() => window.location.reload()}
-                    className="px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors text-red-700"
+                    onClick={() => navigate("/data")}
+                    className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg transform hover:scale-105 duration-200"
                   >
-                    Try Again
+                    Explore All Data
+                  </button>
+                  <button
+                    onClick={() => navigate("/about")}
+                    className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-lg transform hover:scale-105 duration-200"
+                  >
+                    Learn More
                   </button>
                 </div>
-              </div>
-            ) : (
-              <div className="w-full h-full">
-                <MemoizedGlobe 
-                  onError={handleError} 
-                  onIndicatorSelect={handleIndicatorSelect}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Content Section */}
-          <div className="w-full md:w-1/2 order-1 md:order-2 md:pl-12">
-            <div className="text-center md:text-left mb-12">
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
-                <img 
-                  src={companyLogo}
-                  alt="NPH Solutions Logo" 
-                  className="w-30 h-30 md:w-24 md:h-24 object-contain rounded-lg shadow-lg"
-                />
-              </div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 text-gray-800 leading-tight">
-                Narratives of Public Health Solutions LTD
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-6">
-                Unlocking health data for community and policy action
-              </p>
-              
-              {/* Services Bullet Points */}
-              <div className="mb-10">
-                <ul className="space-y-4 text-base md:text-lg text-gray-700">
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Public health research</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Monitoring and evaluation of public health interventions</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Data systems and analytics</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                    <span className="font-medium break-words leading-snug">Health promotion</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div className="flex flex-col gap-4 justify-center md:justify-start">
-                <button 
-                  onClick={() => navigate('/data')}
-                  className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg transform hover:scale-105 duration-200"
-                >
-                  Explore All Data
-                </button>
-                <button 
-                  onClick={() => navigate('/about')}
-                  className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-lg transform hover:scale-105 duration-200"
-                >
-                  Learn More
-                </button>
-              </div>
-
-              {/* Dynamic Country Data Section */}
-              {selectedCountry && countryData && (
-                <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="text-xl font-semibold text-blue-800 mb-4">
-                    📊 DHS Data for {selectedCountry}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{countryData.indicators}</div>
-                      <div className="text-gray-600">Health Indicators</div>
+                {/* Dynamic Country Data Section (shown when a country is selected on the globe) */}
+                {selectedCountry && countryData && (
+                  <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 className="text-xl font-semibold text-blue-800 mb-4">
+                      📊 DHS Data for {selectedCountry}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {countryData.indicators}
+                        </div>
+                        <div className="text-gray-600">Health Indicators</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {countryData.surveys}
+                        </div>
+                        <div className="text-gray-600">Surveys Available</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-blue-600">
+                          {countryData.lastUpdated}
+                        </div>
+                        <div className="text-gray-600">Last Updated</div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{countryData.surveys}</div>
-                      <div className="text-gray-600">Surveys Available</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-sm font-semibold text-blue-600">{countryData.lastUpdated}</div>
-                      <div className="text-gray-600">Last Updated</div>
+                    <p className="text-xs text-gray-500 mt-3">
+                      Click on indicators above to explore detailed data for {selectedCountry}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Globe and Arc Overlay Section */}
+            <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-10" style={{ backgroundColor: "#ffffff" }}>
+              {/* Desktop Layout: Globe and Indicator List Side by Side */}
+              <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
+                {/* Globe Visualization (left) */}
+                <div className="flex-1 flex justify-center">
+                  <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
+                    <GlobeVisualization onError={handleError} onIndicatorSelect={handleIndicatorSelect} />
+                  </div>
+                </div>
+                {/* Desktop Indicator List (right) */}
+                <div className="flex-1 flex justify-center">
+                  <div className="w-full max-w-2xl">
+                    <h2 className="text-lg font-bold mb-3 text-gray-800 text-left" style={{ transform: "translatex(-300px)", textDecoration: "underline" }}>
+                      Health Indicators
+                    </h2>
+                    <div className="space-y-0">
+                      {/* Desktop Arc Cards: Each card is only as wide as its content */}
+                      {localIndicators.map((indicator, idx) => {
+                        const colors = [
+                          "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
+                        ];
+                        const color = colors[idx % colors.length];
+                        // Arc transformations for arc effect
+                        const arcTransformations = [
+                          -300, -220, -110, -60, -20, 10, 20, 30, 40, 40, 30, 20, 10, -20, -60, -110, -200, -300,
+                        ];
+                        const translateX = arcTransformations[idx] || 0;
+                        return (
+                          <motion.div
+                            key={indicator.id}
+                            className={classNames(
+                              "home-arc-card cursor-pointer transition-all duration-200 hover:scale-105",
+                              selectedIdx === idx && "selected"
+                            )}
+                            style={{
+                              transform: `translateX(${translateX}px)`,
+                              height: "40px",
+                              padding: "0",
+                              "--indicator-color": color,
+                            } as React.CSSProperties}
+                            onClick={() => setSelectedIdx(idx)}
+                          >
+                            <div className="home-arc-number" style={{ borderColor: color }}>{idx + 1}</div>
+                            <div className="home-arc-content flex-1 min-w-0">
+                              <div className="home-arc-title whitespace-nowrap">{indicator.label}</div>
+                              <hr style={{borderColor: color, borderWidth: '1px', borderStyle: 'solid'}}/>
+                              <div className="home-arc-description whitespace-nowrap">{indicator.shortDescription}</div>
+                            </div>
+                            <div className="home-arc-arrow flex-shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-3">
-                    Click on indicators above to explore detailed data for {selectedCountry}
-                  </p>
                 </div>
+              </div>
+              {/* Mobile/Tablet Layout: Globe only (stacked) */}
+              <div className="lg:hidden w-full max-w-xs mx-auto h-[300px] md:h-[600px] md:max-w-2xl rounded-lg overflow-hidden relative flex items-center justify-center">
+                <GlobeVisualization onError={handleError} onIndicatorSelect={handleIndicatorSelect} />
+              </div>
+            </div>
+            {/* Details/Story Panel: Shows indicator details on all screen sizes */}
+            <AnimatePresence>
+              {selectedIdx !== null && localIndicators[selectedIdx] && (
+                <motion.div
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 100 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
+                >
+                  <div className="sticky top-0 z-10 bg-white p-4 pb-2 mt-10 pt-10">
+                    <button
+                      onClick={handleClose}
+                      className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto px-8 pb-4">
+                    <h2 className="text-2xl font-bold mb-2">{localIndicators[selectedIdx].label}</h2>
+                    <p className="text-gray-700 mb-6">{localIndicators[selectedIdx].definition}</p>
+                  </div>
+                  <div className="sticky bottom-0 z-10 bg-white p-4 flex justify-between">
+                    <button onClick={handlePrev} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
+                    <button onClick={handleNext} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</button>
+                  </div>
+                </motion.div>
               )}
+            </AnimatePresence>
+            {/* Tooltip: Shows indicator definition on hover (all screen sizes) */}
+            <AnimatePresence>
+              {hoveredIndicator && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
+                  style={{ left: "50%", bottom: "2rem", transform: "translateX(-50%)", zIndex: 1000 }}
+                >
+                  <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.label}</h3>
+                  <p className="text-gray-600 text-sm">{hoveredIndicator.definition}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+        {/* Mobile Indicator List: Single column below globe */}
+        <div className="block md:hidden w-full mt-8">
+          <h2 className="text-lg font-bold mb-3 text-gray-800 text-center">Health Indicators</h2>
+          <div className="grid grid-cols-1 gap-4 px-2">
+            {localIndicators.map((indicator, idx) => {
+              const colors = [
+                "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
+              ];
+              const color = colors[idx % colors.length];
+              return (
+                <motion.div
+                  key={indicator.id}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={classNames(
+                    "home-tablet-card cursor-pointer transition",
+                    selectedIdx === idx && "selected"
+                  )}
+                  style={{ borderColor: color }}
+                  onClick={() => setSelectedIdx(idx)}
+                >
+                  <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
+                  <div className="home-tablet-content">
+                    <div className="home-tablet-title">{indicator.label}</div>
+                    <div className="home-tablet-description">{indicator.shortDescription}</div>
+                  </div>
+                  <div className="home-tablet-arrow">→</div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+        {/* Tablet Indicator List: 2-column grid below globe */}
+        <div className="hidden md:block lg:hidden w-full mt-8">
+          <h2 className="text-lg font-bold mb-3 text-gray-800 text-center">Health Indicators</h2>
+          <div className="flex justify-center">
+            <div className="grid grid-cols-2 gap-4 w-full max-w-4xl px-4">
+              {localIndicators.map((indicator, idx) => {
+                const colors = [
+                  "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
+                ];
+                const color = colors[idx % colors.length];
+                return (
+                  <motion.div
+                    key={indicator.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={classNames(
+                      "home-tablet-card cursor-pointer transition-all duration-200",
+                      selectedIdx === idx && "selected"
+                    )}
+                    style={{ borderColor: color }}
+                    onClick={() => setSelectedIdx(idx)}
+                  >
+                    <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
+                    <div className="home-tablet-content">
+                      <div className="home-tablet-title">{indicator.label}</div>
+                      <div className="home-tablet-description">{indicator.shortDescription}</div>
+                    </div>
+                    <div className="home-tablet-arrow">→</div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Featured Images Section */}
-      <div className="relative z-10 bg-white py-16 md:py-24 mt-16 md:mt-24">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Health Tools & Resources</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-            {/* Left Box: Dynamic Health Feeding Tips */}
-            <FeedingTipsCarousel feedingTips={feedingTips} />
-            {/* Middle Box: Child Growth Z-Score Calculator */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">Growth Z-Score Calculator</h3>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Age (months)</label>
-                    <input 
-                      type="number" 
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="24"
-                      value={calculatorData.age}
-                      onChange={(e) => handleCalculatorChange('age', e.target.value)}
-                    />
+        {/* Health Tools & Resources Section */}
+        <div className="relative z-10 bg-white py-16 md:py-24 mt-16 md:mt-24">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+              Health Tools & Resources
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+              {/* Left Box: Dynamic Health Feeding Tips */}
+              <FeedingTipsCarousel feedingTips={feedingTips} />
+              {/* Middle Box: Child Growth Z-Score Calculator */}
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
-                    <input 
-                      type="number" 
-                      step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="12.5"
-                      value={calculatorData.weight}
-                      onChange={(e) => handleCalculatorChange('weight', e.target.value)}
-                    />
+                  <h3 className="text-2xl font-bold text-gray-800">Growth Z-Score Calculator</h3>
+                </div>
+                {/* Calculator Form */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Age (months)</label>
+                      <input
+                        type="number"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="24"
+                        value={calculatorData.age}
+                        onChange={(e) => handleCalculatorChange("age", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="12.5"
+                        value={calculatorData.weight}
+                        onChange={(e) => handleCalculatorChange("weight", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="85.2"
+                        value={calculatorData.height}
+                        onChange={(e) => handleCalculatorChange("height", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                      <select
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={calculatorData.gender}
+                        onChange={(e) => handleCalculatorChange("gender", e.target.value)}
+                      >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  onClick={calculateZScore}
+                >
+                  Calculate Z-Score
+                </button>
+                {/* Results Section */}
+                {zScoreResult && (
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div>
+                        <div className="text-xs text-gray-600">Weight Z-Score</div>
+                        <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div>
+                        <div className="text-xs text-gray-600">Height Z-Score</div>
+                        <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div>
+                        <div className="text-xs text-gray-600">Wasting Z-Score</div>
+                        <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
+                      </div>
+                    </div>
+                    <div className="border-t pt-3">
+                      <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
+                      <ul className="space-y-1">
+                        {zScoreResult.recommendations.map((rec: string, index: number) => (
+                          <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                            <span className="text-green-500 mt-1">•</span>
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+                {/* Feedback Section (shown before calculation) */}
+                {!zScoreResult && (
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-2">📊 Growth Assessment</h4>
+                    <p className="text-sm text-gray-600">Enter the child's measurements above to get personalized growth feedback and recommendations.</p>
+                  </div>
+                )}
+              </div>
+              {/* Right Box: BMI Calculator */}
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800">BMI Calculator</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Age (years)</label>
+                      <input 
+                        type="number" 
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="25"
+                        value={bmiData.age}
+                        onChange={(e) => handleBmiChange('age', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="70"
+                        value={bmiData.weight}
+                        onChange={(e) => handleBmiChange('weight', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="175"
+                        value={bmiData.height}
+                        onChange={(e) => handleBmiChange('height', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                      <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={bmiData.gender}
+                        onChange={(e) => handleBmiChange('gender', e.target.value)}
+                      >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
-                    <input 
-                      type="number" 
-                      step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="85.2"
-                      value={calculatorData.height}
-                      onChange={(e) => handleCalculatorChange('height', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={calculatorData.gender}
-                      onChange={(e) => handleCalculatorChange('gender', e.target.value)}
-                    >
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              
-              <button 
-                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                onClick={calculateZScore}
-              >
-                Calculate Z-Score
-              </button>
-              
-              {/* Results Section */}
-              {zScoreResult && (
-                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
-                  
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div>
-                      <div className="text-xs text-gray-600">Weight Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${
-                        zScoreResult.weightStatus === 'Normal' ? 'bg-green-100 text-green-700' :
-                        zScoreResult.weightStatus === 'Underweight' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {zScoreResult.weightStatus}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div>
-                      <div className="text-xs text-gray-600">Height Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${
-                        zScoreResult.heightStatus === 'Normal' ? 'bg-green-100 text-green-700' :
-                        zScoreResult.heightStatus === 'Stunted' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {zScoreResult.heightStatus}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div>
-                      <div className="text-xs text-gray-600">Wasting Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${
-                        zScoreResult.wastingStatus === 'Normal' ? 'bg-green-100 text-green-700' :
-                        zScoreResult.wastingStatus === 'Wasted' ? 'bg-red-100 text-red-700' :
-                        'bg-orange-100 text-orange-700'
-                      }`}>
-                        {zScoreResult.wastingStatus}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t pt-3">
-                    <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
-                    <ul className="space-y-1">
-                      {zScoreResult.recommendations.map((rec: string, index: number) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                          <span className="text-green-500 mt-1">•</span>
-                          {rec}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-              
-              {/* Feedback Section */}
-              {!zScoreResult && (
-                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-2">📊 Growth Assessment</h4>
-                  <p className="text-sm text-gray-600">Enter the child's measurements above to get personalized growth feedback and recommendations.</p>
-                </div>
-              )}
-            </div>
-            {/* Right Box: BMI Calculator */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">BMI Calculator</h3>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Age (years)</label>
-                    <input 
-                      type="number" 
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="25"
-                      value={bmiData.age}
-                      onChange={(e) => handleBmiChange('age', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
-                    <input 
-                      type="number" 
-                      step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="70"
-                      value={bmiData.weight}
-                      onChange={(e) => handleBmiChange('weight', e.target.value)}
-                    />
-                  </div>
-                </div>
+                <button 
+                  className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  onClick={calculateBMI}
+                >
+                  Calculate BMI
+                </button>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
-                    <input 
-                      type="number" 
-                      step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="175"
-                      value={bmiData.height}
-                      onChange={(e) => handleBmiChange('height', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={bmiData.gender}
-                      onChange={(e) => handleBmiChange('gender', e.target.value)}
-                    >
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              
-              <button 
-                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                onClick={calculateBMI}
-              >
-                Calculate BMI
-              </button>
-              
-              {/* Results Section */}
-              {bmiResult && (
-                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-3">📊 BMI Results</h4>
-                  
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{bmiResult.bmi}</div>
-                      <div className="text-xs text-gray-600">BMI</div>
-                      <div className={bmiResult.color}>
-                        {bmiResult.category}
+                {/* Results Section */}
+                {bmiResult && (
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">📊 BMI Results</h4>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{bmiResult.bmi}</div>
+                        <div className="text-xs text-gray-600">BMI</div>
+                        <div className={bmiResult.color}>
+                          {bmiResult.category}
+                        </div>
                       </div>
                     </div>
+                    
+                    <div className="border-t pt-3">
+                      <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
+                      <ul className="space-y-1">
+                        {bmiResult.recommendations.map((rec: string, index: number) => (
+                          <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                            <span className="text-green-500 mt-1">•</span>
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  
-                  <div className="border-t pt-3">
-                    <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
-                    <ul className="space-y-1">
-                      {bmiResult.recommendations.map((rec: string, index: number) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                          <span className="text-green-500 mt-1">•</span>
-                          {rec}
-                        </li>
-                      ))}
-                    </ul>
+                )}
+                
+                {/* Feedback Section */}
+                {!bmiResult && (
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-2">📊 BMI Assessment</h4>
+                    <p className="text-sm text-gray-600">Enter your measurements above to get personalized BMI feedback and recommendations.</p>
                   </div>
-                </div>
-              )}
-              
-              {/* Feedback Section */}
-              {!bmiResult && (
-                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-2">📊 BMI Assessment</h4>
-                  <p className="text-sm text-gray-600">Enter your measurements above to get personalized BMI feedback and recommendations.</p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
+        {/* Footer */}
+        <Footer />
       </div>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    </>
   );
 };
 
-export default Home; 
+export default Home;
+      
