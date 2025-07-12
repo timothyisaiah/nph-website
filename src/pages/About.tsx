@@ -33,7 +33,7 @@ const About = () => {
 
               {/* Slogan */}
               <div className="border-l-4 border-blue-500 pl-6 py-4 bg-blue-50 rounded-r-lg">
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">Our Slogan</h2>
+                {/* <h2 className="text-xl font-semibold text-gray-800 mb-2">Our Slogan</h2> */}
                 <blockquote className="text-xl md:text-2xl italic text-blue-700 font-medium">
                   "Unlocking health data for community and policy action"
                 </blockquote>
