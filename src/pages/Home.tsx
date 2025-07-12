@@ -2,7 +2,7 @@
 // Main landing page for NPH Solutions website
 // Features: Globe visualization, responsive indicator lists, details panel, health tools, and more
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import GlobeVisualization from "../components/globe/GlobeVisualization";
 import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
@@ -13,6 +13,14 @@ import { indicators as localIndicators } from "../data/indicators";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
+
+// Memoized Globe Component to prevent unnecessary re-renders
+const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect }: any) => (
+  <GlobeVisualization 
+    onError={onError} 
+    onIndicatorSelect={onIndicatorSelect}
+  />
+));
 
 // Helper: Get tagline (first sentence of definition)
 const getTagline = (definition: string) => {
@@ -178,8 +186,20 @@ const Home: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [countryData, setCountryData] = useState<any>(null);
-  const [calculatorData, setCalculatorData] = useState({ age: "", weight: "", height: "", gender: "" });
+  const [calculatorData, setCalculatorData] = useState({
+    age: '',
+    weight: '',
+    height: '',
+    gender: ''
+  });
+  const [bmiData, setBmiData] = useState({
+    age: '',
+    weight: '',
+    height: '',
+    gender: ''
+  });
   const [zScoreResult, setZScoreResult] = useState<any>(null);
+  const [bmiResult, setBmiResult] = useState<any>(null);
   const navigate = useNavigate();
   const { setSelectedIndicator } = useIndicator();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
@@ -216,7 +236,13 @@ const Home: React.FC = () => {
     setCalculatorData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Z-Score calculation (mock)
+  const handleBmiChange = (field: string, value: string) => {
+    setBmiData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const calculateZScore = () => {
     const { age, weight, height, gender } = calculatorData;
     if (!age || !weight || !height || !gender) {
@@ -226,25 +252,97 @@ const Home: React.FC = () => {
     const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
     const heightNum = parseFloat(height);
-    const weightZScore = (weightNum - 12) / 2 + (Math.random() - 0.5) * 0.5;
-    const heightZScore = (heightNum - 85) / 5 + (Math.random() - 0.5) * 0.5;
-    let weightStatus = "Normal";
-    let heightStatus = "Normal";
-    if (weightZScore < -2) weightStatus = "Underweight";
-    else if (weightZScore > 2) weightStatus = "Overweight";
-    if (heightZScore < -2) heightStatus = "Stunted";
-    else if (heightZScore > 2) heightStatus = "Tall";
+    
+    // Simplified mock calculation
+    const weightZScore = ((weightNum - 12) / 2) + (Math.random() - 0.5) * 0.5;
+    const heightZScore = ((heightNum - 85) / 5) + (Math.random() - 0.5) * 0.5;
+    const wastingZScore = ((weightNum / heightNum) - 0.14) / 0.02 + (Math.random() - 0.5) * 0.5;
+    
+    let weightStatus = 'Normal';
+    let heightStatus = 'Normal';
+    let wastingStatus = 'Normal';
+    
+    if (weightZScore < -2) weightStatus = 'Underweight';
+    else if (weightZScore > 2) weightStatus = 'Overweight';
+    
+    if (heightZScore < -2) heightStatus = 'Stunted';
+    else if (heightZScore > 2) heightStatus = 'Tall';
+    
+    if (wastingZScore < -2) wastingStatus = 'Wasted';
+    else if (wastingZScore > 2) wastingStatus = 'Overweight';
+    
     setZScoreResult({
       weightZScore: weightZScore.toFixed(2),
       heightZScore: heightZScore.toFixed(2),
+      wastingZScore: wastingZScore.toFixed(2),
       weightStatus,
       heightStatus,
-      recommendations: getRecommendations(weightStatus, heightStatus),
+      wastingStatus,
+      recommendations: getRecommendations(weightStatus, heightStatus, wastingStatus)
     });
   };
 
-  // Recommendations for Z-Score calculator
-  const getRecommendations = (weightStatus: string, heightStatus: string) => {
+  const calculateBMI = () => {
+    const { age, weight, height, gender } = bmiData;
+    
+    if (!age || !weight || !height || !gender) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    const ageNum = parseFloat(age);
+    const weightNum = parseFloat(weight);
+    const heightNum = parseFloat(height);
+
+    // Calculate BMI: weight (kg) / height (m)²
+    const heightInMeters = heightNum / 100;
+    const bmi = weightNum / (heightInMeters * heightInMeters);
+
+    let bmiCategory = '';
+    let bmiColor = '';
+
+    if (bmi < 18.5) {
+      bmiCategory = 'Underweight';
+      bmiColor = 'bg-yellow-100 text-yellow-700';
+    } else if (bmi >= 18.5 && bmi < 25) {
+      bmiCategory = 'Normal weight';
+      bmiColor = 'bg-green-100 text-green-700';
+    } else if (bmi >= 25 && bmi < 30) {
+      bmiCategory = 'Overweight';
+      bmiColor = 'bg-orange-100 text-orange-700';
+    } else {
+      bmiCategory = 'Obese';
+      bmiColor = 'bg-red-100 text-red-700';
+    }
+
+    setBmiResult({
+      bmi: bmi.toFixed(1),
+      category: bmiCategory,
+      color: bmiColor,
+      recommendations: getBmiRecommendations(bmiCategory)
+    });
+  };
+
+  const getBmiRecommendations = (category: string) => {
+    const recommendations = [];
+    
+    if (category === 'Underweight') {
+      recommendations.push('Increase caloric intake with nutrient-dense foods');
+      recommendations.push('Include protein-rich foods in your diet');
+      recommendations.push('Consider consulting a nutritionist');
+    } else if (category === 'Overweight' || category === 'Obese') {
+      recommendations.push('Focus on balanced nutrition and regular exercise');
+      recommendations.push('Limit processed foods and sugary drinks');
+      recommendations.push('Consider working with a healthcare provider');
+    } else {
+      recommendations.push('Maintain your current healthy lifestyle');
+      recommendations.push('Continue with regular physical activity');
+    }
+    
+    return recommendations;
+  };
+
+  const getRecommendations = (weightStatus: string, heightStatus: string, wastingStatus: string) => {
     const recommendations = [];
     if (weightStatus === "Underweight") {
       recommendations.push("Increase caloric intake with nutrient-dense foods");
@@ -257,6 +355,12 @@ const Home: React.FC = () => {
       recommendations.push("Ensure adequate protein and micronutrient intake");
       recommendations.push("Monitor for underlying health conditions");
     }
+    
+    if (wastingStatus === 'Wasted') {
+      recommendations.push('Immediate nutritional intervention may be needed');
+      recommendations.push('Consult healthcare provider for specialized care');
+    }
+    
     if (recommendations.length === 0) {
       recommendations.push("Continue with current healthy feeding practices");
       recommendations.push("Regular growth monitoring recommended");
@@ -549,10 +653,10 @@ const Home: React.FC = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
               Health Tools & Resources
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-              {/* Left: Feeding Tips Carousel */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+              {/* Left Box: Dynamic Health Feeding Tips */}
               <FeedingTipsCarousel feedingTips={feedingTips} />
-              {/* Right: Child Growth Z-Score Calculator */}
+              {/* Middle Box: Child Growth Z-Score Calculator */}
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
@@ -623,7 +727,7 @@ const Home: React.FC = () => {
                 {zScoreResult && (
                   <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
                     <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-3 gap-4 mb-4">
                       <div className="text-center">
                         <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div>
                         <div className="text-xs text-gray-600">Weight Z-Score</div>
@@ -633,6 +737,11 @@ const Home: React.FC = () => {
                         <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div>
                         <div className="text-xs text-gray-600">Height Z-Score</div>
                         <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div>
+                        <div className="text-xs text-gray-600">Wasting Z-Score</div>
+                        <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
                       </div>
                     </div>
                     <div className="border-t pt-3">
@@ -656,14 +765,88 @@ const Home: React.FC = () => {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
-        {/* Footer */}
-        <Footer />
-      </div>
-    </>
-  );
-};
-
-export default Home;
+              {/* Right Box: BMI Calculator */}
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800">BMI Calculator</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Age (years)</label>
+                      <input 
+                        type="number" 
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="25"
+                        value={bmiData.age}
+                        onChange={(e) => handleBmiChange('age', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="70"
+                        value={bmiData.weight}
+                        onChange={(e) => handleBmiChange('weight', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="175"
+                        value={bmiData.height}
+                        onChange={(e) => handleBmiChange('height', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                      <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={bmiData.gender}
+                        onChange={(e) => handleBmiChange('gender', e.target.value)}
+                      >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                <button 
+                  className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  onClick={calculateBMI}
+                >
+                  Calculate BMI
+                </button>
+                
+                {/* Results Section */}
+                {bmiResult && (
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">📊 BMI Results</h4>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{bmiResult.bmi}</div>
+                        <div className="text-xs text-gray-600">BMI</div>
+                        <div className={bmiResult.color}>
+                          {bmiResult.category}
+                        </div>
+                      </div>
+                    </div>
+                    
+      
