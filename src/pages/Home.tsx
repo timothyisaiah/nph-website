@@ -849,4 +849,37 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                     
+                    <div className="border-t pt-3">
+                      <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
+                      <ul className="space-y-1">
+                        {bmiResult.recommendations.map((rec: string, index: number) => (
+                          <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                            <span className="text-green-500 mt-1">•</span>
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Feedback Section */}
+                {!bmiResult && (
+                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-2">📊 BMI Assessment</h4>
+                    <p className="text-sm text-gray-600">Enter your measurements above to get personalized BMI feedback and recommendations.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Footer */}
+        <Footer />
+      </div>
+    </>
+  );
+};
+
+export default Home;
       
