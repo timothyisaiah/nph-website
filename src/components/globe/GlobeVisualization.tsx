@@ -60,7 +60,7 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
     const globe = new Globe(containerRef.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .backgroundColor('#f8fafc')
+      .backgroundColor('#ffffff')
       .width(containerRef.current.clientWidth)
       .height(containerRef.current.clientHeight)
       .enablePointerInteraction(true)
@@ -186,7 +186,7 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
       <div 
         ref={containerRef} 
         className="w-full h-full"
-        style={{ background: 'radial-gradient(circle at 50% 50%, #ffffff 0%, #f1f5f9 100%)' }}
+        style={{ background: 'transparent' }}
       />
 
       {/* Loading Overlay */}
