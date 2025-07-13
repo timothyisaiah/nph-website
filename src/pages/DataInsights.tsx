@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
 import { images } from '../assets/images';
 
 const DataInsights: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'briefs' | 'visualization'>('briefs');
 
   const dataBriefs = [
@@ -139,7 +141,10 @@ const DataInsights: React.FC = () => {
               </div>
 
               <div className="text-center">
-                <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                <button 
+                  onClick={() => navigate('/data-explorer')}
+                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200"
+                >
                   Launch Data Explorer
                 </button>
                 <p className="text-sm text-gray-500 mt-2">

@@ -15,12 +15,12 @@ import {
 } from 'recharts';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { useIndicator } from '../../context/IndicatorContext';
+import Select from 'react-select';
 
 interface Country {
   CountryName: string;
   DHS_CountryCode: string;
   ISO_Code: string;
-  FIPS_CountryCode: string;
   Regional_Indicator: string;
 }
 
@@ -49,12 +49,16 @@ const DataCanvas: React.FC = () => {
   const { selectedIndicator, setSelectedIndicator } = useIndicator();
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  // Change selectedCountry to selectedCountries (array)
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [yearRange, setYearRange] = useState({ start: 2010, end: 2023 });
   const [data, setData] = useState<DataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [visualizationType, setVisualizationType] = useState<VisualizationType>('table');
+  // Add state for characteristics and selected breakdowns
+  const [characteristics, setCharacteristics] = useState<any[]>([]);
+  const [selectedBreakdowns, setSelectedBreakdowns] = useState<string[]>(['Total']);
 
   // Set selected indicator from URL params or context
   useEffect(() => {
@@ -118,26 +122,73 @@ const DataCanvas: React.FC = () => {
     fetchMetadata();
   }, []);
 
+  // Fetch breakdowns (characteristics) from data API by extracting unique CharacteristicLabel values
+  useEffect(() => {
+    const fetchBreakdowns = async () => {
+      if (!selectedIndicator || !selectedCountries.length) {
+        setCharacteristics([{ CharacteristicID: 'Total', CharacteristicLabel: 'Total' }]);
+        setSelectedBreakdowns(['Total']);
+        return;
+      }
+      try {
+        setIsLoading(true);
+        const res = await axios.get('https://api.dhsprogram.com/rest/dhs/data', {
+          params: {
+            indicatorIds: selectedIndicator,
+            countryIds: selectedCountries.join(','),
+            surveyYearStart: 1990,
+            surveyYearEnd: new Date().getFullYear(),
+            returnFields: 'CharacteristicLabel',
+            f: 'json',
+          },
+        });
+        const labels = Array.from(
+          new Set(res.data.Data.map((d: any) => d.CharacteristicLabel || 'Total'))
+        ) as string[];
+        const chars = labels.map((label: string) => ({
+          CharacteristicID: label,
+          CharacteristicLabel: label,
+        }));
+        setCharacteristics(chars.length ? chars : [{ CharacteristicID: 'Total', CharacteristicLabel: 'Total' }]);
+        setSelectedBreakdowns(['Total']);
+      } catch (err) {
+        setError('Failed to load breakdowns.');
+        setCharacteristics([{ CharacteristicID: 'Total', CharacteristicLabel: 'Total' }]);
+        setSelectedBreakdowns(['Total']);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBreakdowns();
+  }, [selectedIndicator, selectedCountries]);
+
   // Fetch data when selections change
   useEffect(() => {
     const fetchData = async () => {
-      if (!selectedIndicator || !selectedCountry) return;
-
+      if (!selectedIndicator || !selectedCountries.length) return;
       try {
         setIsLoading(true);
         setError(null);
-
+        let params: any = {
+          indicatorIds: selectedIndicator,
+          countryIds: selectedCountries.join(','),
+          surveyYearStart: yearRange.start,
+          surveyYearEnd: yearRange.end,
+          returnFields: 'CountryName,SurveyYear,Value,CharacteristicLabel',
+          f: 'json',
+        };
+        // If not just 'Total', add characteristics param
+        if (
+          selectedBreakdowns.length > 0 &&
+          !(selectedBreakdowns.length === 1 && selectedBreakdowns[0] === 'Total')
+        ) {
+          params.characteristics = selectedBreakdowns
+            .filter((id) => id !== 'Total')
+            .join(',');
+        }
         const response = await axios.get('https://api.dhsprogram.com/rest/dhs/data', {
-          params: {
-            indicatorIds: selectedIndicator,
-            countryIds: selectedCountry,
-            surveyYearStart: yearRange.start,
-            surveyYearEnd: yearRange.end,
-            returnFields: 'CountryName,SurveyYear,Value,CharacteristicLabel',
-            f: 'json'
-          }
+          params,
         });
-
         setData(response.data.Data);
       } catch (err) {
         setError('Failed to fetch data. Please try again later.');
@@ -146,14 +197,61 @@ const DataCanvas: React.FC = () => {
         setIsLoading(false);
       }
     };
-
     fetchData();
-  }, [selectedIndicator, selectedCountry, yearRange]);
+  }, [selectedIndicator, selectedCountries, yearRange, selectedBreakdowns]);
 
   // Generate unique key for indicators
   const getIndicatorKey = (indicator: Indicator) => {
     return `${indicator.IndicatorId}_${indicator.SurveyType || 'default'}`;
   };
+
+  // Color palette for countries
+  const countryColors = [
+    '#4F46E5', '#16A34A', '#F59E42', '#E11D48', '#6366F1', '#FBBF24', '#10B981', '#F472B6', '#0EA5E9', '#A21CAF',
+  ];
+
+  // Helper: get color for a country
+  const getCountryColor = (country: string) => {
+    const idx = countries.findIndex((c) => c.CountryName === country);
+    return countryColors[idx % countryColors.length];
+  };
+
+  // Prepare chart data: group by SurveyYear, then by country and breakdown
+  const chartData = React.useMemo(() => {
+    // Group by year
+    const years = Array.from(new Set(data.map((d) => d.SurveyYear))).sort();
+    return years.map((year) => {
+      const row: any = { SurveyYear: year };
+      data.forEach((d) => {
+        if (d.SurveyYear === year) {
+          // Key: CountryName + (if breakdowns, CharacteristicLabel)
+          const key = selectedBreakdowns.length > 1 && d.CharacteristicLabel
+            ? `${d.CountryName} - ${d.CharacteristicLabel}`
+            : d.CountryName;
+          row[key] = d.Value;
+        }
+      });
+      return row;
+    });
+  }, [data, selectedBreakdowns]);
+
+  // Get all country/breakdown keys for chart series
+  const chartKeys = React.useMemo(() => {
+    const keys = new Set<string>();
+    data.forEach((d) => {
+      const key = selectedBreakdowns.length > 1 && d.CharacteristicLabel
+        ? `${d.CountryName} - ${d.CharacteristicLabel}`
+        : d.CountryName;
+      keys.add(key);
+    });
+    return Array.from(keys);
+  }, [data, selectedBreakdowns]);
+
+  // Map countries to react-select options
+  const countryOptions = countries.map((country) => ({
+    value: country.DHS_CountryCode,
+    label: country.CountryName,
+  }));
 
   const renderVisualization = () => {
     switch (visualizationType) {
@@ -162,13 +260,15 @@ const DataCanvas: React.FC = () => {
           <div className="h-[500px] bg-gray-50 p-4 rounded-lg">
             <h3 className="text-lg font-semibold mb-4">Bar Chart</h3>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="SurveyYear" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="Value" fill="#4F46E5" name="Value" />
+                {chartKeys.map((key, idx) => (
+                  <Bar key={key} dataKey={key} fill={countryColors[idx % countryColors.length]} name={key} />
+                ))}
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -179,19 +279,22 @@ const DataCanvas: React.FC = () => {
           <div className="h-[500px] bg-gray-50 p-4 rounded-lg">
             <h3 className="text-lg font-semibold mb-4">Trend Line</h3>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="SurveyYear" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="Value"
-                  stroke="#4F46E5"
-                  name="Value"
-                  dot={{ fill: '#4F46E5' }}
-                />
+                {chartKeys.map((key, idx) => (
+                  <Line
+                    key={key}
+                    type="monotone"
+                    dataKey={key}
+                    stroke={countryColors[idx % countryColors.length]}
+                    name={key}
+                    dot={{ fill: countryColors[idx % countryColors.length] }}
+                  />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -199,6 +302,12 @@ const DataCanvas: React.FC = () => {
 
       case 'table':
       default:
+        // Sort table rows by country, then by breakdown, then by year
+        const sortedData = [...data].sort((a, b) => {
+          if (a.CountryName !== b.CountryName) return a.CountryName.localeCompare(b.CountryName);
+          if ((a.CharacteristicLabel || '') !== (b.CharacteristicLabel || '')) return (a.CharacteristicLabel || '').localeCompare(b.CharacteristicLabel || '');
+          return a.SurveyYear - b.SurveyYear;
+        });
         return (
           <div className="overflow-x-auto bg-gray-50 rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
@@ -222,7 +331,7 @@ const DataCanvas: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {data.map((item, index) => (
+                {sortedData.map((item, index) => (
                   <tr key={`${item.CountryName}_${item.SurveyYear}_${item.CharacteristicLabel}_${index}`}>
                     <td className="px-6 py-4 whitespace-nowrap">{item.CountryName}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{item.SurveyYear}</td>
@@ -250,7 +359,7 @@ const DataCanvas: React.FC = () => {
           </label>
           <select
             className="w-full p-2 border rounded-md"
-            value={selectedIndicator}
+            value={selectedIndicator || ''}
             onChange={(e) => setSelectedIndicator(e.target.value)}
           >
             <option value="">Select an indicator...</option>
@@ -273,20 +382,23 @@ const DataCanvas: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Country
+            Select Country (multiple allowed)
           </label>
-          <select
-            className="w-full p-2 border rounded-md"
-            value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-          >
-            <option value="">Select a country...</option>
-            {countries.map((country) => (
-              <option key={country.DHS_CountryCode} value={country.DHS_CountryCode}>
-                {country.CountryName}
-              </option>
-            ))}
-          </select>
+          <Select
+            isMulti
+            options={countryOptions}
+            value={countryOptions.filter((opt) => selectedCountries.includes(opt.value))}
+            onChange={(selected) => {
+              setSelectedCountries(selected ? selected.map((opt) => opt.value) : []);
+            }}
+            classNamePrefix="react-select"
+            placeholder="Select countries..."
+            closeMenuOnSelect={false}
+            hideSelectedOptions={false}
+            styles={{
+              menu: (provided) => ({ ...provided, zIndex: 9999 }),
+            }}
+          />
         </div>
 
         <div>
@@ -314,6 +426,42 @@ const DataCanvas: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Breakdown selection UI */}
+      {Array.isArray(characteristics) && characteristics.length > 0 ? (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Breakdown by:</label>
+          <div className="flex flex-wrap gap-4">
+            {characteristics.map((char) => (
+              <label key={char.CharacteristicID} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedBreakdowns.includes(char.CharacteristicID) || (char.CharacteristicLabel === 'Total' && selectedBreakdowns.includes('Total'))}
+                  onChange={() => {
+                    if (char.CharacteristicLabel === 'Total') {
+                      setSelectedBreakdowns(['Total']);
+                    } else {
+                      setSelectedBreakdowns((prev) => {
+                        let updated = prev.filter((id) => id !== 'Total');
+                        if (prev.includes(char.CharacteristicID)) {
+                          updated = updated.filter((id) => id !== char.CharacteristicID);
+                        } else {
+                          updated = [...updated, char.CharacteristicID];
+                        }
+                        // If none selected, default to Total
+                        if (updated.length === 0) return ['Total'];
+                        return updated;
+                      });
+                    }
+                  }}
+                  disabled={char.CharacteristicLabel === 'Total' && selectedBreakdowns.length > 1}
+                />
+                <span>{char.CharacteristicLabel}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {/* Error Message */}
       {error && (
