@@ -13,6 +13,10 @@ import { indicators as localIndicators } from "../data/indicators";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
+import axios from 'axios';
+import Select from 'react-select';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 // Memoized Globe Component to prevent unnecessary re-renders
 const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect }: any) => (
@@ -181,6 +185,8 @@ const feedingTips = {
   },
 };
 
+// Remove indicatorsWithDHS mapping and use localIndicators directly
+
 const Home: React.FC = () => {
   // State for error, selected country, indicator, and calculator
   const [error, setError] = useState<string | null>(null);
@@ -205,6 +211,12 @@ const Home: React.FC = () => {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [hoveredIndicator, setHoveredIndicator] = useState<any>(null);
   const [arcPositions, setArcPositions] = useState<{ x: number; y: number }[]>([]);
+  const [overlayCountry, setOverlayCountry] = useState<{ value: string; label: string } | null>(null);
+  const [overlayData, setOverlayData] = useState<any[]>([]);
+  const [overlayLoading, setOverlayLoading] = useState(false);
+  const [overlayError, setOverlayError] = useState<string | null>(null);
+  const [overlayChartMode, setOverlayChartMode] = useState<'latest' | 'chart'>('latest');
+  const [overlayAvailableCountries, setOverlayAvailableCountries] = useState<{ value: string; label: string }[]>([]);
 
   // Memoized event handlers for globe
   const handleIndicatorSelect = useCallback(
@@ -230,6 +242,40 @@ const Home: React.FC = () => {
   useEffect(() => {
     setArcPositions(calculateArcPositions(localIndicators.length, 300));
   }, []);
+
+  // Fetch available countries for overlay on mount
+  useEffect(() => {
+    axios.get('https://api.dhsprogram.com/rest/dhs/countries', { params: { f: 'json' } })
+      .then(res => {
+        const opts = res.data.Data.map((c: any) => ({ value: c.DHS_CountryCode, label: c.CountryName }));
+        setOverlayAvailableCountries(opts);
+        setOverlayCountry(opts.find((c: any) => c.value === 'UG') || opts[0]);
+      });
+  }, []);
+
+  // Fetch DHS data for overlay when indicator or country changes
+  useEffect(() => {
+    if (selectedIdx === null || !overlayCountry) return;
+    const indicator = localIndicators[selectedIdx];
+    setOverlayLoading(true);
+    setOverlayError(null);
+    setOverlayData([]);
+    axios.get('https://api.dhsprogram.com/rest/dhs/data', {
+      params: {
+        indicatorIds: indicator.indicatorId,
+        countryIds: overlayCountry.value,
+        surveyYearStart: 1990,
+        surveyYearEnd: new Date().getFullYear(),
+        returnFields: 'CountryName,SurveyYear,Value,CharacteristicLabel',
+        f: 'json',
+      },
+    })
+      .then(res => {
+        setOverlayData(res.data.Data || []);
+      })
+      .catch(() => setOverlayError('Failed to load data from DHS.'))
+      .finally(() => setOverlayLoading(false));
+  }, [selectedIdx, overlayCountry]);
 
   // Calculator input change handler
   const handleCalculatorChange = (field: string, value: string) => {
@@ -501,7 +547,7 @@ const Home: React.FC = () => {
                         const translateX = arcTransformations[idx] || 0;
                         return (
                           <motion.div
-                            key={indicator.id}
+                            key={indicator.indicatorId}
                             className={classNames(
                               "home-arc-card cursor-pointer transition-all duration-200 hover:scale-105",
                               selectedIdx === idx && "selected"
@@ -556,6 +602,76 @@ const Home: React.FC = () => {
                   <div className="flex-1 overflow-y-auto px-8 pb-4">
                     <h2 className="text-2xl font-bold mb-2">{localIndicators[selectedIdx].label}</h2>
                     <p className="text-gray-700 mb-6">{localIndicators[selectedIdx].definition}</p>
+                    {/* Country Picker */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                      <Select
+                        options={overlayAvailableCountries}
+                        value={overlayCountry}
+                        onChange={(opt) => setOverlayCountry(opt)}
+                        classNamePrefix="react-select"
+                        placeholder="Select country..."
+                        isSearchable
+                        menuPlacement="auto"
+                        styles={{ menu: (provided) => ({ ...provided, zIndex: 9999 }) }}
+                      />
+                    </div>
+                    {/* Chart/Latest Toggle */}
+                    <div className="mb-4 flex gap-4 items-center">
+                      <button
+                        className={`px-4 py-2 rounded ${overlayChartMode === 'latest' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                        onClick={() => setOverlayChartMode('latest')}
+                      >
+                        Latest Value
+                      </button>
+                      <button
+                        className={`px-4 py-2 rounded ${overlayChartMode === 'chart' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                        onClick={() => setOverlayChartMode('chart')}
+                      >
+                        Mini Chart
+                      </button>
+                    </div>
+                    {/* Data Display */}
+                    {overlayLoading ? (
+                      <div className="py-8 flex justify-center items-center"><LoadingSpinner /></div>
+                    ) : overlayError ? (
+                      <div className="py-8 text-center text-red-600">{overlayError}</div>
+                    ) : overlayChartMode === 'latest' ? (
+                      <>
+                        {overlayData.length > 0 ? (
+                          (() => {
+                            const sorted = [...overlayData].sort((a, b) => b.SurveyYear - a.SurveyYear);
+                            const latest = sorted[0];
+                            const indicator = localIndicators[selectedIdx];
+                            const valueDisplay = indicator.measurementType.toLowerCase() === 'percent'
+                              ? `${latest.Value}%`
+                              : latest.Value;
+                            return (
+                              <div className="mb-4">
+                                <div className="text-4xl font-bold text-blue-700">{valueDisplay}</div>
+                                <div className="text-gray-600">{latest.CountryName} ({latest.SurveyYear})</div>
+                                <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className="text-gray-500">No data available for this indicator/country.</div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="h-48 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={overlayData.sort((a, b) => a.SurveyYear - b.SurveyYear)}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="SurveyYear" />
+                            <YAxis label={{ value: localIndicators[selectedIdx].measurementType, angle: -90, position: 'insideLeft' }} />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="Value" stroke="#4F46E5" name="Value" dot={{ fill: '#4F46E5' }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                        <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
+                      </div>
+                    )}
                   </div>
                   <div className="sticky bottom-0 z-10 bg-white p-4 flex justify-between">
                     <button onClick={handlePrev} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
@@ -592,7 +708,7 @@ const Home: React.FC = () => {
               const color = colors[idx % colors.length];
               return (
                 <motion.div
-                  key={indicator.id}
+                  key={indicator.indicatorId}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   className={classNames(
@@ -625,7 +741,7 @@ const Home: React.FC = () => {
                 const color = colors[idx % colors.length];
                 return (
                   <motion.div
-                    key={indicator.id}
+                    key={indicator.indicatorId}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className={classNames(
