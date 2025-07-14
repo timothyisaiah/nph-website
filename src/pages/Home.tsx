@@ -217,6 +217,7 @@ const Home: React.FC = () => {
   const [overlayError, setOverlayError] = useState<string | null>(null);
   const [overlayChartMode, setOverlayChartMode] = useState<'latest' | 'chart'>('latest');
   const [overlayAvailableCountries, setOverlayAvailableCountries] = useState<{ value: string; label: string }[]>([]);
+  const [showNutritionDisclaimer, setShowNutritionDisclaimer] = useState(false);
 
   // Memoized event handlers for globe
   const handleIndicatorSelect = useCallback(
@@ -424,6 +425,11 @@ const Home: React.FC = () => {
     else setSelectedIdx((selectedIdx - 1 + localIndicators.length) % localIndicators.length);
   };
   const handleClose = () => setSelectedIdx(null);
+
+  const handleCheckNutrition = () => {
+    setShowNutritionDisclaimer(true);
+    calculateZScore();
+  };
 
   return (
     <>
@@ -835,27 +841,32 @@ const Home: React.FC = () => {
                 </div>
                 <button
                   className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  onClick={calculateZScore}
+                  onClick={handleCheckNutrition}
                 >
-                  Calculate Z-Score
+                  Check Child Nutrition Status
                 </button>
                 {/* Results Section */}
+                {showNutritionDisclaimer && (
+                  <div className="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 text-sm rounded">
+                    <strong>Warning:</strong> The data used for the calculation and graphics generation come from the World Health Organization. Use this calculator at your own risk. This calculator may not be accurate or reliable. By using this calculator you acknowledge any reliance on this calculator shall be at your sole risk.
+                  </div>
+                )}
                 {zScoreResult && (
                   <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
                     <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
                     <div className="grid grid-cols-3 gap-4 mb-4">
                       <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div>
+                        {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div> */}
                         <div className="text-xs text-gray-600">Weight Z-Score</div>
                         <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div>
+                        {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div> */}
                         <div className="text-xs text-gray-600">Height Z-Score</div>
                         <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div>
+                        {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div> */}
                         <div className="text-xs text-gray-600">Wasting Z-Score</div>
                         <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
                       </div>
