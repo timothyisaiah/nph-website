@@ -435,278 +435,293 @@ const Home: React.FC = () => {
     <>
       {/* Main Page Container */}
       <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
-        {/* Header, Logo, and Intro Section */}
-        <div className="max-w-screen-lg mx-auto pt-10">
-          <div className="relative z-10 container mx-auto px-4 mt-12">
-            {/* Company Logo and Title */}
-            <div className="w-full mb-12 flex flex-col justify-center">
-              <div className="text-center md:text-left mb-12">
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
-                  <img
-                    src={companyLogo}
-                    alt="NPH Solutions Logo"
-                    className="w-30 h-30 md:w-24 md:h-24 object-contain rounded-lg shadow-lg"
-                  />
-                </div>
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 text-gray-800 leading-tight">
+        {/* Redesigned Full-Width Hero Section with Logo as Background */}
+        <div className="w-full bg-green-100/90 border-b border-blue-100 pb-0 pt-6 md:pt-10 relative overflow-hidden">
+          {/* Background Logo */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none select-none"
+            style={{ backgroundImage: `url(${companyLogo})` }}
+          />
+          <div className="flex flex-col items-center justify-center px-4 md:px-12 lg:px-24 gap-2 md:gap-4 text-center relative z-10">
+            {/* Title and Description (centered, compact) */}
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 leading-tight pt-14">
                   Narratives of Public Health Solutions LTD
                 </h1>
-                <p className="text-lg md:text-xl text-gray-600 mb-6">
+                <p className="text-sm md:text-base text-gray-600 mb-2 mx-auto whitespace-nowrap">
                   Unlocking health data for community and policy action
                 </p>
-                {/* Services Bullet Points */}
-                <div className="mb-10">
-                  <ul className="space-y-4 text-base md:text-lg text-gray-700">
-                    <li className="flex items-start gap-4">
-                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                      <span className="font-medium break-words leading-snug">Public health research</span>
-                    </li>
-                    <li className="flex items-start gap-4">
-                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                      <span className="font-medium break-words leading-snug">Monitoring and evaluation of public health interventions</span>
-                    </li>
-                    <li className="flex items-start gap-4">
-                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                      <span className="font-medium break-words leading-snug">Data systems and analytics</span>
-                    </li>
-                    <li className="flex items-start gap-4">
-                      <span className="text-green-500 text-2xl font-bold mt-1">✓</span>
-                      <span className="font-medium break-words leading-snug">Health promotion</span>
-                    </li>
-                  </ul>
+            {/* Services (compact, inline, centered) */}
+            <ul className="flex flex-wrap gap-2 justify-center text-xs md:text-sm text-gray-700 mb-2 pt-0">
+              <li className="flex items-center gap-1"><span className="text-green-500 font-bold">✓</span>Public health research</li>
+              <li className="flex items-center gap-1"><span className="text-green-500 font-bold">✓</span>Monitoring & evaluation</li>
+              <li className="flex items-center gap-1"><span className="text-green-500 font-bold">✓</span>Data systems</li>
+              <li className="flex items-center gap-1"><span className="text-green-500 font-bold">✓</span>Health promotion</li>
+            </ul>
+            {/* Navigation Buttons (smaller, inline, centered) */}
+            <div className="flex gap-2 mt-2 justify-center pb-10">
+              <button
+                onClick={() => navigate("/data")}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs md:text-sm shadow"
+              >
+                Explore Data
+              </button>
+              <button
+                onClick={() => navigate("/about")}
+                className="px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded hover:bg-blue-50 text-xs md:text-sm shadow"
+              >
+                Learn More
+              </button>
+            </div>
+          </div>
+        </div>
+        {/* End Hero Section */}
+        {/* Dynamic Country Data Section (shown when a country is selected on the globe) */}
+        {selectedCountry && countryData && (
+          <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 className="text-xl font-semibold text-blue-800 mb-4">
+              📊 DHS Data for {selectedCountry}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {countryData.indicators}
                 </div>
-                {/* Navigation Buttons */}
-                <div className="flex flex-col gap-4 justify-center md:justify-start">
-                  <button
-                    onClick={() => navigate("/data")}
-                    className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg transform hover:scale-105 duration-200"
-                  >
-                    Explore All Data
-                  </button>
-                  <button
-                    onClick={() => navigate("/about")}
-                    className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors shadow-lg transform hover:scale-105 duration-200"
-                  >
-                    Learn More
-                  </button>
+                <div className="text-gray-600">Health Indicators</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {countryData.surveys}
                 </div>
-                {/* Dynamic Country Data Section (shown when a country is selected on the globe) */}
-                {selectedCountry && countryData && (
-                  <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                    <h3 className="text-xl font-semibold text-blue-800 mb-4">
-                      📊 DHS Data for {selectedCountry}
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {countryData.indicators}
-                        </div>
-                        <div className="text-gray-600">Health Indicators</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {countryData.surveys}
-                        </div>
-                        <div className="text-gray-600">Surveys Available</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm font-semibold text-blue-600">
-                          {countryData.lastUpdated}
-                        </div>
-                        <div className="text-gray-600">Last Updated</div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3">
-                      Click on indicators above to explore detailed data for {selectedCountry}
-                    </p>
-                  </div>
-                )}
+                <div className="text-gray-600">Surveys Available</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm font-semibold text-blue-600">
+                  {countryData.lastUpdated}
+                </div>
+                <div className="text-gray-600">Last Updated</div>
               </div>
             </div>
-            {/* Globe and Arc Overlay Section */}
-            <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-10" style={{ backgroundColor: "#ffffff" }}>
-              {/* Desktop Layout: Globe and Indicator List Side by Side */}
-              <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
-                {/* Globe Visualization (left) */}
-                <div className="flex-1 flex justify-center">
-                  <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
-                    <GlobeVisualization onError={handleError} onIndicatorSelect={handleIndicatorSelect} />
-                  </div>
-                </div>
-                {/* Desktop Indicator List (right) */}
-                <div className="flex-1 flex justify-center">
-                  <div className="w-full max-w-2xl">
-                    <h2 className="text-lg font-bold mb-3 text-gray-800 text-left" style={{ transform: "translatex(-300px)", textDecoration: "underline" }}>
-                      Health Indicators
-                    </h2>
-                    <div className="space-y-0">
-                      {/* Desktop Arc Cards: Each card is only as wide as its content */}
-                      {localIndicators.map((indicator, idx) => {
-                        const colors = [
-                          "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
-                        ];
-                        const color = colors[idx % colors.length];
-                        // Arc transformations for arc effect
-                        const arcTransformations = [
-                          -300, -220, -110, -60, -20, 10, 20, 30, 40, 40, 30, 20, 10, -20, -60, -110, -200, -300,
-                        ];
-                        const translateX = arcTransformations[idx] || 0;
-                        return (
-                          <motion.div
-                            key={indicator.indicatorId}
-                            className={classNames(
-                              "home-arc-card cursor-pointer transition-all duration-200 hover:scale-105",
-                              selectedIdx === idx && "selected"
-                            )}
-                            style={{
-                              transform: `translateX(${translateX}px)`,
-                              height: "40px",
-                              padding: "0",
-                              "--indicator-color": color,
-                            } as React.CSSProperties}
-                            onClick={() => setSelectedIdx(idx)}
-                          >
-                            <div className="home-arc-number" style={{ borderColor: color }}>{idx + 1}</div>
-                            <div className="home-arc-content flex-1 min-w-0">
-                              <div className="home-arc-title whitespace-nowrap">{indicator.label}</div>
-                              <hr style={{borderColor: color, borderWidth: '1px', borderStyle: 'solid'}}/>
-                              <div className="home-arc-description whitespace-nowrap">{indicator.shortDescription}</div>
-                            </div>
-                            <div className="home-arc-arrow flex-shrink-0">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* Mobile/Tablet Layout: Globe only (stacked) */}
-              <div className="lg:hidden w-full max-w-xs mx-auto h-[300px] md:h-[600px] md:max-w-2xl rounded-lg overflow-hidden relative flex items-center justify-center">
+            <p className="text-xs text-gray-500 mt-3">
+              Click on indicators above to explore detailed data for {selectedCountry}
+            </p>
+          </div>
+        )}
+        {/* Globe and Arc Overlay Section */}
+        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-10" style={{ backgroundColor: "#ffffff" }}>
+          {/* Desktop Layout: Globe and Indicator List Side by Side */}
+          <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
+            {/* Globe Visualization (left) */}
+            <div className="flex-1 flex justify-center">
+              <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
                 <GlobeVisualization onError={handleError} onIndicatorSelect={handleIndicatorSelect} />
               </div>
             </div>
-            {/* Details/Story Panel: Shows indicator details on all screen sizes */}
-            <AnimatePresence>
-              {selectedIdx !== null && localIndicators[selectedIdx] && (
-                <motion.div
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 100 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
-                >
-                  <div className="sticky top-0 z-10 bg-white p-4 pb-2 mt-10 pt-10">
-                    <button
-                      onClick={handleClose}
-                      className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto px-8 pb-4">
-                    <h2 className="text-2xl font-bold mb-2">{localIndicators[selectedIdx].label}</h2>
-                    <p className="text-gray-700 mb-6">{localIndicators[selectedIdx].definition}</p>
-                    {/* Country Picker */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                      <Select
-                        options={overlayAvailableCountries}
-                        value={overlayCountry}
-                        onChange={(opt) => setOverlayCountry(opt)}
-                        classNamePrefix="react-select"
-                        placeholder="Select country..."
-                        isSearchable
-                        menuPlacement="auto"
-                        styles={{ menu: (provided) => ({ ...provided, zIndex: 9999 }) }}
-                      />
-                    </div>
-                    {/* Chart/Latest Toggle */}
-                    <div className="mb-4 flex gap-4 items-center">
-                      <button
-                        className={`px-4 py-2 rounded ${overlayChartMode === 'latest' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-                        onClick={() => setOverlayChartMode('latest')}
-                      >
-                        Latest Value
-                      </button>
-                      <button
-                        className={`px-4 py-2 rounded ${overlayChartMode === 'chart' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-                        onClick={() => setOverlayChartMode('chart')}
-                      >
-                        Mini Chart
-                      </button>
-                    </div>
-                    {/* Data Display */}
-                    {overlayLoading ? (
-                      <div className="py-8 flex justify-center items-center"><LoadingSpinner /></div>
-                    ) : overlayError ? (
-                      <div className="py-8 text-center text-red-600">{overlayError}</div>
-                    ) : overlayChartMode === 'latest' ? (
-                      <>
-                        {overlayData.length > 0 ? (
-                          (() => {
-                            const sorted = [...overlayData].sort((a, b) => b.SurveyYear - a.SurveyYear);
-                            const latest = sorted[0];
-                            const indicator = localIndicators[selectedIdx];
-                            const valueDisplay = indicator.measurementType.toLowerCase() === 'percent'
-                              ? `${latest.Value}%`
-                              : latest.Value;
-                            return (
-                              <div className="mb-4">
-                                <div className="text-4xl font-bold text-blue-700">{valueDisplay}</div>
-                                <div className="text-gray-600">{latest.CountryName} ({latest.SurveyYear})</div>
-                                <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
-                              </div>
-                            );
-                          })()
-                        ) : (
-                          <div className="text-gray-500">No data available for this indicator/country.</div>
+            {/* Desktop Indicator List (right) */}
+            <div className="flex-1 flex justify-center">
+              <div className="w-full max-w-2xl">
+                <h2 className="text-lg font-bold mb-3 text-gray-800 text-left" style={{ transform: "translatex(-300px)", textDecoration: "underline" }}>
+                  Health Indicators
+                </h2>
+                <div className="space-y-0">
+                  {/* Desktop Arc Cards: Each card is only as wide as its content */}
+                  {localIndicators.map((indicator, idx) => {
+                    const colors = [
+                      "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
+                    ];
+                    const color = colors[idx % colors.length];
+                    // Arc transformations for arc effect
+                    const arcTransformations = [
+                      -300, -220, -110, -60, -20, 10, 20, 30, 40, 40, 30, 20, 10, -20, -60, -110, -200, -300,
+                    ];
+                    const translateX = arcTransformations[idx] || 0;
+                    return (
+                      <motion.div
+                        key={indicator.indicatorId}
+                        className={classNames(
+                          "home-arc-card cursor-pointer transition-all duration-200 hover:scale-105",
+                          selectedIdx === idx && "selected"
                         )}
-                      </>
-                    ) : (
-                      <div className="h-48 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={overlayData.sort((a, b) => a.SurveyYear - b.SurveyYear)}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="SurveyYear" />
-                            <YAxis label={{ value: localIndicators[selectedIdx].measurementType, angle: -90, position: 'insideLeft' }} />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="Value" stroke="#4F46E5" name="Value" dot={{ fill: '#4F46E5' }} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                        <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="sticky bottom-0 z-10 bg-white p-4 flex justify-between">
-                    <button onClick={handlePrev} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
-                    <button onClick={handleNext} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {/* Tooltip: Shows indicator definition on hover (all screen sizes) */}
-            <AnimatePresence>
-              {hoveredIndicator && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
-                  style={{ left: "50%", bottom: "2rem", transform: "translateX(-50%)", zIndex: 1000 }}
-                >
-                  <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.label}</h3>
-                  <p className="text-gray-600 text-sm">{hoveredIndicator.definition}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                        style={{
+                          transform: `translateX(${translateX}px)`,
+                          height: "40px",
+                          padding: "0",
+                          "--indicator-color": color,
+                        } as React.CSSProperties}
+                        onClick={() => setSelectedIdx(idx)}
+                      >
+                        <div className="home-arc-number" style={{ borderColor: color }}>{idx + 1}</div>
+                        <div className="home-arc-content flex-1 min-w-0">
+                          <div className="home-arc-title whitespace-nowrap">{indicator.label}</div>
+                          <hr style={{borderColor: color, borderWidth: '1px', borderStyle: 'solid'}}/>
+                          <div className="home-arc-description whitespace-nowrap">{indicator.shortDescription}</div>
+                        </div>
+                        <div className="home-arc-arrow flex-shrink-0">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Mobile/Tablet Layout: Globe only (stacked) */}
+          <div className="lg:hidden w-full max-w-xs mx-auto h-[300px] md:h-[600px] md:max-w-2xl rounded-lg overflow-hidden relative flex items-center justify-center">
+            <GlobeVisualization onError={handleError} onIndicatorSelect={handleIndicatorSelect} />
           </div>
         </div>
-        {/* Mobile Indicator List: Single column below globe */}
-        <div className="block md:hidden w-full mt-8">
-          <h2 className="text-lg font-bold mb-3 text-gray-800 text-center">Health Indicators</h2>
-          <div className="grid grid-cols-1 gap-4 px-2">
+        {/* Details/Story Panel: Shows indicator details on all screen sizes */}
+        <AnimatePresence>
+          {selectedIdx !== null && localIndicators[selectedIdx] && (
+            <motion.div
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
+            >
+              <div className="sticky top-0 z-10 bg-white p-4 pb-2 mt-10 pt-10">
+                <button
+                  onClick={handleClose}
+                  className="self-end text-gray-400 hover:text-gray-700 text-2xl mb-4"
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto px-8 pb-4">
+                <h2 className="text-2xl font-bold mb-2">{localIndicators[selectedIdx].label}</h2>
+                <p className="text-gray-700 mb-6">{localIndicators[selectedIdx].definition}</p>
+                {/* Country Picker */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                  <Select
+                    options={overlayAvailableCountries}
+                    value={overlayCountry}
+                    onChange={(opt) => setOverlayCountry(opt)}
+                    classNamePrefix="react-select"
+                    placeholder="Select country..."
+                    isSearchable
+                    menuPlacement="auto"
+                    styles={{ menu: (provided) => ({ ...provided, zIndex: 9999 }) }}
+                  />
+                </div>
+                {/* Chart/Latest Toggle */}
+                <div className="mb-4 flex gap-4 items-center">
+                  <button
+                    className={`px-4 py-2 rounded ${overlayChartMode === 'latest' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                    onClick={() => setOverlayChartMode('latest')}
+                  >
+                    Latest Value
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded ${overlayChartMode === 'chart' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                    onClick={() => setOverlayChartMode('chart')}
+                  >
+                    Trend
+                  </button>
+                </div>
+                {/* Data Display */}
+                {overlayLoading ? (
+                  <div className="py-8 flex justify-center items-center"><LoadingSpinner /></div>
+                ) : overlayError ? (
+                  <div className="py-8 text-center text-red-600">{overlayError}</div>
+                ) : overlayChartMode === 'latest' ? (
+                  <>
+                    {overlayData.length > 0 ? (
+                      (() => {
+                        const sorted = [...overlayData].sort((a, b) => b.SurveyYear - a.SurveyYear);
+                        const latest = sorted[0];
+                        const indicator = localIndicators[selectedIdx];
+                        const valueDisplay = indicator.measurementType.toLowerCase() === 'percent'
+                          ? `${latest.Value}%`
+                          : latest.Value;
+                        return (
+                          <div className="mb-4">
+                            <div className="text-4xl font-bold text-blue-700">{valueDisplay}</div>
+                            <div className="text-gray-600">{latest.CountryName} ({latest.SurveyYear})</div>
+                            <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="text-gray-500">No data available for this indicator/country.</div>
+                    )}
+                  </>
+                ) : (
+                  <div className="h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={overlayData.sort((a, b) => a.SurveyYear - b.SurveyYear)}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="SurveyYear" />
+                        <YAxis label={{ value: localIndicators[selectedIdx].measurementType, angle: -90, position: 'insideLeft' }} />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="Value" stroke="#4F46E5" name="Value" dot={{ fill: '#4F46E5' }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
+                  </div>
+                )}
+              </div>
+              <div className="sticky bottom-0 z-10 bg-white p-4 flex justify-between">
+                <button onClick={handlePrev} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</button>
+                <button onClick={handleNext} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* Tooltip: Shows indicator definition on hover (all screen sizes) */}
+        <AnimatePresence>
+          {hoveredIndicator && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
+              style={{ left: "50%", bottom: "2rem", transform: "translateX(-50%)", zIndex: 1000 }}
+            >
+              <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.label}</h3>
+              <p className="text-gray-600 text-sm">{hoveredIndicator.definition}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      {/* Mobile Indicator List: Single column below globe */}
+      <div className="block md:hidden w-full mt-8">
+        <h2 className="text-lg font-bold mb-3 text-gray-800 text-center">Health Indicators</h2>
+        <div className="grid grid-cols-1 gap-4 px-2">
+          {localIndicators.map((indicator, idx) => {
+            const colors = [
+              "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
+            ];
+            const color = colors[idx % colors.length];
+            return (
+              <motion.div
+                key={indicator.indicatorId}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className={classNames(
+                  "home-tablet-card cursor-pointer transition",
+                  selectedIdx === idx && "selected"
+                )}
+                style={{ borderColor: color }}
+                onClick={() => setSelectedIdx(idx)}
+              >
+                <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
+                <div className="home-tablet-content">
+                  <div className="home-tablet-title">{indicator.label}</div>
+                  <div className="home-tablet-description">{indicator.shortDescription}</div>
+                </div>
+                <div className="home-tablet-arrow">→</div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+      {/* Tablet Indicator List: 2-column grid below globe */}
+      <div className="hidden md:block lg:hidden w-full mt-8">
+        <h2 className="text-lg font-bold mb-3 text-gray-800 text-center">Health Indicators</h2>
+        <div className="flex justify-center">
+          <div className="grid grid-cols-2 gap-4 w-full max-w-4xl px-4">
             {localIndicators.map((indicator, idx) => {
               const colors = [
                 "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
@@ -715,10 +730,10 @@ const Home: React.FC = () => {
               return (
                 <motion.div
                   key={indicator.indicatorId}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   className={classNames(
-                    "home-tablet-card cursor-pointer transition",
+                    "home-tablet-card cursor-pointer transition-all duration-200",
                     selectedIdx === idx && "selected"
                   )}
                   style={{ borderColor: color }}
@@ -735,275 +750,241 @@ const Home: React.FC = () => {
             })}
           </div>
         </div>
-        {/* Tablet Indicator List: 2-column grid below globe */}
-        <div className="hidden md:block lg:hidden w-full mt-8">
-          <h2 className="text-lg font-bold mb-3 text-gray-800 text-center">Health Indicators</h2>
-          <div className="flex justify-center">
-            <div className="grid grid-cols-2 gap-4 w-full max-w-4xl px-4">
-              {localIndicators.map((indicator, idx) => {
-                const colors = [
-                  "#00A0DC", "#7AC36A", "#F15A60", "#9B5DE5", "#F5A623", "#2CCCE4", "#FF66B2", "#5C6BC0", "#42B883", "#FF7043", "#FFD600", "#8D6E63", "#00B8D4", "#C51162", "#43A047", "#FF3D00", "#6D4C41", "#1DE9B6", "#D500F9", "#FFAB00",
-                ];
-                const color = colors[idx % colors.length];
-                return (
-                  <motion.div
-                    key={indicator.indicatorId}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={classNames(
-                      "home-tablet-card cursor-pointer transition-all duration-200",
-                      selectedIdx === idx && "selected"
-                    )}
-                    style={{ borderColor: color }}
-                    onClick={() => setSelectedIdx(idx)}
-                  >
-                    <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
-                    <div className="home-tablet-content">
-                      <div className="home-tablet-title">{indicator.label}</div>
-                      <div className="home-tablet-description">{indicator.shortDescription}</div>
-                    </div>
-                    <div className="home-tablet-arrow">→</div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        {/* Health Tools & Resources Section */}
-        <div className="relative z-10 bg-white py-16 md:py-24 mt-16 md:mt-24">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-              Health Tools & Resources
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-              {/* Left Box: Dynamic Health Feeding Tips */}
-              <FeedingTipsCarousel feedingTips={feedingTips} />
-              {/* Middle Box: Child Growth Z-Score Calculator */}
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800">Growth Z-Score Calculator</h3>
+      </div>
+      {/* Health Tools & Resources Section */}
+      <div className="relative z-10 bg-white py-16 md:py-24 mt-16 md:mt-24">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+            Health Tools & Resources
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+            {/* Left Box: Dynamic Health Feeding Tips */}
+            <FeedingTipsCarousel feedingTips={feedingTips} />
+            {/* Middle Box: Child Growth Z-Score Calculator */}
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                 </div>
-                {/* Calculator Form */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Age (months)</label>
-                      <input
-                        type="number"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="24"
-                        value={calculatorData.age}
-                        onChange={(e) => handleCalculatorChange("age", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="12.5"
-                        value={calculatorData.weight}
-                        onChange={(e) => handleCalculatorChange("weight", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="85.2"
-                        value={calculatorData.height}
-                        onChange={(e) => handleCalculatorChange("height", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                      <select
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={calculatorData.gender}
-                        onChange={(e) => handleCalculatorChange("gender", e.target.value)}
-                      >
-                        <option value="">Select</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  onClick={handleCheckNutrition}
-                >
-                  Check Child Nutrition Status
-                </button>
-                {/* Results Section */}
-                {showNutritionDisclaimer && (
-                  <div className="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 text-sm rounded">
-                    <strong>Warning:</strong> The data used for the calculation and graphics generation come from the World Health Organization. Use this calculator at your own risk. This calculator may not be accurate or reliable. By using this calculator you acknowledge any reliance on this calculator shall be at your sole risk.
-                  </div>
-                )}
-                {zScoreResult && (
-                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                    <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <div className="text-center">
-                        {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div> */}
-                        <div className="text-xs text-gray-600">Weight Z-Score</div>
-                        <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
-                      </div>
-                      <div className="text-center">
-                        {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div> */}
-                        <div className="text-xs text-gray-600">Height Z-Score</div>
-                        <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
-                      </div>
-                      <div className="text-center">
-                        {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div> */}
-                        <div className="text-xs text-gray-600">Wasting Z-Score</div>
-                        <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
-                      </div>
-                    </div>
-                    <div className="border-t pt-3">
-                      <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
-                      <ul className="space-y-1">
-                        {zScoreResult.recommendations.map((rec: string, index: number) => (
-                          <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                            <span className="text-green-500 mt-1">•</span>
-                            {rec}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-                {/* Feedback Section (shown before calculation) */}
-                {!zScoreResult && (
-                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                    <h4 className="font-semibold text-gray-800 mb-2">📊 Growth Assessment</h4>
-                    <p className="text-sm text-gray-600">Enter the child's measurements above to get personalized growth feedback and recommendations.</p>
-                  </div>
-                )}
+                <h3 className="text-2xl font-bold text-gray-800">Growth Z-Score Calculator</h3>
               </div>
-              {/* Right Box: BMI Calculator */}
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
+              {/* Calculator Form */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Age (months)</label>
+                    <input
+                      type="number"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="24"
+                      value={calculatorData.age}
+                      onChange={(e) => handleCalculatorChange("age", e.target.value)}
+                    />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-800">BMI Calculator</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="12.5"
+                      value={calculatorData.weight}
+                      onChange={(e) => handleCalculatorChange("weight", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="85.2"
+                      value={calculatorData.height}
+                      onChange={(e) => handleCalculatorChange("height", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                    <select
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={calculatorData.gender}
+                      onChange={(e) => handleCalculatorChange("gender", e.target.value)}
+                    >
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <button
+                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                onClick={handleCheckNutrition}
+              >
+                Check Child Nutrition Status
+              </button>
+              {/* Results Section */}
+              {showNutritionDisclaimer && (
+                <div className="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 text-sm rounded">
+                  <strong>Warning:</strong> The data used for the calculation and graphics generation come from the World Health Organization. Use this calculator at your own risk. This calculator may not be accurate or reliable. By using this calculator you acknowledge any reliance on this calculator shall be at your sole risk.
+                </div>
+              )}
+              {zScoreResult && (
+                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="text-center">
+                      {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div> */}
+                      <div className="text-xs text-gray-600">Weight Z-Score</div>
+                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
+                    </div>
+                    <div className="text-center">
+                      {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div> */}
+                      <div className="text-xs text-gray-600">Height Z-Score</div>
+                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
+                    </div>
+                    <div className="text-center">
+                      {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div> */}
+                      <div className="text-xs text-gray-600">Wasting Z-Score</div>
+                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
+                    </div>
+                  </div>
+                  <div className="border-t pt-3">
+                    <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
+                    <ul className="space-y-1">
+                      {zScoreResult.recommendations.map((rec: string, index: number) => (
+                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                          <span className="text-green-500 mt-1">•</span>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+              {/* Feedback Section (shown before calculation) */}
+              {!zScoreResult && (
+                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-2">📊 Growth Assessment</h4>
+                  <p className="text-sm text-gray-600">Enter the child's measurements above to get personalized growth feedback and recommendations.</p>
+                </div>
+              )}
+            </div>
+            {/* Right Box: BMI Calculator */}
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800">BMI Calculator</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Age (years)</label>
+                    <input 
+                      type="number" 
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="25"
+                      value={bmiData.age}
+                      onChange={(e) => handleBmiChange('age', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="70"
+                      value={bmiData.weight}
+                      onChange={(e) => handleBmiChange('weight', e.target.value)}
+                    />
+                  </div>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Age (years)</label>
-                      <input 
-                        type="number" 
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="25"
-                        value={bmiData.age}
-                        onChange={(e) => handleBmiChange('age', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="70"
-                        value={bmiData.weight}
-                        onChange={(e) => handleBmiChange('weight', e.target.value)}
-                      />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="175"
+                      value={bmiData.height}
+                      onChange={(e) => handleBmiChange('height', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={bmiData.gender}
+                      onChange={(e) => handleBmiChange('gender', e.target.value)}
+                    >
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <button 
+                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                onClick={calculateBMI}
+              >
+                Calculate BMI
+              </button>
+              
+              {/* Results Section */}
+              {bmiResult && (
+                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-3">📊 BMI Results</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-blue-600">{bmiResult.bmi}</div>
+                      <div className="text-xs text-gray-600">BMI</div>
+                      <div className={bmiResult.color}>
+                        {bmiResult.category}
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="175"
-                        value={bmiData.height}
-                        onChange={(e) => handleBmiChange('height', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                      <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={bmiData.gender}
-                        onChange={(e) => handleBmiChange('gender', e.target.value)}
-                      >
-                        <option value="">Select</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select>
-                    </div>
+                  <div className="border-t pt-3">
+                    <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
+                    <ul className="space-y-1">
+                      {bmiResult.recommendations.map((rec: string, index: number) => (
+                        <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                          <span className="text-green-500 mt-1">•</span>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-                
-                <button 
-                  className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  onClick={calculateBMI}
-                >
-                  Calculate BMI
-                </button>
-                
-                {/* Results Section */}
-                {bmiResult && (
-                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                    <h4 className="font-semibold text-gray-800 mb-3">📊 BMI Results</h4>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-blue-600">{bmiResult.bmi}</div>
-                        <div className="text-xs text-gray-600">BMI</div>
-                        <div className={bmiResult.color}>
-                          {bmiResult.category}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="border-t pt-3">
-                      <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
-                      <ul className="space-y-1">
-                        {bmiResult.recommendations.map((rec: string, index: number) => (
-                          <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                            <span className="text-green-500 mt-1">•</span>
-                            {rec}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Feedback Section */}
-                {!bmiResult && (
-                  <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-                    <h4 className="font-semibold text-gray-800 mb-2">📊 BMI Assessment</h4>
-                    <p className="text-sm text-gray-600">Enter your measurements above to get personalized BMI feedback and recommendations.</p>
-                  </div>
-                )}
-              </div>
+              )}
+              
+              {/* Feedback Section */}
+              {!bmiResult && (
+                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-2">📊 BMI Assessment</h4>
+                  <p className="text-sm text-gray-600">Enter your measurements above to get personalized BMI feedback and recommendations.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-        {/* Footer */}
-        <Footer />
       </div>
+      {/* Footer */}
+      <Footer />
     </>
   );
 };

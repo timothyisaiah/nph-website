@@ -78,13 +78,13 @@ const MainLayout: React.FC = () => {
                     to={item.path}
                     className={`relative px-3 py-2 rounded-md transition-all duration-200 ${
                       isActive
-                        ? 'text-blue-600 font-semibold bg-blue-50'
+                        ? 'text-grren-600 font-semibold bg-green-50'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
                   >
                     {item.name}
                     {isActive && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full"></div>
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-600 rounded-full"></div>
                     )}
                   </Link>
                 );

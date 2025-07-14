@@ -60,15 +60,15 @@ const Navbar = () => {
                   to={item.path}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 relative group
                     ${isActive 
-                      ? 'text-blue-600 bg-blue-50 font-semibold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-blue-600' 
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      ? 'text-green-600 bg-green-50 font-semibold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-green-600' 
+                      : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
                     }
                   `}
                 >
                   {item.name}
                   {/* Hover indicator line */}
                   <span 
-                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform origin-left transition-transform duration-200
+                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-green-600 transform origin-left transition-transform duration-200
                       ${isActive ? 'opacity-0' : 'scale-x-0 group-hover:scale-x-100'}
                     `}
                   />
@@ -81,7 +81,7 @@ const Navbar = () => {
           <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-600"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-green-600 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-600"
               aria-expanded="false"
             >
               <span className="sr-only">Open main menu</span>
@@ -133,8 +133,8 @@ const Navbar = () => {
                 to={item.path}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                   isActive
-                    ? 'text-blue-600 bg-blue-50 font-semibold border-l-4 border-blue-600'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:border-l-4 hover:border-blue-300'
+                    ? 'text-green-600 bg-green-50 font-semibold border-l-4 border-green-600'
+                    : 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:border-l-4 hover:border-green-300'
                 }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -142,7 +142,7 @@ const Navbar = () => {
                   {item.name}
                   {isActive && (
                     <svg 
-                      className="ml-2 h-4 w-4 text-blue-600" 
+                      className="ml-2 h-4 w-4 text-green-600" 
                       fill="none" 
                       strokeLinecap="round" 
                       strokeLinejoin="round" 
@@ -161,7 +161,7 @@ const Navbar = () => {
       </div>
 
       {/* Bottom border for the entire navbar */}
-      <div className={`absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-600 to-transparent transform transition-opacity duration-300 ${
+      <div className={`absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-600 to-transparent transform transition-opacity duration-300 ${
         isScrolled ? 'opacity-100' : 'opacity-0'
       }`} />
     </nav>
