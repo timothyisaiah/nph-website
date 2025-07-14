@@ -56,5 +56,5 @@ export const router = createBrowserRouter([
     ],
   },
 ], {
-  basename: '/nph-website/' // Updated to match your GitHub Pages URL path
+  basename: '/' // Updated to match your GitHub Pages URL path
 });
