@@ -19,10 +19,12 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 // Memoized Globe Component to prevent unnecessary re-renders
-const MemoizedGlobe = React.memo(({ onError, onIndicatorSelect }: any) => (
+const MemoizedGlobe = React.memo(({ onError, onCountrySelect }: any) => (
   <GlobeVisualization 
-    onError={onError} 
-    onIndicatorSelect={onIndicatorSelect}
+    onError={onError}
+    enableRotation={true}
+    rotationSpeed={0.05}
+    onCountrySelect={onCountrySelect}
   />
 ));
 
@@ -209,7 +211,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const { setSelectedIndicator } = useIndicator();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [hoveredIndicator, setHoveredIndicator] = useState<any>(null);
+
   const [arcPositions, setArcPositions] = useState<{ x: number; y: number }[]>([]);
   const [overlayCountry, setOverlayCountry] = useState<{ value: string; label: string } | null>(null);
   const [overlayData, setOverlayData] = useState<any[]>([]);
@@ -218,6 +220,7 @@ const Home: React.FC = () => {
   const [overlayChartMode, setOverlayChartMode] = useState<'latest' | 'chart'>('latest');
   const [overlayAvailableCountries, setOverlayAvailableCountries] = useState<{ value: string; label: string }[]>([]);
   const [showNutritionDisclaimer, setShowNutritionDisclaimer] = useState(false);
+  const [selectedGlobeCountry, setSelectedGlobeCountry] = useState<{ value: string; label: string } | null>(null);
 
   // Memoized event handlers for globe
   const handleIndicatorSelect = useCallback(
@@ -238,6 +241,14 @@ const Home: React.FC = () => {
   const handleError = useCallback((errorMessage: string) => {
     setError(errorMessage);
   }, []);
+
+  const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
+    setSelectedGlobeCountry(country);
+    // Update the overlay country if it matches
+    if (overlayAvailableCountries.find(c => c.value === country.value)) {
+      setOverlayCountry({ value: country.value, label: country.label });
+    }
+  }, [overlayAvailableCountries]);
 
   // Calculate arc positions (for future arc overlays)
   useEffect(() => {
@@ -512,9 +523,9 @@ const Home: React.FC = () => {
           <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
             {/* Globe Visualization (left) */}
             <div className="flex-1 flex justify-center">
-              <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
-                <GlobeVisualization onError={handleError} onIndicatorSelect={handleIndicatorSelect} />
-              </div>
+                          <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
+              <MemoizedGlobe onError={handleError} onCountrySelect={handleGlobeCountrySelect} />
+            </div>
             </div>
             {/* Desktop Indicator List (right) */}
             <div className="flex-1 flex justify-center">
@@ -567,7 +578,7 @@ const Home: React.FC = () => {
           </div>
           {/* Mobile/Tablet Layout: Globe only (stacked) */}
           <div className="lg:hidden w-full max-w-xs mx-auto h-[300px] md:h-[600px] md:max-w-2xl rounded-lg overflow-hidden relative flex items-center justify-center">
-            <GlobeVisualization onError={handleError} onIndicatorSelect={handleIndicatorSelect} />
+            <MemoizedGlobe onError={handleError} onCountrySelect={handleGlobeCountrySelect} />
           </div>
         </div>
         {/* Details/Story Panel: Shows indicator details on all screen sizes */}
@@ -669,21 +680,7 @@ const Home: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Tooltip: Shows indicator definition on hover (all screen sizes) */}
-        <AnimatePresence>
-          {hoveredIndicator && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
-              style={{ left: "50%", bottom: "2rem", transform: "translateX(-50%)", zIndex: 1000 }}
-            >
-              <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.label}</h3>
-              <p className="text-gray-600 text-sm">{hoveredIndicator.definition}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
       </div>
       {/* Mobile Indicator List: Single column below globe */}
       <div className="block md:hidden w-full mt-8">
