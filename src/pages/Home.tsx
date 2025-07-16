@@ -208,6 +208,18 @@ const Home: React.FC = () => {
   });
   const [zScoreResult, setZScoreResult] = useState<any>(null);
   const [bmiResult, setBmiResult] = useState<any>(null);
+  const [calculatorErrors, setCalculatorErrors] = useState({
+    age: false,
+    weight: false,
+    height: false,
+    gender: false
+  });
+  const [bmiErrors, setBmiErrors] = useState({
+    age: false,
+    weight: false,
+    height: false,
+    gender: false
+  });
   const navigate = useNavigate();
   const { setSelectedIndicator } = useIndicator();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
@@ -221,6 +233,7 @@ const Home: React.FC = () => {
   const [overlayAvailableCountries, setOverlayAvailableCountries] = useState<{ value: string; label: string }[]>([]);
   const [showNutritionDisclaimer, setShowNutritionDisclaimer] = useState(false);
   const [selectedGlobeCountry, setSelectedGlobeCountry] = useState<{ value: string; label: string } | null>(null);
+  const [showNutritionModal, setShowNutritionModal] = useState(false);
 
   // Memoized event handlers for globe
   const handleIndicatorSelect = useCallback(
@@ -292,6 +305,10 @@ const Home: React.FC = () => {
   // Calculator input change handler
   const handleCalculatorChange = (field: string, value: string) => {
     setCalculatorData((prev) => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (value) {
+      setCalculatorErrors(prev => ({ ...prev, [field]: false }));
+    }
   };
 
   const handleBmiChange = (field: string, value: string) => {
@@ -299,6 +316,10 @@ const Home: React.FC = () => {
       ...prev,
       [field]: value
     }));
+    // Clear error for this field when user starts typing
+    if (value) {
+      setBmiErrors(prev => ({ ...prev, [field]: false }));
+    }
   };
 
   const calculateZScore = () => {
@@ -343,8 +364,17 @@ const Home: React.FC = () => {
   const calculateBMI = () => {
     const { age, weight, height, gender } = bmiData;
     
-    if (!age || !weight || !height || !gender) {
-      alert('Please fill in all fields');
+    const errors = {
+      age: !age,
+      weight: !weight,
+      height: !height,
+      gender: !gender
+    };
+    
+    setBmiErrors(errors);
+    
+    // Check if any errors exist
+    if (Object.values(errors).some(error => error)) {
       return;
     }
 
@@ -438,7 +468,26 @@ const Home: React.FC = () => {
   const handleClose = () => setSelectedIdx(null);
 
   const handleCheckNutrition = () => {
-    setShowNutritionDisclaimer(true);
+    const { age, weight, height, gender } = calculatorData;
+    const errors = {
+      age: !age,
+      weight: !weight,
+      height: !height,
+      gender: !gender
+    };
+    
+    setCalculatorErrors(errors);
+    
+    // Check if any errors exist
+    if (Object.values(errors).some(error => error)) {
+      return;
+    }
+    
+    setShowNutritionModal(true);
+  };
+
+  const handleAcknowledgeWarning = () => {
+    setShowNutritionModal(false);
     calculateZScore();
   };
 
@@ -774,22 +823,28 @@ const Home: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Age (months)</label>
                     <input
                       type="number"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        calculatorErrors.age ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       placeholder="24"
                       value={calculatorData.age}
                       onChange={(e) => handleCalculatorChange("age", e.target.value)}
                     />
+                    {calculatorErrors.age && <p className="text-xs text-red-500 mt-1">Age is required</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
                     <input
                       type="number"
                       step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        calculatorErrors.weight ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       placeholder="12.5"
                       value={calculatorData.weight}
                       onChange={(e) => handleCalculatorChange("weight", e.target.value)}
                     />
+                    {calculatorErrors.weight && <p className="text-xs text-red-500 mt-1">Weight is required</p>}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -798,16 +853,21 @@ const Home: React.FC = () => {
                     <input
                       type="number"
                       step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        calculatorErrors.height ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       placeholder="85.2"
                       value={calculatorData.height}
                       onChange={(e) => handleCalculatorChange("height", e.target.value)}
                     />
+                    {calculatorErrors.height && <p className="text-xs text-red-500 mt-1">Height is required</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
                     <select
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        calculatorErrors.gender ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       value={calculatorData.gender}
                       onChange={(e) => handleCalculatorChange("gender", e.target.value)}
                     >
@@ -815,6 +875,7 @@ const Home: React.FC = () => {
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                     </select>
+                    {calculatorErrors.gender && <p className="text-xs text-red-500 mt-1">Gender is required</p>}
                   </div>
                 </div>
               </div>
@@ -825,31 +886,133 @@ const Home: React.FC = () => {
                 Check Child Nutrition Status
               </button>
               {/* Results Section */}
-              {showNutritionDisclaimer && (
-                <div className="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 text-sm rounded">
-                  <strong>Warning:</strong> The data used for the calculation and graphics generation come from the World Health Organization. Use this calculator at your own risk. This calculator may not be accurate or reliable. By using this calculator you acknowledge any reliance on this calculator shall be at your sole risk.
-                </div>
-              )}
               {zScoreResult && (
                 <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
+                  
+                  {/* Z-Score Gauges */}
                   <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="text-center">
-                      {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.weightZScore}</div> */}
-                      <div className="text-xs text-gray-600">Weight Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
+                    {/* Weight Z-Score Gauge */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-20 h-10 mb-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 50">
+                          {/* Underweight segment (yellow) - < -2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#F59E0B"
+                            strokeWidth="6"
+                            strokeDasharray="33 100"
+                            strokeDashoffset="0"
+                          />
+                          {/* Normal segment (green) - -2 to +2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#10B981"
+                            strokeWidth="6"
+                            strokeDasharray="34 100"
+                            strokeDashoffset="33"
+                          />
+                          {/* Overweight segment (red) - > +2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#EF4444"
+                            strokeWidth="6"
+                            strokeDasharray="33 100"
+                            strokeDashoffset="67"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="text-lg font-bold text-gray-800">{zScoreResult.weightZScore}</div>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 mb-1">Weight Z-Score</div>
+                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
                     </div>
-                    <div className="text-center">
-                      {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.heightZScore}</div> */}
-                      <div className="text-xs text-gray-600">Height Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
+                    
+                    {/* Height Z-Score Gauge */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-20 h-10 mb-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 50">
+                          {/* Stunted segment (yellow) - < -2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#F59E0B"
+                            strokeWidth="6"
+                            strokeDasharray="33 100"
+                            strokeDashoffset="0"
+                          />
+                          {/* Normal segment (green) - -2 to +2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#10B981"
+                            strokeWidth="6"
+                            strokeDasharray="34 100"
+                            strokeDashoffset="33"
+                          />
+                          {/* Tall segment (blue) - > +2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#3B82F6"
+                            strokeWidth="6"
+                            strokeDasharray="33 100"
+                            strokeDashoffset="67"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="text-lg font-bold text-gray-800">{zScoreResult.heightZScore}</div>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 mb-1">Height Z-Score</div>
+                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
                     </div>
-                    <div className="text-center">
-                      {/* <div className="text-lg font-bold text-blue-600">{zScoreResult.wastingZScore}</div> */}
-                      <div className="text-xs text-gray-600">Wasting Z-Score</div>
-                      <div className={`text-xs font-medium mt-1 px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
+                    
+                    {/* Wasting Z-Score Gauge */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-20 h-10 mb-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 50">
+                          {/* Wasted segment (red) - < -2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#EF4444"
+                            strokeWidth="6"
+                            strokeDasharray="33 100"
+                            strokeDashoffset="0"
+                          />
+                          {/* Normal segment (green) - -2 to +2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#10B981"
+                            strokeWidth="6"
+                            strokeDasharray="34 100"
+                            strokeDashoffset="33"
+                          />
+                          {/* Overweight segment (orange) - > +2 */}
+                          <path
+                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            fill="none"
+                            stroke="#F59E0B"
+                            strokeWidth="6"
+                            strokeDasharray="33 100"
+                            strokeDashoffset="67"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="text-lg font-bold text-gray-800">{zScoreResult.wastingZScore}</div>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-600 mb-1">Wasting Z-Score</div>
+                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
                     </div>
                   </div>
+                  
                   <div className="border-t pt-3">
                     <h5 className="font-medium text-gray-800 mb-2">💡 Recommendations:</h5>
                     <ul className="space-y-1">
@@ -888,22 +1051,28 @@ const Home: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Age (years)</label>
                     <input 
                       type="number" 
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        bmiErrors.age ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       placeholder="25"
                       value={bmiData.age}
                       onChange={(e) => handleBmiChange('age', e.target.value)}
                     />
+                    {bmiErrors.age && <p className="text-xs text-red-500 mt-1">Age is required</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
                     <input 
                       type="number" 
                       step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        bmiErrors.weight ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       placeholder="70"
                       value={bmiData.weight}
                       onChange={(e) => handleBmiChange('weight', e.target.value)}
                     />
+                    {bmiErrors.weight && <p className="text-xs text-red-500 mt-1">Weight is required</p>}
                   </div>
                 </div>
                 
@@ -913,15 +1082,20 @@ const Home: React.FC = () => {
                     <input 
                       type="number" 
                       step="0.1"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        bmiErrors.height ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       placeholder="175"
                       value={bmiData.height}
                       onChange={(e) => handleBmiChange('height', e.target.value)}
                     />
+                    {bmiErrors.height && <p className="text-xs text-red-500 mt-1">Height is required</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    <select className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        bmiErrors.gender ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       value={bmiData.gender}
                       onChange={(e) => handleBmiChange('gender', e.target.value)}
                     >
@@ -929,6 +1103,7 @@ const Home: React.FC = () => {
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                     </select>
+                    {bmiErrors.gender && <p className="text-xs text-red-500 mt-1">Gender is required</p>}
                   </div>
                 </div>
               </div>
@@ -982,6 +1157,57 @@ const Home: React.FC = () => {
       </div>
       {/* Footer */}
       <Footer />
+      
+      {/* Nutrition Warning Modal */}
+      <AnimatePresence>
+        {showNutritionModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowNutritionModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <span className="text-yellow-500">⚠️</span>
+                  Important Notice
+                </h3>
+                <button
+                  onClick={() => setShowNutritionModal(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  &times;
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>Warning:</strong> The data used for the calculation and graphics generation come from the World Health Organization. 
+                  Use this calculator at your own risk. This calculator may not be accurate or reliable. 
+                  By using this calculator you acknowledge any reliance on this calculator shall be at your sole risk.
+                </p>
+              </div>
+              
+              <div className="flex justify-end">
+                <button
+                  onClick={handleAcknowledgeWarning}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  I Understand
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
