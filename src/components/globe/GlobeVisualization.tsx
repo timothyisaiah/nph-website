@@ -1,86 +1,262 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { indicators as localIndicators } from '../../data/indicators';
-import type { Indicator } from '../../data/indicators';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Globe from 'globe.gl';
-import classNames from 'classnames';
+import LoadingSpinner from '../common/LoadingSpinner';
+import CountrySelectionDialog from './CountrySelectionDialog';
+import * as d3 from 'd3-geo';
+import { countryBoundariesService } from '../../services/countryBoundariesService';
+import type { CountryFeature } from '../../services/countryBoundariesService';
+
+interface Country {
+  value: string;
+  label: string;
+  flag?: string;
+}
 
 interface GlobeVisualizationProps {
   onError?: (error: string) => void;
-  onIndicatorSelect?: (indicatorId: string) => void;
+  width?: number;
+  height?: number;
+  backgroundColor?: string;
+  enableRotation?: boolean;
+  rotationSpeed?: number;
+  onCountrySelect?: (country: Country) => void;
 }
 
-const colors = [
-  '#00A0DC', '#7AC36A', '#F15A60', '#9B5DE5', '#F5A623',
-  '#2CCCE4', '#FF66B2', '#5C6BC0', '#42B883', '#FF7043',
-  '#FFD600', '#8D6E63', '#00B8D4', '#C51162', '#43A047',
-  '#FF3D00', '#6D4C41', '#1DE9B6', '#D500F9', '#FFAB00'
-];
-
-const generateRandomPosition = (): [number, number] => {
-  const lat = Math.min(Math.max((Math.random() - 0.5) * 180, -85), 85);
-  const lng = Math.min(Math.max((Math.random() - 0.5) * 360, -180), 180);
-  return [lat, lng];
+// Polygon styling constants
+const POLYGON_STYLES = {
+  default: {
+    capColor: 'rgba(255, 255, 255, 0.1)',
+    sideColor: 'rgba(255, 255, 255, 0.1)',
+    strokeColor: 'rgba(0, 0, 0, 0.3)',
+    altitude: 0.01
+  },
+  highlighted: {
+    capColor: 'rgba(59, 130, 246, 0.6)',
+    sideColor: 'rgba(59, 130, 246, 0.4)',
+    strokeColor: 'rgba(59, 130, 246, 0.8)',
+    altitude: 0.01
+  }
 };
 
-// Helper to get tagline (first sentence of definition)
-const getTagline = (definition: string) => {
-  const match = definition.match(/^(.*?\.|\!|\?)(\s|$)/);
-  return match ? match[1] : definition;
+// Point styling constants
+const POINT_STYLES = {
+  default: {
+    color: '#3B82F6',
+    size: 0.5,
+    altitude: 0.01
+  },
+  highlighted: {
+    color: '#FFD700',
+    size: 1.0,
+    altitude: 0.01
+  }
 };
 
-
-
-const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndicatorSelect }) => {
+const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ 
+  onError, 
+  width,
+  height,
+  backgroundColor = '#ffffff',
+  enableRotation = true,
+  rotationSpeed = 0.05,
+  onCountrySelect
+}) => {
   const globeRef = useRef<any>();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [indicators, setIndicators] = useState<(Indicator & { color: string; lat: number; lng: number; size: number; })[]>([]);
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [hoveredIndicator, setHoveredIndicator] = useState<Indicator | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [isRotating, setIsRotating] = useState(true);
+  const [boundariesLoaded, setBoundariesLoaded] = useState(false);
+  const animationRef = useRef<number>();
 
-  // Prepare indicators with color and position
+  // Load country boundaries on mount
   useEffect(() => {
-    const processed = localIndicators.map((indicator, idx) => {
-      const [lat, lng] = generateRandomPosition();
-      return {
-        ...indicator,
-        color: colors[idx % colors.length],
-        lat,
-        lng,
-        size: 1
-      };
+    const loadBoundaries = async () => {
+      try {
+        await countryBoundariesService.loadBoundaries();
+        setBoundariesLoaded(true);
+      } catch (error) {
+        console.error('Failed to load boundaries:', error);
+        onError?.('Failed to load country boundaries');
+      }
+    };
+
+    loadBoundaries();
+  }, [onError]);
+
+  // Helper function to check if countries have polygon geometry
+  const hasPolygonGeometry = (countries: CountryFeature[]): boolean => {
+    return countries.some((country: CountryFeature) => 
+      country.geometry.type === 'Polygon' || country.geometry.type === 'MultiPolygon'
+    );
+  };
+
+  // Helper function to create country object from feature
+  const createCountryFromFeature = (feature: CountryFeature): Country => ({
+    value: feature.properties.iso_a2 || feature.properties.iso_a3 || feature.properties.dhs_code || '',
+    label: feature.properties.name,
+    flag: feature.properties.iso_a2?.toLowerCase()
+  });
+
+  // Helper function to setup polygon visualization
+  const setupPolygonVisualization = (globe: any, countries: CountryFeature[]) => {
+    globe
+      .polygonsData(countries)
+      .polygonCapColor(() => POLYGON_STYLES.default.capColor)
+      .polygonSideColor(() => POLYGON_STYLES.default.sideColor)
+      .polygonStrokeColor(() => POLYGON_STYLES.default.strokeColor)
+      .polygonAltitude(POLYGON_STYLES.default.altitude)
+      .onPolygonHover((polygon: any) => {
+        document.body.style.cursor = polygon ? 'pointer' : 'default';
+      })
+      .onPolygonClick((polygon: any) => {
+        if (polygon) {
+          const country = createCountryFromFeature(polygon);
+          handleCountrySelect(country);
+        }
+      });
+  };
+
+  // Helper function to setup point visualization
+  const setupPointVisualization = (globe: any, countries: CountryFeature[]) => {
+    const pointData = countries.map((country: CountryFeature) => {
+      if (country.geometry.type === 'Point') {
+        return {
+          ...country,
+          lat: country.geometry.coordinates[1],
+          lng: country.geometry.coordinates[0],
+          color: POINT_STYLES.default.color,
+          size: POINT_STYLES.default.size
+        };
+      }
+      return country;
     });
-    setIndicators(processed);
-    setIsLoading(false);
-  }, []);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const globe = new Globe(containerRef.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .backgroundColor('#ffffff')
-      .width(containerRef.current.clientWidth)
-      .height(containerRef.current.clientHeight)
-      .enablePointerInteraction(true)
-      .pointRadius(1)
+    globe
+      .pointsData(pointData)
+      .pointRadius('size')
       .pointColor('color')
-      .pointAltitude(0)
-      .pointsMerge(false)
-      .pointResolution(32)
-      .pointLabel((d: any) => '')
-      .onPointHover((point: any | null) => {
-        setHoveredIndicator(point as Indicator | null);
+      .pointAltitude(POINT_STYLES.default.altitude)
+      .onPointHover((point: any) => {
         document.body.style.cursor = point ? 'pointer' : 'default';
       })
       .onPointClick((point: any) => {
-        if (point && point.id) {
-          const idx = indicators.findIndex(ind => ind.id === point.id);
-          setSelectedIdx(idx);
-          onIndicatorSelect?.(point.id);
+        if (point) {
+          const country = createCountryFromFeature(point);
+          handleCountrySelect(country);
         }
       });
+  };
+
+  // Helper function to highlight selected country
+  const highlightSelectedCountry = (globe: any, countries: CountryFeature[], selectedCountryCode: string) => {
+    const hasPolygons = hasPolygonGeometry(countries);
+    
+    if (hasPolygons) {
+      const highlightedCountries = countries.map((feature: CountryFeature) => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          highlighted: feature.properties.iso_a2 === selectedCountryCode || 
+                      feature.properties.iso_a3 === selectedCountryCode ||
+                      feature.properties.dhs_code === selectedCountryCode
+        }
+      }));
+      
+      globe
+        .polygonsData(highlightedCountries)
+        .polygonCapColor((d: any) => 
+          d.properties.highlighted ? POLYGON_STYLES.highlighted.capColor : POLYGON_STYLES.default.capColor
+        )
+        .polygonSideColor((d: any) => 
+          d.properties.highlighted ? POLYGON_STYLES.highlighted.sideColor : POLYGON_STYLES.default.sideColor
+        )
+        .polygonStrokeColor((d: any) => 
+          d.properties.highlighted ? POLYGON_STYLES.highlighted.strokeColor : POLYGON_STYLES.default.strokeColor
+        );
+    } else {
+      const highlightedCountries = countries.map((feature: CountryFeature) => {
+        if (feature.geometry.type === 'Point') {
+          return {
+            ...feature,
+            lat: feature.geometry.coordinates[1],
+            lng: feature.geometry.coordinates[0],
+            color: (feature.properties.iso_a2 === selectedCountryCode || 
+                    feature.properties.iso_a3 === selectedCountryCode ||
+                    feature.properties.dhs_code === selectedCountryCode) 
+                   ? POINT_STYLES.highlighted.color 
+                   : POINT_STYLES.default.color,
+            size: (feature.properties.iso_a2 === selectedCountryCode || 
+                   feature.properties.iso_a3 === selectedCountryCode ||
+                   feature.properties.dhs_code === selectedCountryCode) 
+                  ? POINT_STYLES.highlighted.size 
+                  : POINT_STYLES.default.size
+          };
+        }
+        return feature;
+      });
+      
+      globe
+        .pointsData(highlightedCountries)
+        .pointColor('color')
+        .pointRadius('size');
+    }
+  };
+
+  // Helper function to reset country highlighting
+  const resetCountryHighlighting = (globe: any, countries: CountryFeature[]) => {
+    const hasPolygons = hasPolygonGeometry(countries);
+    
+    if (hasPolygons) {
+      globe
+        .polygonsData(countries)
+        .polygonCapColor(() => POLYGON_STYLES.default.capColor)
+        .polygonSideColor(() => POLYGON_STYLES.default.sideColor)
+        .polygonStrokeColor(() => POLYGON_STYLES.default.strokeColor);
+    } else {
+      const pointCountries = countries.map((country: CountryFeature) => {
+        if (country.geometry.type === 'Point') {
+          return {
+            ...country,
+            lat: country.geometry.coordinates[1],
+            lng: country.geometry.coordinates[0],
+            color: POINT_STYLES.default.color,
+            size: POINT_STYLES.default.size
+          };
+        }
+        return country;
+      });
+      
+      globe
+        .pointsData(pointCountries)
+        .pointColor('color')
+        .pointRadius('size');
+    }
+  };
+
+  // Initialize globe
+  useEffect(() => {
+    if (!containerRef.current || !boundariesLoaded) return;
+    
+    setIsLoading(true);
+    
+    const allCountries = countryBoundariesService.getAllCountries();
+    const hasPolygons = hasPolygonGeometry(allCountries);
+    
+    const globe = new Globe(containerRef.current)
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .backgroundColor(backgroundColor)
+      .width(width || containerRef.current.clientWidth)
+      .height(height || containerRef.current.clientHeight)
+      .enablePointerInteraction(true);
+
+    // Setup visualization based on geometry type
+    if (hasPolygons) {
+      setupPolygonVisualization(globe, allCountries);
+    } else {
+      setupPointVisualization(globe, allCountries);
+    }
 
     // Set fixed camera position to prevent zooming
     globe.pointOfView({ lat: 5, lng: 0, altitude: 2.5 });
@@ -88,8 +264,6 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
     // Disable zoom controls directly
     if (globe.controls()) {
       globe.controls().enableZoom = false;
-      // globe.controls().enablePan = false;
-      // globe.controls().enableRotate = false;
     }
 
     // Touch support
@@ -123,62 +297,108 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
     const handleResize = () => {
       if (containerRef.current && globeRef.current) {
         globeRef.current
-          .width(containerRef.current.clientWidth)
-          .height(containerRef.current.clientHeight);
+          .width(width || containerRef.current.clientWidth)
+          .height(height || containerRef.current.clientHeight);
       }
     };
     window.addEventListener('resize', handleResize);
-
-    // Rotation
-    const rotationSpeed = 0.05;
-    let lastTime = 0;
-    let currentRotation = 0;
-    const animate = (time: number) => {
-      requestAnimationFrame(animate);
-      const deltaTime = time - lastTime;
-      lastTime = time;
-      if (globeRef.current) {
-        currentRotation += rotationSpeed * (deltaTime / 16.67);
-        globeRef.current.pointOfView({ lat: 5, lng: currentRotation % 360 });
-      }
-    };
-    requestAnimationFrame(animate);
-
-    // Set points
-    if (indicators.length > 0) {
-      globe.pointsData(indicators);
-    }
+    
+    // Use a timeout to ensure the globe has time to render
+    const initTimeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
 
     // Cleanup
     return () => {
+      clearTimeout(initTimeout);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
       window.removeEventListener('resize', handleResize);
       if (globeRef.current) globeRef.current = null;
       if (containerRef.current) {
         containerRef.current.removeEventListener('touchstart', () => {});
       }
     };
-    // eslint-disable-next-line
-  }, [indicators, onIndicatorSelect]);
+  }, [backgroundColor, width, height, enableRotation, rotationSpeed, boundariesLoaded]);
 
-  // Highlight selected indicator
+  // Handle rotation separately
   useEffect(() => {
-    if (globeRef.current && selectedIdx !== null && indicators[selectedIdx]) {
-      globeRef.current.pointsData(indicators.map((ind, idx) =>
-        idx === selectedIdx ? { ...ind, color: '#FFD600', size: 1.5 } : { ...ind, size: 1 }
-      ));
-    }
-  }, [selectedIdx, indicators]);
+    if (!globeRef.current || !enableRotation) return;
 
-  // Navigation handlers
-  const handleNext = () => {
-    if (selectedIdx === null) setSelectedIdx(0);
-    else setSelectedIdx((selectedIdx + 1) % indicators.length);
+    let lastTime = 0;
+    let currentRotation = 0;
+
+    const animate = (time: number) => {
+      if (isRotating) {
+        animationRef.current = requestAnimationFrame(animate);
+        const deltaTime = time - lastTime;
+        lastTime = time;
+        if (globeRef.current) {
+          currentRotation += rotationSpeed * (deltaTime / 16.67);
+          globeRef.current.pointOfView({ lat: 5, lng: currentRotation % 360 });
+        }
+      }
+    };
+
+    if (isRotating) {
+      requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isRotating, enableRotation, rotationSpeed]);
+
+  // Handle country selection
+  const handleCountrySelect = (country: Country) => {
+    setSelectedCountry(country);
+    setIsRotating(false);
+    
+    // Find the country feature
+    const countryFeature = countryBoundariesService.getCountryByCode(country.value);
+    
+    if (countryFeature && globeRef.current) {
+      let center: [number, number];
+      
+      if (countryFeature.geometry.type === 'Point') {
+        // For point data, use the coordinates directly
+        center = [countryFeature.geometry.coordinates[0], countryFeature.geometry.coordinates[1]];
+      } else {
+        // For polygon data, calculate the centroid
+        center = d3.geoCentroid(countryFeature);
+      }
+      
+      // Focus on the selected country
+      globeRef.current.pointOfView({ 
+        lat: center[1], 
+        lng: center[0], 
+        altitude: 2.5 
+      });
+      
+      // Highlight the selected country
+      const allCountries = countryBoundariesService.getAllCountries();
+      highlightSelectedCountry(globeRef.current, allCountries, country.value);
+    }
+    
+    onCountrySelect?.(country);
   };
-  const handlePrev = () => {
-    if (selectedIdx === null) setSelectedIdx(indicators.length - 1);
-    else setSelectedIdx((selectedIdx - 1 + indicators.length) % indicators.length);
+
+  // Reset to default view
+  const handleResetView = () => {
+    setSelectedCountry(null);
+    setIsRotating(true);
+    
+    if (globeRef.current) {
+      globeRef.current.pointOfView({ lat: 5, lng: 0, altitude: 2.5 });
+      
+      // Reset all countries to default appearance
+      const allCountries = countryBoundariesService.getAllCountries();
+      resetCountryHighlighting(globeRef.current, allCountries);
+    }
   };
-  const handleClose = () => setSelectedIdx(null);
 
   return (
     <div className="relative w-full h-full">
@@ -189,44 +409,35 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ onError, onIndi
         style={{ background: 'transparent' }}
       />
 
+
+
       {/* Loading Overlay */}
       <AnimatePresence>
-        {isLoading && (
+        {(isLoading || !boundariesLoaded) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80"
+            className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90"
           >
             <div className="text-center">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-600">Loading health indicators...</p>
+              <LoadingSpinner />
+              <p className="text-gray-600 mt-4">
+                {!boundariesLoaded ? 'Loading country boundaries...' : 'Loading globe...'}
+              </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-
-      {/* Tooltip */}
-      <AnimatePresence>
-        {hoveredIndicator && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute p-4 bg-white rounded-lg shadow-lg max-w-md"
-            style={{
-              left: '50%',
-              bottom: '2rem',
-              transform: 'translateX(-50%)',
-              zIndex: 1000
-            }}
-          >
-            <h3 className="font-semibold text-lg mb-2">{hoveredIndicator.label}</h3>
-            <p className="text-gray-600 text-sm">{hoveredIndicator.definition}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Country Selection Dialog */}
+      <CountrySelectionDialog
+        isOpen={true}
+        onClose={() => {}} // No close functionality since it's permanent
+        onCountrySelect={handleCountrySelect}
+        onCountryClear={handleResetView}
+        selectedCountry={selectedCountry}
+      />
     </div>
   );
 };
