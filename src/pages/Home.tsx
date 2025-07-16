@@ -391,13 +391,13 @@ const Home: React.FC = () => {
 
     if (bmi < 18.5) {
       bmiCategory = 'Underweight';
-      bmiColor = 'bg-yellow-100 text-yellow-700';
+      bmiColor = 'bg-red-100 text-red-700';
     } else if (bmi >= 18.5 && bmi < 25) {
       bmiCategory = 'Normal weight';
       bmiColor = 'bg-green-100 text-green-700';
     } else if (bmi >= 25 && bmi < 30) {
       bmiCategory = 'Overweight';
-      bmiColor = 'bg-orange-100 text-orange-700';
+      bmiColor = 'bg-yellow-100 text-yellow-700';
     } else {
       bmiCategory = 'Obese';
       bmiColor = 'bg-red-100 text-red-700';
@@ -891,125 +891,107 @@ const Home: React.FC = () => {
                   <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
                   
                   {/* Z-Score Gauges */}
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-3 gap-6 mb-4">
                     {/* Weight Z-Score Gauge */}
                     <div className="flex flex-col items-center">
-                      <div className="relative w-20 h-10 mb-2">
-                        <svg className="w-full h-full" viewBox="0 0 100 50">
-                          {/* Underweight segment (yellow) - < -2 */}
+                      <div className="relative w-24 h-12 mb-2 pt-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 60">
+                          {/* Gauge background */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#F59E0B"
+                            stroke="#E5E7EB"
                             strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="0"
+                            strokeLinecap="round"
                           />
-                          {/* Normal segment (green) - -2 to +2 */}
+                          {/* Filled path based on status */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#10B981"
+                            stroke={zScoreResult.weightStatus === "Normal" ? "#10B981" : "#EF4444"}
                             strokeWidth="6"
-                            strokeDasharray="34 100"
-                            strokeDashoffset="33"
-                          />
-                          {/* Overweight segment (red) - > +2 */}
-                          <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
-                            fill="none"
-                            stroke="#EF4444"
-                            strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="67"
+                            strokeLinecap="round"
+                            strokeDasharray="100 100"
+                            strokeDashoffset={zScoreResult.weightStatus === "Normal" ? "0" : "70"}
                           />
                         </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-lg font-bold text-gray-800">{zScoreResult.weightZScore}</div>
-                        </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-1">Weight Z-Score</div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
+                      
+                      {/* Weight Z-Score value display - positioned independently */}
+                      <div className="flex flex-col items-center mb-2">
+                        <div className="text-base font-bold text-gray-800">{zScoreResult.weightZScore}</div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-600 mb-2">Weight Z-Score</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-red-100 text-red-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
                     </div>
                     
                     {/* Height Z-Score Gauge */}
                     <div className="flex flex-col items-center">
-                      <div className="relative w-20 h-10 mb-2">
-                        <svg className="w-full h-full" viewBox="0 0 100 50">
-                          {/* Stunted segment (yellow) - < -2 */}
+                      <div className="relative w-24 h-12 mb-2 pt-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 60">
+                          {/* Gauge background */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#F59E0B"
+                            stroke="#E5E7EB"
                             strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="0"
+                            strokeLinecap="round"
                           />
-                          {/* Normal segment (green) - -2 to +2 */}
+                          {/* Filled path based on status */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#10B981"
+                            stroke={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "#10B981" : "#EF4444"}
                             strokeWidth="6"
-                            strokeDasharray="34 100"
-                            strokeDashoffset="33"
-                          />
-                          {/* Tall segment (blue) - > +2 */}
-                          <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
-                            fill="none"
-                            stroke="#3B82F6"
-                            strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="67"
+                            strokeLinecap="round"
+                            strokeDasharray="100 100"
+                            strokeDashoffset={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "0" : "70"}
                           />
                         </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-lg font-bold text-gray-800">{zScoreResult.heightZScore}</div>
-                        </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-1">Height Z-Score</div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
+                      
+                      {/* Height Z-Score value display - positioned independently */}
+                      <div className="flex flex-col items-center mb-2">
+                        <div className="text-base font-bold text-gray-800">{zScoreResult.heightZScore}</div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-600 mb-2">Height Z-Score</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>{zScoreResult.heightStatus}</div>
                     </div>
                     
                     {/* Wasting Z-Score Gauge */}
                     <div className="flex flex-col items-center">
-                      <div className="relative w-20 h-10 mb-2">
-                        <svg className="w-full h-full" viewBox="0 0 100 50">
-                          {/* Wasted segment (red) - < -2 */}
+                      <div className="relative w-24 h-12 mb-2 pt-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 60">
+                          {/* Gauge background */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#EF4444"
+                            stroke="#E5E7EB"
                             strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="0"
+                            strokeLinecap="round"
                           />
-                          {/* Normal segment (green) - -2 to +2 */}
+                          {/* Filled path based on status */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#10B981"
+                            stroke={zScoreResult.wastingStatus === "Normal" ? "#10B981" : zScoreResult.wastingStatus === "Overweight" ? "#F59E0B" : "#EF4444"}
                             strokeWidth="6"
-                            strokeDasharray="34 100"
-                            strokeDashoffset="33"
-                          />
-                          {/* Overweight segment (orange) - > +2 */}
-                          <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
-                            fill="none"
-                            stroke="#F59E0B"
-                            strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="67"
+                            strokeLinecap="round"
+                            strokeDasharray="100 100"
+                            strokeDashoffset={zScoreResult.wastingStatus === "Normal" ? "0" : zScoreResult.wastingStatus === "Overweight" ? "40" : "70"}
                           />
                         </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-lg font-bold text-gray-800">{zScoreResult.wastingZScore}</div>
-                        </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-1">Wasting Z-Score</div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
+                      
+                      {/* Wasting Z-Score value display - positioned independently */}
+                      <div className="flex flex-col items-center mb-2">
+                        <div className="text-base font-bold text-gray-800">{zScoreResult.wastingZScore}</div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-600 mb-2">Wasting Z-Score</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>{zScoreResult.wastingStatus}</div>
                     </div>
                   </div>
                   
@@ -1120,13 +1102,41 @@ const Home: React.FC = () => {
                 <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-800 mb-3">📊 BMI Results</h4>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{bmiResult.bmi}</div>
+                  {/* BMI Gauge Visualization */}
+                  <div className="flex flex-col items-center mb-4">
+                    {/* Gradient gauge */}
+                    <div className="relative w-40 h-20 mb-4 pt-4">
+                      <svg className="w-full h-full" viewBox="0 0 100 60">
+                        {/* Gauge background */}
+                        <path
+                          d="M 10 45 A 30 30 0 0 1 90 45"
+                          fill="none"
+                          stroke="#E5E7EB"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                        />
+                        {/* Filled path based on status */}
+                        <path
+                          d="M 10 45 A 30 30 0 0 1 90 45"
+                          fill="none"
+                          stroke={bmiResult.category === "Normal weight" ? "#10B981" : bmiResult.category === "Overweight" ? "#F59E0B" : "#EF4444"}
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray="100 100"
+                          strokeDashoffset={bmiResult.category === "Normal weight" ? "0" : bmiResult.category === "Overweight" ? "40" : "70"}
+                        />
+                      </svg>
+                    </div>
+                    
+                    {/* BMI value display - positioned independently */}
+                    <div className="flex flex-col items-center mb-3">
+                      <div className="text-xl font-bold text-gray-800">{bmiResult.bmi}</div>
                       <div className="text-xs text-gray-600">BMI</div>
-                      <div className={bmiResult.color}>
-                        {bmiResult.category}
-                      </div>
+                    </div>
+                    
+                    {/* Status indicator */}
+                    <div className={`px-6 py-2 text-sm font-medium ${bmiResult.color}`}>
+                      {bmiResult.category}
                     </div>
                   </div>
                   
