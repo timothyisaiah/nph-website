@@ -21,6 +21,8 @@ interface GlobeVisualizationProps {
   enableRotation?: boolean;
   rotationSpeed?: number;
   onCountrySelect?: (country: Country) => void;
+  showCountryDialog?: boolean; // New prop to control dialog visibility
+  selectedCountry?: Country | null; // External selected country for highlighting
 }
 
 // Polygon styling constants
@@ -67,16 +69,26 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({
   backgroundColor = '#ffffff',
   enableRotation = true,
   rotationSpeed = 0.05,
-  onCountrySelect
+  onCountrySelect,
+  showCountryDialog = true, // Default to true
+  selectedCountry // New prop
 }) => {
   const globeRef = useRef<any>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [selectedCountryState, setSelectedCountry] = useState<Country | null>(null);
   const [isRotating, setIsRotating] = useState(true);
   const [boundariesLoaded, setBoundariesLoaded] = useState(false);
   const animationRef = useRef<number>();
   const [highlightPoint, setHighlightPoint] = useState<{ lat: number; lng: number } | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Load country boundaries on mount
   useEffect(() => {
@@ -92,6 +104,49 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({
 
     loadBoundaries();
   }, [onError]);
+
+  // Respond to external selectedCountry changes
+  useEffect(() => {
+    if (selectedCountry && globeRef.current && boundariesLoaded) {
+      // Update internal state
+      setSelectedCountry(selectedCountry);
+      
+      // Find the country feature and highlight it
+      const countryFeature = countryBoundariesService.getCountryByCode(selectedCountry.value);
+      
+      if (countryFeature) {
+        let center: [number, number];
+        
+        // For polygon data, calculate the centroid
+        center = d3.geoCentroid(countryFeature);
+        
+        // Focus on the selected country
+        globeRef.current.pointOfView({ 
+          lat: center[1], 
+          lng: center[0], 
+          altitude: 2.5 
+        });
+        
+        // Highlight the selected country
+        const allCountries = countryBoundariesService.getAllCountries();
+        highlightSelectedCountry(globeRef.current, allCountries, selectedCountry.value);
+        
+        // Draw a highlighted point at the centroid
+        setHighlightPoint({ lat: center[1], lng: center[0] });
+      }
+    } else if (!selectedCountry && globeRef.current && boundariesLoaded) {
+      // Reset when no country is selected
+      setSelectedCountry(null);
+      setHighlightPoint(null);
+      
+      // Reset globe view
+      globeRef.current.pointOfView({ lat: 5, lng: 0, altitude: 2.5 });
+      
+      // Reset all countries to default appearance
+      const allCountries = countryBoundariesService.getAllCountries();
+      resetCountryHighlighting(globeRef.current, allCountries);
+    }
+  }, [selectedCountry, boundariesLoaded]);
 
   // Helper function to check if countries have polygon geometry
   const hasPolygonGeometry = (countries: CountryFeature[]): boolean => {
@@ -383,13 +438,15 @@ const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({
       </AnimatePresence>
 
       {/* Country Selection Dialog */}
-      <CountrySelectionDialog
-        isOpen={true}
-        onClose={() => {}} // No close functionality since it's permanent
-        onCountrySelect={handleCountrySelect}
-        onCountryClear={handleResetView}
-        selectedCountry={selectedCountry}
-      />
+      {showCountryDialog && !isMobile && (
+        <CountrySelectionDialog
+          isOpen={true}
+          onClose={() => {}} // No close functionality since it's permanent
+          onCountrySelect={handleCountrySelect}
+          onCountryClear={handleResetView}
+          selectedCountry={selectedCountryState}
+        />
+      )}
     </div>
   );
 };

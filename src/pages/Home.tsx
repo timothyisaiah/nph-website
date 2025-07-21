@@ -5,6 +5,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import GlobeVisualization from "../components/globe/GlobeVisualization";
+import MobileCountrySelector from "../components/globe/MobileCountrySelector";
 import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
 import { useIndicator } from "../context/IndicatorContext";
 import Footer from "../components/layout/Footer";
@@ -17,16 +18,6 @@ import axios from 'axios';
 import Select from 'react-select';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-
-// Memoized Globe Component to prevent unnecessary re-renders
-const MemoizedGlobe = React.memo(({ onError, onCountrySelect }: any) => (
-  <GlobeVisualization 
-    onError={onError}
-    enableRotation={true}
-    rotationSpeed={0.05}
-    onCountrySelect={onCountrySelect}
-  />
-));
 
 // Helper: Get tagline (first sentence of definition)
 const getTagline = (definition: string) => {
@@ -243,25 +234,23 @@ const Home: React.FC = () => {
     },
     [setSelectedIndicator, navigate]
   );
-  const handleCountrySelect = useCallback((country: any) => {
-    setSelectedCountry(country?.properties?.name || null);
+  // Replace handleGlobeCountrySelect to update selectedCountry and selectedGlobeCountry
+  const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
+    setSelectedGlobeCountry(country);
+    setSelectedCountry(country.label);
     setCountryData({
       indicators: Math.floor(Math.random() * 50) + 10,
       surveys: Math.floor(Math.random() * 20) + 5,
       lastUpdated: new Date().toLocaleDateString(),
     });
-  }, []);
-  const handleError = useCallback((errorMessage: string) => {
-    setError(errorMessage);
-  }, []);
-
-  const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
-    setSelectedGlobeCountry(country);
-    // Update the overlay country if it matches
+    // Update overlay country if it matches
     if (overlayAvailableCountries.find(c => c.value === country.value)) {
       setOverlayCountry({ value: country.value, label: country.label });
     }
   }, [overlayAvailableCountries]);
+  const handleError = useCallback((errorMessage: string) => {
+    setError(errorMessage);
+  }, []);
 
   // Calculate arc positions (for future arc overlays)
   useEffect(() => {
@@ -536,7 +525,7 @@ const Home: React.FC = () => {
         </div>
         {/* End Hero Section */}
         {/* Dynamic Country Data Section (shown when a country is selected on the globe) */}
-        {selectedCountry && countryData && (
+        {/* {selectedCountry && countryData && (
           <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
             <h3 className="text-xl font-semibold text-blue-800 mb-4">
               📊 DHS Data for {selectedCountry}
@@ -562,19 +551,26 @@ const Home: React.FC = () => {
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-3">
-              Click on indicators above to explore detailed data for {selectedCountry}
+              Click on indicators below to explore detailed data for {selectedCountry}
             </p>
           </div>
-        )}
+        )} */}
         {/* Globe and Arc Overlay Section */}
-        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-10" style={{ backgroundColor: "#ffffff" }}>
+        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{ 
+          background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)" 
+        }}>
           {/* Desktop Layout: Globe and Indicator List Side by Side */}
           <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
             {/* Globe Visualization (left) */}
             <div className="flex-1 flex justify-center">
-                          <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
-              <MemoizedGlobe onError={handleError} onCountrySelect={handleGlobeCountrySelect} />
-            </div>
+              <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
+                <GlobeVisualization 
+                  onError={handleError} 
+                  onCountrySelect={handleGlobeCountrySelect}
+                  showCountryDialog={true} // Show the overlay dialog on desktop
+                  selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                />
+              </div>
             </div>
             {/* Desktop Indicator List (right) */}
             <div className="flex-1 flex justify-center">
@@ -625,9 +621,29 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-          {/* Mobile/Tablet Layout: Globe only (stacked) */}
-          <div className="lg:hidden w-full max-w-xs mx-auto h-[300px] md:h-[600px] md:max-w-2xl rounded-lg overflow-hidden relative flex items-center justify-center">
-            <MemoizedGlobe onError={handleError} onCountrySelect={handleGlobeCountrySelect} />
+          {/* Mobile/Tablet Layout: Country Selector + Globe (stacked) */}
+          <div className="lg:hidden w-full max-w-md mx-auto flex flex-col items-center space-y-8 px-4">
+            
+            {/* Mobile Country Selector */}
+            <MobileCountrySelector
+              onCountrySelect={handleGlobeCountrySelect}
+              onCountryClear={() => {
+                setSelectedGlobeCountry(null);
+                setSelectedCountry(null);
+                setCountryData(null);
+              }}
+              selectedCountry={selectedGlobeCountry}
+            />
+            
+            {/* Mobile Globe */}
+            <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative shadow-2xl border border-gray-200">
+              <GlobeVisualization 
+                onError={handleError} 
+                onCountrySelect={handleGlobeCountrySelect}
+                showCountryDialog={false} // Hide the overlay dialog on mobile
+                selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+              />
+            </div>
           </div>
         </div>
         {/* Details/Story Panel: Shows indicator details on all screen sizes */}
