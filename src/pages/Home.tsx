@@ -5,6 +5,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import GlobeVisualization from "../components/globe/GlobeVisualization";
+import MobileCountrySelector from "../components/globe/MobileCountrySelector";
 import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
 import { useIndicator } from "../context/IndicatorContext";
 import Footer from "../components/layout/Footer";
@@ -17,16 +18,6 @@ import axios from 'axios';
 import Select from 'react-select';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-
-// Memoized Globe Component to prevent unnecessary re-renders
-const MemoizedGlobe = React.memo(({ onError, onCountrySelect }: any) => (
-  <GlobeVisualization 
-    onError={onError}
-    enableRotation={true}
-    rotationSpeed={0.05}
-    onCountrySelect={onCountrySelect}
-  />
-));
 
 // Helper: Get tagline (first sentence of definition)
 const getTagline = (definition: string) => {
@@ -243,25 +234,23 @@ const Home: React.FC = () => {
     },
     [setSelectedIndicator, navigate]
   );
-  const handleCountrySelect = useCallback((country: any) => {
-    setSelectedCountry(country?.properties?.name || null);
+  // Replace handleGlobeCountrySelect to update selectedCountry and selectedGlobeCountry
+  const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
+    setSelectedGlobeCountry(country);
+    setSelectedCountry(country.label);
     setCountryData({
       indicators: Math.floor(Math.random() * 50) + 10,
       surveys: Math.floor(Math.random() * 20) + 5,
       lastUpdated: new Date().toLocaleDateString(),
     });
-  }, []);
-  const handleError = useCallback((errorMessage: string) => {
-    setError(errorMessage);
-  }, []);
-
-  const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
-    setSelectedGlobeCountry(country);
-    // Update the overlay country if it matches
+    // Update overlay country if it matches
     if (overlayAvailableCountries.find(c => c.value === country.value)) {
       setOverlayCountry({ value: country.value, label: country.label });
     }
   }, [overlayAvailableCountries]);
+  const handleError = useCallback((errorMessage: string) => {
+    setError(errorMessage);
+  }, []);
 
   // Calculate arc positions (for future arc overlays)
   useEffect(() => {
@@ -391,13 +380,13 @@ const Home: React.FC = () => {
 
     if (bmi < 18.5) {
       bmiCategory = 'Underweight';
-      bmiColor = 'bg-yellow-100 text-yellow-700';
+      bmiColor = 'bg-red-100 text-red-700';
     } else if (bmi >= 18.5 && bmi < 25) {
       bmiCategory = 'Normal weight';
       bmiColor = 'bg-green-100 text-green-700';
     } else if (bmi >= 25 && bmi < 30) {
       bmiCategory = 'Overweight';
-      bmiColor = 'bg-orange-100 text-orange-700';
+      bmiColor = 'bg-yellow-100 text-yellow-700';
     } else {
       bmiCategory = 'Obese';
       bmiColor = 'bg-red-100 text-red-700';
@@ -536,7 +525,7 @@ const Home: React.FC = () => {
         </div>
         {/* End Hero Section */}
         {/* Dynamic Country Data Section (shown when a country is selected on the globe) */}
-        {selectedCountry && countryData && (
+        {/* {selectedCountry && countryData && (
           <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
             <h3 className="text-xl font-semibold text-blue-800 mb-4">
               📊 DHS Data for {selectedCountry}
@@ -562,19 +551,26 @@ const Home: React.FC = () => {
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-3">
-              Click on indicators above to explore detailed data for {selectedCountry}
+              Click on indicators below to explore detailed data for {selectedCountry}
             </p>
           </div>
-        )}
+        )} */}
         {/* Globe and Arc Overlay Section */}
-        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-10" style={{ backgroundColor: "#ffffff" }}>
+        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{ 
+          background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)" 
+        }}>
           {/* Desktop Layout: Globe and Indicator List Side by Side */}
           <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
             {/* Globe Visualization (left) */}
             <div className="flex-1 flex justify-center">
-                          <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
-              <MemoizedGlobe onError={handleError} onCountrySelect={handleGlobeCountrySelect} />
-            </div>
+              <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
+                <GlobeVisualization 
+                  onError={handleError} 
+                  onCountrySelect={handleGlobeCountrySelect}
+                  showCountryDialog={true} // Show the overlay dialog on desktop
+                  selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                />
+              </div>
             </div>
             {/* Desktop Indicator List (right) */}
             <div className="flex-1 flex justify-center">
@@ -625,9 +621,29 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-          {/* Mobile/Tablet Layout: Globe only (stacked) */}
-          <div className="lg:hidden w-full max-w-xs mx-auto h-[300px] md:h-[600px] md:max-w-2xl rounded-lg overflow-hidden relative flex items-center justify-center">
-            <MemoizedGlobe onError={handleError} onCountrySelect={handleGlobeCountrySelect} />
+          {/* Mobile/Tablet Layout: Country Selector + Globe (stacked) */}
+          <div className="lg:hidden w-full max-w-md mx-auto flex flex-col items-center space-y-8 px-4">
+            
+            {/* Mobile Country Selector */}
+            <MobileCountrySelector
+              onCountrySelect={handleGlobeCountrySelect}
+              onCountryClear={() => {
+                setSelectedGlobeCountry(null);
+                setSelectedCountry(null);
+                setCountryData(null);
+              }}
+              selectedCountry={selectedGlobeCountry}
+            />
+            
+            {/* Mobile Globe */}
+            <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative shadow-2xl border border-gray-200">
+              <GlobeVisualization 
+                onError={handleError} 
+                onCountrySelect={handleGlobeCountrySelect}
+                showCountryDialog={false} // Hide the overlay dialog on mobile
+                selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+              />
+            </div>
           </div>
         </div>
         {/* Details/Story Panel: Shows indicator details on all screen sizes */}
@@ -891,125 +907,107 @@ const Home: React.FC = () => {
                   <h4 className="font-semibold text-gray-800 mb-3">📊 Growth Assessment Results</h4>
                   
                   {/* Z-Score Gauges */}
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-3 gap-6 mb-4">
                     {/* Weight Z-Score Gauge */}
                     <div className="flex flex-col items-center">
-                      <div className="relative w-20 h-10 mb-2">
-                        <svg className="w-full h-full" viewBox="0 0 100 50">
-                          {/* Underweight segment (yellow) - < -2 */}
+                      <div className="relative w-24 h-12 mb-2 pt-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 60">
+                          {/* Gauge background */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#F59E0B"
+                            stroke="#E5E7EB"
                             strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="0"
+                            strokeLinecap="round"
                           />
-                          {/* Normal segment (green) - -2 to +2 */}
+                          {/* Filled path based on status */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#10B981"
+                            stroke={zScoreResult.weightStatus === "Normal" ? "#10B981" : "#EF4444"}
                             strokeWidth="6"
-                            strokeDasharray="34 100"
-                            strokeDashoffset="33"
-                          />
-                          {/* Overweight segment (red) - > +2 */}
-                          <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
-                            fill="none"
-                            stroke="#EF4444"
-                            strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="67"
+                            strokeLinecap="round"
+                            strokeDasharray="100 100"
+                            strokeDashoffset={zScoreResult.weightStatus === "Normal" ? "0" : "70"}
                           />
                         </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-lg font-bold text-gray-800">{zScoreResult.weightZScore}</div>
-                        </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-1">Weight Z-Score</div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
+                      
+                      {/* Weight Z-Score value display - positioned independently */}
+                      <div className="flex flex-col items-center mb-2">
+                        <div className="text-base font-bold text-gray-800">{zScoreResult.weightZScore}</div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-600 mb-2">Weight Z-Score</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-red-100 text-red-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
                     </div>
                     
                     {/* Height Z-Score Gauge */}
                     <div className="flex flex-col items-center">
-                      <div className="relative w-20 h-10 mb-2">
-                        <svg className="w-full h-full" viewBox="0 0 100 50">
-                          {/* Stunted segment (yellow) - < -2 */}
+                      <div className="relative w-24 h-12 mb-2 pt-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 60">
+                          {/* Gauge background */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#F59E0B"
+                            stroke="#E5E7EB"
                             strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="0"
+                            strokeLinecap="round"
                           />
-                          {/* Normal segment (green) - -2 to +2 */}
+                          {/* Filled path based on status */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#10B981"
+                            stroke={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "#10B981" : "#EF4444"}
                             strokeWidth="6"
-                            strokeDasharray="34 100"
-                            strokeDashoffset="33"
-                          />
-                          {/* Tall segment (blue) - > +2 */}
-                          <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
-                            fill="none"
-                            stroke="#3B82F6"
-                            strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="67"
+                            strokeLinecap="round"
+                            strokeDasharray="100 100"
+                            strokeDashoffset={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "0" : "70"}
                           />
                         </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-lg font-bold text-gray-800">{zScoreResult.heightZScore}</div>
-                        </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-1">Height Z-Score</div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-yellow-100 text-yellow-700" : "bg-blue-100 text-blue-700"}`}>{zScoreResult.heightStatus}</div>
+                      
+                      {/* Height Z-Score value display - positioned independently */}
+                      <div className="flex flex-col items-center mb-2">
+                        <div className="text-base font-bold text-gray-800">{zScoreResult.heightZScore}</div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-600 mb-2">Height Z-Score</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>{zScoreResult.heightStatus}</div>
                     </div>
                     
                     {/* Wasting Z-Score Gauge */}
                     <div className="flex flex-col items-center">
-                      <div className="relative w-20 h-10 mb-2">
-                        <svg className="w-full h-full" viewBox="0 0 100 50">
-                          {/* Wasted segment (red) - < -2 */}
+                      <div className="relative w-24 h-12 mb-2 pt-2">
+                        <svg className="w-full h-full" viewBox="0 0 100 60">
+                          {/* Gauge background */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#EF4444"
+                            stroke="#E5E7EB"
                             strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="0"
+                            strokeLinecap="round"
                           />
-                          {/* Normal segment (green) - -2 to +2 */}
+                          {/* Filled path based on status */}
                           <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
+                            d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke="#10B981"
+                            stroke={zScoreResult.wastingStatus === "Normal" ? "#10B981" : zScoreResult.wastingStatus === "Overweight" ? "#F59E0B" : "#EF4444"}
                             strokeWidth="6"
-                            strokeDasharray="34 100"
-                            strokeDashoffset="33"
-                          />
-                          {/* Overweight segment (orange) - > +2 */}
-                          <path
-                            d="M 10 40 A 30 30 0 0 1 90 40"
-                            fill="none"
-                            stroke="#F59E0B"
-                            strokeWidth="6"
-                            strokeDasharray="33 100"
-                            strokeDashoffset="67"
+                            strokeLinecap="round"
+                            strokeDasharray="100 100"
+                            strokeDashoffset={zScoreResult.wastingStatus === "Normal" ? "0" : zScoreResult.wastingStatus === "Overweight" ? "40" : "70"}
                           />
                         </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-lg font-bold text-gray-800">{zScoreResult.wastingZScore}</div>
-                        </div>
                       </div>
-                      <div className="text-xs text-gray-600 mb-1">Wasting Z-Score</div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{zScoreResult.wastingStatus}</div>
+                      
+                      {/* Wasting Z-Score value display - positioned independently */}
+                      <div className="flex flex-col items-center mb-2">
+                        <div className="text-base font-bold text-gray-800">{zScoreResult.wastingZScore}</div>
+                      </div>
+                      
+                      <div className="text-xs text-gray-600 mb-2">Wasting Z-Score</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>{zScoreResult.wastingStatus}</div>
                     </div>
                   </div>
                   
@@ -1120,13 +1118,41 @@ const Home: React.FC = () => {
                 <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-800 mb-3">📊 BMI Results</h4>
                   
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{bmiResult.bmi}</div>
+                  {/* BMI Gauge Visualization */}
+                  <div className="flex flex-col items-center mb-4">
+                    {/* Gradient gauge */}
+                    <div className="relative w-40 h-20 mb-4 pt-4">
+                      <svg className="w-full h-full" viewBox="0 0 100 60">
+                        {/* Gauge background */}
+                        <path
+                          d="M 10 45 A 30 30 0 0 1 90 45"
+                          fill="none"
+                          stroke="#E5E7EB"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                        />
+                        {/* Filled path based on status */}
+                        <path
+                          d="M 10 45 A 30 30 0 0 1 90 45"
+                          fill="none"
+                          stroke={bmiResult.category === "Normal weight" ? "#10B981" : bmiResult.category === "Overweight" ? "#F59E0B" : "#EF4444"}
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray="100 100"
+                          strokeDashoffset={bmiResult.category === "Normal weight" ? "0" : bmiResult.category === "Overweight" ? "40" : "70"}
+                        />
+                      </svg>
+                    </div>
+                    
+                    {/* BMI value display - positioned independently */}
+                    <div className="flex flex-col items-center mb-3">
+                      <div className="text-xl font-bold text-gray-800">{bmiResult.bmi}</div>
                       <div className="text-xs text-gray-600">BMI</div>
-                      <div className={bmiResult.color}>
-                        {bmiResult.category}
-                      </div>
+                    </div>
+                    
+                    {/* Status indicator */}
+                    <div className={`px-6 py-2 text-sm font-medium ${bmiResult.color}`}>
+                      {bmiResult.category}
                     </div>
                   </div>
                   
