@@ -36,7 +36,7 @@ const GlobePage: React.FC = () => {
         } else if (countryCode === hoveredCountry) {
           return '#f59e0b'; // Orange for hovered
         }
-        return '#3b82f6'; // Blue for normal
+        return 'rgba(59, 130, 246, 0.3)'; // Transparent blue for normal
       })
       .polygonSideColor((polygon: any) => {
         const countryCode = polygon.properties?.ISO_A3;
@@ -108,7 +108,7 @@ const GlobePage: React.FC = () => {
           } else if (countryCode === hoveredCountry) {
             return '#f59e0b'; // Orange for hovered
           }
-          return '#3b82f6'; // Blue for normal
+          return 'rgba(59, 130, 246, 0.3)'; // Transparent blue for normal
         })
         .polygonSideColor((polygon: any) => {
           const countryCode = polygon.properties?.ISO_A3;
