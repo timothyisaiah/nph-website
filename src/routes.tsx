@@ -10,6 +10,7 @@ import Contact from './pages/Contact';
 import ErrorPage from './pages/Error';
 import DataCanvas from './components/data/DataCanvas';
 import DataInsights from './pages/DataInsights';
+import Globe from './pages/Globe';
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
       {
         path: 'data-explorer',
         element: <DataCanvas />,
+      },
+      {
+        path: 'globe',
+        element: <Globe />,
       },
     ],
   },

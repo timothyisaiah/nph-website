@@ -494,11 +494,8 @@ const Home: React.FC = () => {
           <div className="flex flex-col items-center justify-center px-4 md:px-12 lg:px-24 gap-2 md:gap-4 text-center relative z-10">
             {/* Title and Description (centered, compact) */}
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 leading-tight pt-14">
-                  Narratives of Public Health Solutions LTD
-                </h1>
-                <p className="text-sm md:text-base text-gray-600 mb-2 mx-auto whitespace-nowrap">
                   Unlocking health data for community and policy action
-                </p>
+                </h1>
             {/* Services (compact, inline, centered) */}
             <ul className="flex flex-wrap gap-2 justify-center text-xs md:text-sm text-gray-700 mb-2 pt-0">
               <li className="flex items-center gap-1"><span className="text-green-500 font-bold">✓</span>Public health research</li>
