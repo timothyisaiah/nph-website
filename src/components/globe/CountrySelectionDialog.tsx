@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Select from 'react-select';
+// @ts-ignore
+import countryMapping from '../../data/country-mapping.json';
 
 interface Country {
   value: string;
@@ -26,27 +28,21 @@ const CountrySelectionDialog: React.FC<CountrySelectionDialogProps> = ({
   const [countries, setCountries] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch countries from DHS API
+  // Load countries from static mapping file
   useEffect(() => {
-    const fetchCountries = async () => {
+    if (isOpen) {
       try {
-        const response = await fetch('https://api.dhsprogram.com/rest/dhs/countries?f=json');
-        const data = await response.json();
-        const countryOptions = data.Data.map((country: any) => ({
-          value: country.DHS_CountryCode,
-          label: country.CountryName,
-          flag: country.DHS_CountryCode.toLowerCase()
+        const countryOptions = countryMapping.map((country: any) => ({
+          value: country.dhsCode,
+          label: country.countryName,
+          flag: country.dhsCode.toLowerCase()
         }));
         setCountries(countryOptions);
         setIsLoading(false);
       } catch (error) {
-        console.error('Failed to fetch countries:', error);
+        console.error('Failed to load countries from static file:', error);
         setIsLoading(false);
       }
-    };
-
-    if (isOpen) {
-      fetchCountries();
     }
   }, [isOpen]);
 

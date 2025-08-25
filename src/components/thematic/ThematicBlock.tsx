@@ -16,7 +16,7 @@ const ThematicBlock: React.FC<ThematicBlockProps> = ({
   objectives 
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-white rounded-lg overflow-hidden hover:shadow-sm transition-shadow duration-300">
       {image && (
         <div className="h-48 overflow-hidden">
           <img 

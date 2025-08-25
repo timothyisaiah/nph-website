@@ -4,8 +4,15 @@ import Globe from 'globe.gl';
 import LoadingSpinner from '../common/LoadingSpinner';
 import CountrySelectionDialog from './CountrySelectionDialog';
 import * as d3 from 'd3-geo';
-import { countryBoundariesService } from '../../services/countryBoundariesService';
-import type { CountryFeature } from '../../services/countryBoundariesService';
+import * as topojson from 'topojson-client';
+
+// Import data with type assertions
+// @ts-ignore
+import topologyData from '../../data/topology.js';
+// @ts-ignore
+import shortcodesData from '../../data/shortcodes.js';
+// @ts-ignore
+import countryMapping from '../../data/country-mapping.json';
 
 interface Country {
   value: string;
@@ -14,438 +21,283 @@ interface Country {
 }
 
 interface GlobeVisualizationProps {
+  onCountrySelect?: (country: Country) => void;
   onError?: (error: string) => void;
+  selectedCountry?: { value: string; label: string } | null;
+  showCountryDialog?: boolean;
+  className?: string;
   width?: number;
   height?: number;
-  backgroundColor?: string;
-  enableRotation?: boolean;
-  rotationSpeed?: number;
-  onCountrySelect?: (country: Country) => void;
-  showCountryDialog?: boolean; // New prop to control dialog visibility
-  selectedCountry?: Country | null; // External selected country for highlighting
 }
 
-// Polygon styling constants
-const POLYGON_STYLES = {
-  default: {
-    capColor: 'rgba(255, 255, 255, 0.1)',
-    sideColor: 'rgba(255, 255, 255, 0.1)',
-    strokeColor: 'rgba(0, 0, 0, 0.3)',
-    altitude: 0.01
-  },
-  highlighted: {
-    capColor: 'rgba(59, 130, 246, 0.6)',
-    sideColor: 'rgba(59, 130, 246, 0.4)',
-    strokeColor: 'rgba(59, 130, 246, 0.8)',
-    altitude: 0.01
-  }
-};
-
-// Point styling constants
-const POINT_STYLES = {
-  default: {
-    color: '#3B82F6',
-    size: 0.5,
-    altitude: 0.01
-  },
-  highlighted: {
-    color: '#FFD700',
-    size: 1.0,
-    altitude: 0.01
-  }
-};
-
-const HIGHLIGHT_POINT_STYLE = {
-  color: '#FF0000', // bright red
-  size: 1.5,
-  altitude: 0.03
-};
-
-// POLYGON-ONLY VERSION: All country visualization and interaction uses polygons only for benchmarking.
-const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({ 
-  onError, 
-  width,
-  height,
-  backgroundColor = '#ffffff',
-  enableRotation = true,
-  rotationSpeed = 0.05,
+const GlobeVisualization: React.FC<GlobeVisualizationProps> = ({
   onCountrySelect,
-  showCountryDialog = true, // Default to true
-  selectedCountry // New prop
+  onError,
+  selectedCountry,
+  showCountryDialog = false,
+  className = '',
+  width = 800,
+  height = 600
 }) => {
-  const globeRef = useRef<any>();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const globeRef = useRef<HTMLDivElement>(null);
+  const globeInstanceRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCountryState, setSelectedCountry] = useState<Country | null>(null);
-  const [isRotating, setIsRotating] = useState(true);
-  const [boundariesLoaded, setBoundariesLoaded] = useState(false);
-  const animationRef = useRef<number>();
-  const [highlightPoint, setHighlightPoint] = useState<{ lat: number; lng: number } | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const [internalSelectedCountry, setInternalSelectedCountry] = useState<string | null>(null);
+  const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(showCountryDialog);
+
+  // Convert TopoJSON to GeoJSON
+  const geoJSONData = topojson.feature(topologyData, topologyData.objects.wb_countries) as any;
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    if (!globeRef.current) return;
 
-  // Load country boundaries on mount
-  useEffect(() => {
-    const loadBoundaries = async () => {
-      try {
-        await countryBoundariesService.loadBoundaries();
-        setBoundariesLoaded(true);
-      } catch (error) {
-        console.error('Failed to load boundaries:', error);
-        onError?.('Failed to load country boundaries');
-      }
-    };
-
-    loadBoundaries();
-  }, [onError]);
-
-  // Respond to external selectedCountry changes
-  useEffect(() => {
-    if (selectedCountry && globeRef.current && boundariesLoaded) {
-      // Update internal state
-      setSelectedCountry(selectedCountry);
-      
-      // Find the country feature and highlight it
-      const countryFeature = countryBoundariesService.getCountryByCode(selectedCountry.value);
-      
-      if (countryFeature) {
-        let center: [number, number];
-        
-        // For polygon data, calculate the centroid
-        center = d3.geoCentroid(countryFeature);
-        
-        // Focus on the selected country
-        globeRef.current.pointOfView({ 
-          lat: center[1], 
-          lng: center[0], 
-          altitude: 2.5 
-        });
-        
-        // Highlight the selected country
-        const allCountries = countryBoundariesService.getAllCountries();
-        highlightSelectedCountry(globeRef.current, allCountries, selectedCountry.value);
-        
-        // Draw a highlighted point at the centroid
-        setHighlightPoint({ lat: center[1], lng: center[0] });
-      }
-    } else if (!selectedCountry && globeRef.current && boundariesLoaded) {
-      // Reset when no country is selected
-      setSelectedCountry(null);
-      setHighlightPoint(null);
-      
-      // Reset globe view
-      globeRef.current.pointOfView({ lat: 5, lng: 0, altitude: 2.5 });
-      
-      // Reset all countries to default appearance
-      const allCountries = countryBoundariesService.getAllCountries();
-      resetCountryHighlighting(globeRef.current, allCountries);
-    }
-  }, [selectedCountry, boundariesLoaded]);
-
-  // Helper function to check if countries have polygon geometry
-  const hasPolygonGeometry = (countries: CountryFeature[]): boolean => {
-    return countries.some((country: CountryFeature) => 
-      country.geometry.type === 'Polygon' || country.geometry.type === 'MultiPolygon'
-    );
-  };
-
-  // Helper function to create country object from feature
-  const createCountryFromFeature = (feature: CountryFeature): Country => ({
-    value: feature.properties.iso_a2 || feature.properties.iso_a3 || feature.properties.dhs_code || '',
-    label: feature.properties.name,
-    flag: feature.properties.iso_a2?.toLowerCase()
-  });
-
-  // Helper function to setup polygon visualization (always used)
-  const setupPolygonVisualization = (globe: any, countries: CountryFeature[]) => {
-    globe
-      .polygonsData(countries)
-      .polygonCapColor(() => POLYGON_STYLES.default.capColor)
-      .polygonSideColor(() => POLYGON_STYLES.default.sideColor)
-      .polygonStrokeColor(() => POLYGON_STYLES.default.strokeColor)
-      .polygonAltitude(POLYGON_STYLES.default.altitude)
-      .onPolygonHover((polygon: any) => {
-        document.body.style.cursor = polygon ? 'pointer' : 'default';
-      })
-      .onPolygonClick((polygon: any) => {
-        if (polygon) {
-          const country = createCountryFromFeature(polygon);
-          handleCountrySelect(country);
+    // Initialize globe
+    const globe = new Globe(globeRef.current)
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .polygonsData(geoJSONData.features)
+      .polygonCapColor((polygon: any) => {
+        const countryCode = polygon.properties?.ISO_A3;
+        if (countryCode === internalSelectedCountry) {
+          return '#ef4444'; // Red for selected
+        } else if (countryCode === hoveredCountry) {
+          return '#f59e0b'; // Orange for hovered
         }
-      });
-  };
+        return 'rgba(59, 131, 246, 0)'; // Transparent blue for normal
+      })
+      .polygonSideColor((polygon: any) => {
+        const countryCode = polygon.properties?.ISO_A3;
+        if (countryCode === internalSelectedCountry) {
+          return '#dc2626'; // Darker red for selected
+        } else if (countryCode === hoveredCountry) {
+          return '#d97706'; // Darker orange for hovered
+        }
+        return '#1e3a8a'; // Darker blue for normal
+      })
+      .polygonStrokeColor(() => '#ffffff')
+      .polygonAltitude((polygon: any) => {
+        const countryCode = polygon.properties?.ISO_A3;
+        if (countryCode === internalSelectedCountry) {
+          return 0.05; // Higher altitude for selected
+        } else if (countryCode === hoveredCountry) {
+          return 0.03; // Medium altitude for hovered
+        }
+        return 0.01; // Normal altitude
+      })
+      .polygonCapCurvatureResolution(3)
+      .width(width)
+      .height(height);
 
-  // Helper function to setup point visualization
-  /*
-  const setupPointVisualization = (globe: any, countries: CountryFeature[]) => {
-    const pointData = countries.map((country: CountryFeature) => {
-      if (country.geometry.type === 'Point') {
-        return {
-          ...country,
-          lat: country.geometry.coordinates[1],
-          lng: country.geometry.coordinates[0],
-          color: POINT_STYLES.default.color,
-          size: POINT_STYLES.default.size
-        };
+    // Store globe instance
+    globeInstanceRef.current = globe;
+
+    // Set up event handlers
+    globe.onPolygonClick((polygon: any) => {
+      const countryCode = polygon.properties?.ISO_A3;
+      if (countryCode) {
+        // Find the DHS country mapping
+        const mapping = countryMapping.find(m => m.iso3Code === countryCode);
+        
+        if (mapping) {
+          setInternalSelectedCountry(countryCode);
+          
+          // Call the onCountrySelect callback
+          if (onCountrySelect) {
+            onCountrySelect({
+              value: mapping.dhsCode,
+              label: mapping.countryName
+            });
+          }
+          
+          // Focus on the selected country
+          if (polygon) {
+            let center: [number, number];
+            
+            // Calculate the centroid of the country
+            center = d3.geoCentroid(polygon);
+            
+            // Focus on the selected country with smooth animation
+            globe.pointOfView(
+              { 
+                lat: center[1], 
+                lng: center[0], 
+                altitude: 2.5 
+              },
+              1000 // Animation duration in milliseconds
+            );
+          }
+        }
       }
-      return country;
     });
 
-    globe
-      .pointsData(pointData)
-      .pointRadius('size')
-      .pointColor('color')
-      .pointAltitude(POINT_STYLES.default.altitude)
-      .onPointHover((point: any) => {
-        document.body.style.cursor = point ? 'pointer' : 'default';
-      })
-      .onPointClick((point: any) => {
-        if (point) {
-          const country = createCountryFromFeature(point);
-          handleCountrySelect(country);
-        }
-      });
-  };
-  */
-  // Polygon-only: Do not use point visualization
+    globe.onPolygonHover((polygon: any) => {
+      const countryCode = polygon?.properties?.ISO_A3;
+      setHoveredCountry(countryCode || null);
+      document.body.style.cursor = polygon ? 'pointer' : 'default';
+    });
 
-  // Helper function to highlight selected country (always polygons)
-  const highlightSelectedCountry = (globe: any, countries: CountryFeature[], selectedCountryCode: string) => {
-    const highlightedCountries = countries.map((feature: CountryFeature) => ({
-      ...feature,
-      properties: {
-        ...feature.properties,
-        highlighted: feature.properties.iso_a2 === selectedCountryCode || 
-                    feature.properties.iso_a3 === selectedCountryCode ||
-                    feature.properties.dhs_code === selectedCountryCode
-      }
-    }));
-    globe
-      .polygonsData(highlightedCountries)
-      .polygonCapColor((d: any) => 
-        d.properties.highlighted ? POLYGON_STYLES.highlighted.capColor : POLYGON_STYLES.default.capColor
-      )
-      .polygonSideColor((d: any) => 
-        d.properties.highlighted ? POLYGON_STYLES.highlighted.sideColor : POLYGON_STYLES.default.sideColor
-      )
-      .polygonStrokeColor((d: any) => 
-        d.properties.highlighted ? POLYGON_STYLES.highlighted.strokeColor : POLYGON_STYLES.default.strokeColor
-      );
-  };
+    // Auto-rotate
+    globe.controls().autoRotate = true;
+    globe.controls().autoRotateSpeed = 0.5;
 
-  // Helper function to reset country highlighting (always polygons)
-  const resetCountryHighlighting = (globe: any, countries: CountryFeature[]) => {
-    globe
-      .polygonsData(countries)
-      .polygonCapColor(() => POLYGON_STYLES.default.capColor)
-      .polygonSideColor(() => POLYGON_STYLES.default.sideColor)
-      .polygonStrokeColor(() => POLYGON_STYLES.default.strokeColor);
-  };
+    // Set loading to false
+    setIsLoading(false);
 
-  // Initialize globe (always polygons)
-  useEffect(() => {
-    if (!containerRef.current || !boundariesLoaded) return;
-    setIsLoading(true);
-    const allCountries = countryBoundariesService.getAllCountries();
-    const globe = new Globe(containerRef.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .backgroundColor(backgroundColor)
-      .width(width || containerRef.current.clientWidth)
-      .height(height || containerRef.current.clientHeight)
-      .enablePointerInteraction(true);
-    // Always use polygon visualization
-    setupPolygonVisualization(globe, allCountries);
-    // Set fixed camera position to prevent zooming
-    globe.pointOfView({ lat: 5, lng: 0, altitude: 2.5 });
-    // Disable zoom controls directly
-    if (globe.controls()) {
-      globe.controls().enableZoom = false;
-    }
-    // Touch support
-    if (containerRef.current) {
-      containerRef.current.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-      containerRef.current.addEventListener('wheel', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-      containerRef.current.addEventListener('gesturestart', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-      containerRef.current.addEventListener('gesturechange', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-      containerRef.current.addEventListener('gestureend', (e) => {
-        e.preventDefault();
-      }, { passive: false });
-    }
-    globeRef.current = globe;
-    // Resize
-    const handleResize = () => {
-      if (containerRef.current && globeRef.current) {
-        globeRef.current
-          .width(width || containerRef.current.clientWidth)
-          .height(height || containerRef.current.clientHeight);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    // Use a timeout to ensure the globe has time to render
-    const initTimeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
     // Cleanup
     return () => {
-      clearTimeout(initTimeout);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (globeRef.current) {
+        globeRef.current.innerHTML = '';
       }
-      window.removeEventListener('resize', handleResize);
-      if (globeRef.current) globeRef.current = null;
-      if (containerRef.current) {
-        containerRef.current.removeEventListener('touchstart', () => {});
-      }
+      globeInstanceRef.current = null;
     };
-  }, [backgroundColor, width, height, enableRotation, rotationSpeed, boundariesLoaded]);
+  }, []); // Empty dependency array for initial setup
 
-  // Handle rotation separately
+  // Update globe colors when selection/hover changes
   useEffect(() => {
-    if (!globeRef.current || !enableRotation) return;
-
-    let lastTime = 0;
-    let currentRotation = 0;
-
-    const animate = (time: number) => {
-      if (isRotating) {
-        animationRef.current = requestAnimationFrame(animate);
-        const deltaTime = time - lastTime;
-        lastTime = time;
-        if (globeRef.current) {
-          currentRotation += rotationSpeed * (deltaTime / 16.67);
-          globeRef.current.pointOfView({ lat: 5, lng: currentRotation % 360 });
-        }
-      }
-    };
-
-    if (isRotating) {
-      requestAnimationFrame(animate);
+    if (globeInstanceRef.current) {
+      globeInstanceRef.current
+        .polygonCapColor((polygon: any) => {
+          const countryCode = polygon.properties?.ISO_A3;
+          if (countryCode === internalSelectedCountry) {
+            return '#ef4444'; // Red for selected
+          } else if (countryCode === hoveredCountry) {
+            return '#f59e0b'; // Orange for hovered
+          }
+          return 'rgba(59, 130, 246, 0.3)'; // Transparent blue for normal
+        })
+        .polygonSideColor((polygon: any) => {
+          const countryCode = polygon.properties?.ISO_A3;
+          if (countryCode === internalSelectedCountry) {
+            return '#dc2626'; // Darker red for selected
+          } else if (countryCode === hoveredCountry) {
+            return '#d97706'; // Darker orange for hovered
+          }
+          return '#1e3a8a'; // Darker blue for normal
+        })
+        .polygonAltitude((polygon: any) => {
+          const countryCode = polygon.properties?.ISO_A3;
+          if (countryCode === internalSelectedCountry) {
+            return 0.05; // Higher altitude for selected
+          } else if (countryCode === hoveredCountry) {
+            return 0.03; // Medium altitude for hovered
+          }
+          return 0.01; // Normal altitude
+        });
     }
+  }, [internalSelectedCountry, hoveredCountry]);
 
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+  // Update internal selected country when prop changes
+  useEffect(() => {
+    if (selectedCountry) {
+      // Find the ISO3 code for this DHS country
+      const mapping = countryMapping.find(m => m.dhsCode === selectedCountry.value);
+      if (mapping && mapping.iso3Code) {
+        setInternalSelectedCountry(mapping.iso3Code);
       }
-    };
-  }, [isRotating, enableRotation, rotationSpeed]);
-
-  // Handle country selection
-  const handleCountrySelect = (country: Country) => {
-    setSelectedCountry(country);
-    setIsRotating(false);
-    
-    // Find the country feature
-    const countryFeature = countryBoundariesService.getCountryByCode(country.value);
-    
-    if (countryFeature && globeRef.current) {
-      let center: [number, number];
-      
-      // if (countryFeature.geometry.type === 'Point') {
-      //   // For point data, use the coordinates directly
-      //   center = [countryFeature.geometry.coordinates[0], countryFeature.geometry.coordinates[1]];
-      // } else {
-        // For polygon data, calculate the centroid
-        center = d3.geoCentroid(countryFeature);
-      // }
-      
-      // Focus on the selected country
-      globeRef.current.pointOfView({ 
-        lat: center[1], 
-        lng: center[0], 
-        altitude: 2.5 
-      });
-      
-      // Highlight the selected country
-      const allCountries = countryBoundariesService.getAllCountries();
-      highlightSelectedCountry(globeRef.current, allCountries, country.value);
-      // Draw a highlighted point at the centroid
-      setHighlightPoint({ lat: center[1], lng: center[0] });
+    } else {
+      setInternalSelectedCountry(null);
     }
+  }, [selectedCountry]);
+
+  // Update dialog state when prop changes
+  useEffect(() => {
+    setIsCountryDialogOpen(showCountryDialog);
+  }, [showCountryDialog]);
+
+  // Function to reset globe (clear selection and resume rotation)
+  const resetGlobe = () => {
+    setInternalSelectedCountry(null);
+    setHoveredCountry(null);
     
-    onCountrySelect?.(country);
+    // Reset camera to default position
+    if (globeInstanceRef.current) {
+      globeInstanceRef.current.pointOfView(
+        { lat: 0, lng: 0, altitude: 2.5 },
+        1000
+      );
+    }
   };
 
-  // Reset to default view
-  const handleResetView = () => {
-    setSelectedCountry(null);
-    setIsRotating(true);
+  // Function to handle country selection from dialog
+  const handleCountrySelectFromDialog = (country: Country) => {
+    // Find the ISO3 code for this DHS country
+    const mapping = countryMapping.find(m => m.dhsCode === country.value);
     
-    if (globeRef.current) {
-      globeRef.current.pointOfView({ lat: 5, lng: 0, altitude: 2.5 });
+    if (mapping && mapping.iso3Code) {
+      setInternalSelectedCountry(mapping.iso3Code);
       
-      // Reset all countries to default appearance
-      const allCountries = countryBoundariesService.getAllCountries();
-      resetCountryHighlighting(globeRef.current, allCountries);
+      // Focus on the country
+      const countryFeature = geoJSONData.features.find((f: any) => f.properties.ISO_A3 === mapping.iso3Code);
+      if (countryFeature && globeInstanceRef.current) {
+        const center = d3.geoCentroid(countryFeature);
+        globeInstanceRef.current.pointOfView(
+          { lat: center[1], lng: center[0], altitude: 2.5 },
+          1000
+        );
+      }
     }
-    setHighlightPoint(null);
+    
+    if (onCountrySelect) {
+      onCountrySelect(country);
+    }
+    
+         setIsCountryDialogOpen(false);
   };
 
   return (
-    <div className="relative w-full h-full">
-      {/* Globe Container */}
-      <div 
-        ref={containerRef} 
-        className="w-full h-full"
-        style={{ background: 'transparent' }}
-      />
-
-      {highlightPoint && globeRef.current && (
-        globeRef.current.pointsData([
-          {
-            lat: highlightPoint.lat,
-            lng: highlightPoint.lng,
-            color: HIGHLIGHT_POINT_STYLE.color,
-            size: HIGHLIGHT_POINT_STYLE.size
-          }
-        ])
-        .pointColor('color')
-        .pointRadius('size')
-        .pointAltitude(HIGHLIGHT_POINT_STYLE.altitude)
+    <div className={`relative ${className}`}>
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-10">
+          <LoadingSpinner />
+        </div>
       )}
-
-
-      {/* Loading Overlay */}
+      
+      <div 
+        ref={globeRef} 
+        className="bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+        style={{ width: `${width}px`, height: `${height}px` }}
+      />
+      
+             {/* Country Selection Dialog */}
       <AnimatePresence>
-        {(isLoading || !boundariesLoaded) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90"
-          >
-            <div className="text-center">
-              <LoadingSpinner />
-              <p className="text-gray-600 mt-4">
-                {!boundariesLoaded ? 'Loading country boundaries...' : 'Loading globe...'}
-              </p>
-            </div>
-          </motion.div>
+        {isCountryDialogOpen && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <CountrySelectionDialog
+              isOpen={isCountryDialogOpen}
+              onClose={() => setIsCountryDialogOpen(false)}
+              onCountrySelect={handleCountrySelectFromDialog}
+            />
+          </div>
         )}
       </AnimatePresence>
-
-      {/* Country Selection Dialog */}
-      {showCountryDialog && !isMobile && (
-        <CountrySelectionDialog
-          isOpen={true}
-          onClose={() => {}} // No close functionality since it's permanent
-          onCountrySelect={handleCountrySelect}
-          onCountryClear={handleResetView}
-          selectedCountry={selectedCountryState}
-        />
+      
+      {/* Controls */}
+      <div className="absolute top-4 right-4 flex gap-2">
+                 <button
+           onClick={() => setIsCountryDialogOpen(true)}
+           className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+         >
+          Select Country
+        </button>
+        
+        {internalSelectedCountry && (
+          <button
+            onClick={resetGlobe}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+      
+      {/* Selected Country Info */}
+      {internalSelectedCountry && (
+        <div className="absolute bottom-4 left-4 bg-blue-900 bg-opacity-90 text-white p-3 rounded-lg">
+          <h3 className="text-sm font-semibold">Selected Country</h3>
+          <p className="text-xs text-blue-200">
+            {countryMapping.find(m => m.iso3Code === internalSelectedCountry)?.countryName || internalSelectedCountry}
+          </p>
+        </div>
       )}
     </div>
   );

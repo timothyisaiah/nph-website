@@ -1,0 +1,376 @@
+{
+  "TotalPages": 1,
+  "Data": [
+    {
+      "DHS_CountryCode": "AF",
+      "CountryName": "Afghanistan"
+    },
+    {
+      "DHS_CountryCode": "AL",
+      "CountryName": "Albania"
+    },
+    {
+      "DHS_CountryCode": "AO",
+      "CountryName": "Angola"
+    },
+    {
+      "DHS_CountryCode": "AM",
+      "CountryName": "Armenia"
+    },
+    {
+      "DHS_CountryCode": "AZ",
+      "CountryName": "Azerbaijan"
+    },
+    {
+      "DHS_CountryCode": "BD",
+      "CountryName": "Bangladesh"
+    },
+    {
+      "DHS_CountryCode": "BJ",
+      "CountryName": "Benin"
+    },
+    {
+      "DHS_CountryCode": "BO",
+      "CountryName": "Bolivia"
+    },
+    {
+      "DHS_CountryCode": "BT",
+      "CountryName": "Botswana"
+    },
+    {
+      "DHS_CountryCode": "BR",
+      "CountryName": "Brazil"
+    },
+    {
+      "DHS_CountryCode": "BF",
+      "CountryName": "Burkina Faso"
+    },
+    {
+      "DHS_CountryCode": "BU",
+      "CountryName": "Burundi"
+    },
+    {
+      "DHS_CountryCode": "KH",
+      "CountryName": "Cambodia"
+    },
+    {
+      "DHS_CountryCode": "CM",
+      "CountryName": "Cameroon"
+    },
+    {
+      "DHS_CountryCode": "CV",
+      "CountryName": "Cape Verde"
+    },
+    {
+      "DHS_CountryCode": "CF",
+      "CountryName": "Central African Republic"
+    },
+    {
+      "DHS_CountryCode": "TD",
+      "CountryName": "Chad"
+    },
+    {
+      "DHS_CountryCode": "CO",
+      "CountryName": "Colombia"
+    },
+    {
+      "DHS_CountryCode": "KM",
+      "CountryName": "Comoros"
+    },
+    {
+      "DHS_CountryCode": "CG",
+      "CountryName": "Congo"
+    },
+    {
+      "DHS_CountryCode": "CD",
+      "CountryName": "Congo Democratic Republic"
+    },
+    {
+      "DHS_CountryCode": "CI",
+      "CountryName": "Cote d'Ivoire"
+    },
+    {
+      "DHS_CountryCode": "DR",
+      "CountryName": "Dominican Republic"
+    },
+    {
+      "DHS_CountryCode": "EC",
+      "CountryName": "Ecuador"
+    },
+    {
+      "DHS_CountryCode": "EG",
+      "CountryName": "Egypt"
+    },
+    {
+      "DHS_CountryCode": "ES",
+      "CountryName": "El Salvador"
+    },
+    {
+      "DHS_CountryCode": "EK",
+      "CountryName": "Equatorial Guinea"
+    },
+    {
+      "DHS_CountryCode": "ER",
+      "CountryName": "Eritrea"
+    },
+    {
+      "DHS_CountryCode": "SZ",
+      "CountryName": "Eswatini"
+    },
+    {
+      "DHS_CountryCode": "ET",
+      "CountryName": "Ethiopia"
+    },
+    {
+      "DHS_CountryCode": "GA",
+      "CountryName": "Gabon"
+    },
+    {
+      "DHS_CountryCode": "GM",
+      "CountryName": "Gambia"
+    },
+    {
+      "DHS_CountryCode": "GH",
+      "CountryName": "Ghana"
+    },
+    {
+      "DHS_CountryCode": "GU",
+      "CountryName": "Guatemala"
+    },
+    {
+      "DHS_CountryCode": "GN",
+      "CountryName": "Guinea"
+    },
+    {
+      "DHS_CountryCode": "GY",
+      "CountryName": "Guyana"
+    },
+    {
+      "DHS_CountryCode": "HT",
+      "CountryName": "Haiti"
+    },
+    {
+      "DHS_CountryCode": "HN",
+      "CountryName": "Honduras"
+    },
+    {
+      "DHS_CountryCode": "IA",
+      "CountryName": "India"
+    },
+    {
+      "DHS_CountryCode": "ID",
+      "CountryName": "Indonesia"
+    },
+    {
+      "DHS_CountryCode": "JO",
+      "CountryName": "Jordan"
+    },
+    {
+      "DHS_CountryCode": "KK",
+      "CountryName": "Kazakhstan"
+    },
+    {
+      "DHS_CountryCode": "KE",
+      "CountryName": "Kenya"
+    },
+    {
+      "DHS_CountryCode": "KY",
+      "CountryName": "Kyrgyz Republic"
+    },
+    {
+      "DHS_CountryCode": "LA",
+      "CountryName": "Lao People's Democratic Republic"
+    },
+    {
+      "DHS_CountryCode": "LS",
+      "CountryName": "Lesotho"
+    },
+    {
+      "DHS_CountryCode": "LB",
+      "CountryName": "Liberia"
+    },
+    {
+      "DHS_CountryCode": "MD",
+      "CountryName": "Madagascar"
+    },
+    {
+      "DHS_CountryCode": "MW",
+      "CountryName": "Malawi"
+    },
+    {
+      "DHS_CountryCode": "MV",
+      "CountryName": "Maldives"
+    },
+    {
+      "DHS_CountryCode": "ML",
+      "CountryName": "Mali"
+    },
+    {
+      "DHS_CountryCode": "MR",
+      "CountryName": "Mauritania"
+    },
+    {
+      "DHS_CountryCode": "MX",
+      "CountryName": "Mexico"
+    },
+    {
+      "DHS_CountryCode": "MB",
+      "CountryName": "Moldova"
+    },
+    {
+      "DHS_CountryCode": "MA",
+      "CountryName": "Morocco"
+    },
+    {
+      "DHS_CountryCode": "MZ",
+      "CountryName": "Mozambique"
+    },
+    {
+      "DHS_CountryCode": "MM",
+      "CountryName": "Myanmar"
+    },
+    {
+      "DHS_CountryCode": "NM",
+      "CountryName": "Namibia"
+    },
+    {
+      "DHS_CountryCode": "NP",
+      "CountryName": "Nepal"
+    },
+    {
+      "DHS_CountryCode": "NC",
+      "CountryName": "Nicaragua"
+    },
+    {
+      "DHS_CountryCode": "NI",
+      "CountryName": "Niger"
+    },
+    {
+      "DHS_CountryCode": "NG",
+      "CountryName": "Nigeria"
+    },
+    {
+      "DHS_CountryCode": "OS",
+      "CountryName": "Nigeria (Ondo State)"
+    },
+    {
+      "DHS_CountryCode": "PK",
+      "CountryName": "Pakistan"
+    },
+    {
+      "DHS_CountryCode": "PG",
+      "CountryName": "Papua New Guinea"
+    },
+    {
+      "DHS_CountryCode": "PY",
+      "CountryName": "Paraguay"
+    },
+    {
+      "DHS_CountryCode": "PE",
+      "CountryName": "Peru"
+    },
+    {
+      "DHS_CountryCode": "PH",
+      "CountryName": "Philippines"
+    },
+    {
+      "DHS_CountryCode": "RW",
+      "CountryName": "Rwanda"
+    },
+    {
+      "DHS_CountryCode": "WS",
+      "CountryName": "Samoa"
+    },
+    {
+      "DHS_CountryCode": "ST",
+      "CountryName": "Sao Tome and Principe"
+    },
+    {
+      "DHS_CountryCode": "SN",
+      "CountryName": "Senegal"
+    },
+    {
+      "DHS_CountryCode": "SL",
+      "CountryName": "Sierra Leone"
+    },
+    {
+      "DHS_CountryCode": "ZA",
+      "CountryName": "South Africa"
+    },
+    {
+      "DHS_CountryCode": "LK",
+      "CountryName": "Sri Lanka"
+    },
+    {
+      "DHS_CountryCode": "SD",
+      "CountryName": "Sudan"
+    },
+    {
+      "DHS_CountryCode": "TJ",
+      "CountryName": "Tajikistan"
+    },
+    {
+      "DHS_CountryCode": "TZ",
+      "CountryName": "Tanzania"
+    },
+    {
+      "DHS_CountryCode": "TH",
+      "CountryName": "Thailand"
+    },
+    {
+      "DHS_CountryCode": "TL",
+      "CountryName": "Timor-Leste"
+    },
+    {
+      "DHS_CountryCode": "TG",
+      "CountryName": "Togo"
+    },
+    {
+      "DHS_CountryCode": "TT",
+      "CountryName": "Trinidad and Tobago"
+    },
+    {
+      "DHS_CountryCode": "TN",
+      "CountryName": "Tunisia"
+    },
+    {
+      "DHS_CountryCode": "TR",
+      "CountryName": "Turkey"
+    },
+    {
+      "DHS_CountryCode": "TM",
+      "CountryName": "Turkmenistan"
+    },
+    {
+      "DHS_CountryCode": "UG",
+      "CountryName": "Uganda"
+    },
+    {
+      "DHS_CountryCode": "UA",
+      "CountryName": "Ukraine"
+    },
+    {
+      "DHS_CountryCode": "UZ",
+      "CountryName": "Uzbekistan"
+    },
+    {
+      "DHS_CountryCode": "VN",
+      "CountryName": "Vietnam"
+    },
+    {
+      "DHS_CountryCode": "YE",
+      "CountryName": "Yemen"
+    },
+    {
+      "DHS_CountryCode": "ZM",
+      "CountryName": "Zambia"
+    },
+    {
+      "DHS_CountryCode": "ZW",
+      "CountryName": "Zimbabwe"
+    }
+  ],
+  "RecordsReturned": 92,
+  "Page": "1",
+  "RecordCount": 92
+}

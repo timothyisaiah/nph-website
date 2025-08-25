@@ -2,11 +2,9 @@
 // Main landing page for NPH Solutions website
 // Features: Globe visualization, responsive indicator lists, details panel, health tools, and more
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, Suspense, lazy } from 'react';
 import { useNavigate } from "react-router-dom";
-import GlobeVisualization from "../components/globe/GlobeVisualization";
 import MobileCountrySelector from "../components/globe/MobileCountrySelector";
-import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
 import { useIndicator } from "../context/IndicatorContext";
 import Footer from "../components/layout/Footer";
 import companyLogo from "../assets/Company-logo.jpg";
@@ -14,10 +12,29 @@ import { indicators as localIndicators } from "../data/indicators";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
-import axios from 'axios';
-import Select from 'react-select';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+
+// Lazy load heavy components
+const GlobeVisualization = lazy(() => import("../components/globe/OptimizedGlobeVisualization"));
+const FeedingTipsCarousel = lazy(() => import("../components/carousel/FeedingTipsCarousel"));
+const Select = lazy(() => import('react-select'));
+const LineChart = lazy(() => import('recharts').then(module => ({ default: module.LineChart })));
+const Line = lazy(() => import('recharts').then(module => ({ default: module.Line })));
+const XAxis = lazy(() => import('recharts').then(module => ({ default: module.XAxis })));
+const YAxis = lazy(() => import('recharts').then(module => ({ default: module.YAxis })));
+const Tooltip = lazy(() => import('recharts').then(module => ({ default: module.Tooltip })));
+const ResponsiveContainer = lazy(() => import('recharts').then(module => ({ default: module.ResponsiveContainer })));
+const CartesianGrid = lazy(() => import('recharts').then(module => ({ default: module.CartesianGrid })));
+
+// Lazy load axios for API calls
+let axios: any = null;
+const loadAxios = async () => {
+  if (!axios) {
+    const axiosModule = await import('axios');
+    axios = axiosModule.default;
+  }
+  return axios;
+};
 
 // Helper: Get tagline (first sentence of definition)
 const getTagline = (definition: string) => {
@@ -259,12 +276,15 @@ const Home: React.FC = () => {
 
   // Fetch available countries for overlay on mount
   useEffect(() => {
-    axios.get('https://api.dhsprogram.com/rest/dhs/countries', { params: { f: 'json' } })
-      .then(res => {
-        const opts = res.data.Data.map((c: any) => ({ value: c.DHS_CountryCode, label: c.CountryName }));
-        setOverlayAvailableCountries(opts);
-        setOverlayCountry(opts.find((c: any) => c.value === 'UG') || opts[0]);
-      });
+    loadAxios().then(axiosInstance => {
+      axiosInstance.get('https://api.dhsprogram.com/rest/dhs/countries', { params: { f: 'json' } })
+        .then((res: any) => {
+          const opts = res.data.Data.map((c: any) => ({ value: c.DHS_CountryCode, label: c.CountryName }));
+          setOverlayAvailableCountries(opts);
+          const defaultCountry = opts.find((c: any) => c.value === 'UG') || opts[0];
+          setOverlayCountry(defaultCountry as { value: string; label: string } | null);
+        });
+    });
   }, []);
 
   // Fetch DHS data for overlay when indicator or country changes
@@ -274,21 +294,23 @@ const Home: React.FC = () => {
     setOverlayLoading(true);
     setOverlayError(null);
     setOverlayData([]);
-    axios.get('https://api.dhsprogram.com/rest/dhs/data', {
-      params: {
-        indicatorIds: indicator.indicatorId,
-        countryIds: overlayCountry.value,
-        surveyYearStart: 1990,
-        surveyYearEnd: new Date().getFullYear(),
-        returnFields: 'CountryName,SurveyYear,Value,CharacteristicLabel',
-        f: 'json',
-      },
-    })
-      .then(res => {
-        setOverlayData(res.data.Data || []);
+    loadAxios().then(axiosInstance => {
+      axiosInstance.get('https://api.dhsprogram.com/rest/dhs/data', {
+        params: {
+          indicatorIds: indicator.indicatorId,
+          countryIds: overlayCountry.value,
+          surveyYearStart: 1990,
+          surveyYearEnd: new Date().getFullYear(),
+          returnFields: 'CountryName,SurveyYear,Value,CharacteristicLabel',
+          f: 'json',
+        },
       })
-      .catch(() => setOverlayError('Failed to load data from DHS.'))
-      .finally(() => setOverlayLoading(false));
+        .then((res: any) => {
+          setOverlayData(res.data.Data || []);
+        })
+        .catch(() => setOverlayError('Failed to load data from DHS.'))
+        .finally(() => setOverlayLoading(false));
+    });
   }, [selectedIdx, overlayCountry]);
 
   // Calculator input change handler
@@ -561,12 +583,18 @@ const Home: React.FC = () => {
             {/* Globe Visualization (left) */}
             <div className="flex-1 flex justify-center">
               <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
-                <GlobeVisualization 
-                  onError={handleError} 
-                  onCountrySelect={handleGlobeCountrySelect}
-                  showCountryDialog={true} // Show the overlay dialog on desktop
-                  selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-                />
+                <Suspense fallback={
+                  <div className="flex items-center justify-center w-full h-full">
+                    <LoadingSpinner />
+                  </div>
+                }>
+                  <GlobeVisualization 
+                    onError={handleError} 
+                    onCountrySelect={handleGlobeCountrySelect}
+                    showCountryDialog={true} // Show the overlay dialog on desktop
+                    selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                  />
+                </Suspense>
               </div>
             </div>
             {/* Desktop Indicator List (right) */}
@@ -634,12 +662,18 @@ const Home: React.FC = () => {
             
             {/* Mobile Globe */}
             <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative shadow-2xl border border-gray-200">
-              <GlobeVisualization 
-                onError={handleError} 
-                onCountrySelect={handleGlobeCountrySelect}
-                showCountryDialog={false} // Hide the overlay dialog on mobile
-                selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-              />
+              <Suspense fallback={
+                <div className="flex items-center justify-center w-full h-full">
+                  <LoadingSpinner />
+                </div>
+              }>
+                <GlobeVisualization 
+                  onError={handleError} 
+                  onCountrySelect={handleGlobeCountrySelect}
+                  showCountryDialog={false} // Hide the overlay dialog on mobile
+                  selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -818,7 +852,15 @@ const Home: React.FC = () => {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
             {/* Left Box: Dynamic Health Feeding Tips */}
-            <FeedingTipsCarousel feedingTips={feedingTips} />
+            <Suspense fallback={
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-8 shadow-lg border border-green-200">
+                <div className="flex items-center justify-center h-64">
+                  <LoadingSpinner />
+                </div>
+              </div>
+            }>
+              <FeedingTipsCarousel feedingTips={feedingTips} />
+            </Suspense>
             {/* Middle Box: Child Growth Z-Score Calculator */}
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
               <div className="flex items-center gap-4 mb-6">

@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
-import * as GlobeGL from 'globe.gl';
-import * as topojson from 'topojson-client';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 // Import data with type assertions
+// @ts-ignore
 import topologyData from '../data/topology.js';
+// @ts-ignore
 import shortcodesData from '../data/shortcodes.js';
 
 const GlobePage: React.FC = () => {
@@ -11,81 +12,136 @@ const GlobePage: React.FC = () => {
   const globeInstanceRef = useRef<any>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const [isRotating, setIsRotating] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dependenciesLoaded, setDependenciesLoaded] = useState(false);
 
+  // Load dependencies asynchronously
   useEffect(() => {
-    if (!globeRef.current) return;
-
-    console.log('Initializing globe...');
-    console.log('Topology data:', topologyData);
-    
-    // Convert TopoJSON to GeoJSON using topojson-client
-    const geoJSONData = topojson.feature(topologyData, topologyData.objects.wb_countries);
-    console.log('Converted GeoJSON data:', geoJSONData);
-    console.log('Number of countries:', geoJSONData.features?.length || 0);
-    console.log('Sample country:', geoJSONData.features?.[0]);
-
-    // Initialize globe
-    const globe = new GlobeGL.default(globeRef.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-day.jpg')
-      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-      .polygonsData(geoJSONData.features)
-      .polygonCapColor((polygon: any) => {
-        const countryCode = polygon.properties?.ISO_A3;
-        if (countryCode === selectedCountry) {
-          return '#ef4444'; // Red for selected
-        } else if (countryCode === hoveredCountry) {
-          return '#f59e0b'; // Orange for hovered
-        }
-        return 'rgba(59, 130, 246, 0.3)'; // Transparent blue for normal
-      })
-      .polygonSideColor((polygon: any) => {
-        const countryCode = polygon.properties?.ISO_A3;
-        if (countryCode === selectedCountry) {
-          return '#dc2626'; // Darker red for selected
-        } else if (countryCode === hoveredCountry) {
-          return '#d97706'; // Darker orange for hovered
-        }
-        return '#1e3a8a'; // Darker blue for normal
-      })
-      .polygonStrokeColor(() => '#ffffff')
-      .polygonAltitude((polygon: any) => {
-        const countryCode = polygon.properties?.ISO_A3;
-        if (countryCode === selectedCountry) {
-          return 0.05; // Higher altitude for selected
-        } else if (countryCode === hoveredCountry) {
-          return 0.03; // Medium altitude for hovered
-        }
-        return 0.01; // Normal altitude
-      })
-      .polygonCapCurvatureResolution(3)
-      .width(800)
-      .height(600);
-
-    // Store globe instance
-    globeInstanceRef.current = globe;
-
-    // Set up event handlers
-    globe.onPolygonClick((polygon: any) => {
-      console.log('Polygon clicked:', polygon);
-      const countryCode = polygon.properties?.ISO_A3;
-      if (countryCode) {
-        console.log('Setting selected country:', countryCode);
-        setSelectedCountry(countryCode);
+    const loadDependencies = async () => {
+      try {
+        // Load all heavy dependencies in parallel
+        await Promise.all([
+          import('globe.gl'),
+          import('topojson-client'),
+          import('d3-geo')
+        ]);
+        setDependenciesLoaded(true);
+      } catch (err) {
+        console.error('Failed to load globe dependencies:', err);
+        setError('Failed to load globe visualization');
+        setIsLoading(false);
       }
-    });
+    };
 
-    globe.onPolygonHover((polygon: any) => {
-      console.log('Polygon hover:', polygon);
-      const countryCode = polygon?.properties?.ISO_A3;
-      setHoveredCountry(countryCode || null);
-      document.body.style.cursor = polygon ? 'pointer' : 'default';
-    });
+    loadDependencies();
+  }, []);
 
-    // Auto-rotate
-    globe.controls().autoRotate = true;
-    globe.controls().autoRotateSpeed = 0.5;
+  // Initialize globe when dependencies are loaded
+  useEffect(() => {
+    if (!globeRef.current || !dependenciesLoaded) return;
+    
+    const initializeGlobe = async () => {
+      try {
+        // Dynamically import dependencies
+        const [GlobeGLModule, topojsonModule, d3Module] = await Promise.all([
+          import('globe.gl'),
+          import('topojson-client'),
+          import('d3-geo')
+        ]);
 
-    console.log('Globe initialized successfully');
+        // Convert TopoJSON to GeoJSON using topojson-client
+        const geoJSONData = topojsonModule.feature(topologyData, topologyData.objects.wb_countries) as any;
+
+        // Initialize globe with optimized settings
+        const globe = new GlobeGLModule.default(globeRef.current!)
+          .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+          .backgroundColor('#ffffff')
+          .polygonsData(geoJSONData.features)
+          .polygonCapColor((polygon: any) => {
+            const countryCode = polygon.properties?.ISO_A3;
+            if (countryCode === selectedCountry) {
+              return '#ef4444'; // Red for selected
+            } else if (countryCode === hoveredCountry) {
+              return '#f59e0b'; // Orange for hovered
+            }
+            return 'rgba(59, 131, 246, 0.3)'; // Transparent blue for normal
+          })
+          .polygonSideColor((polygon: any) => {
+            const countryCode = polygon.properties?.ISO_A3;
+            if (countryCode === selectedCountry) {
+              return '#dc2626'; // Darker red for selected
+            } else if (countryCode === hoveredCountry) {
+              return '#d97706'; // Darker orange for hovered
+            }
+            return '#1e3a8a'; // Darker blue for normal
+          })
+          .polygonStrokeColor(() => '#ffffff')
+          .polygonAltitude((polygon: any) => {
+            const countryCode = polygon.properties?.ISO_A3;
+            if (countryCode === selectedCountry) {
+              return 0.05; // Higher altitude for selected
+            } else if (countryCode === hoveredCountry) {
+              return 0.03; // Medium altitude for hovered
+            }
+            return 0.01; // Normal altitude
+          })
+          .polygonCapCurvatureResolution(2) // Reduced for better performance
+          .width(800)
+          .height(600);
+
+        // Store globe instance
+        globeInstanceRef.current = globe;
+
+        // Set up event handlers
+        globe.onPolygonClick((polygon: any) => {
+          const countryCode = polygon.properties?.ISO_A3;
+          if (countryCode) {
+            setSelectedCountry(countryCode);
+            
+            // Pause rotation when country is selected
+            setIsRotating(false);
+            
+            // Focus on the selected country
+            if (polygon) {
+              let center: [number, number];
+              
+              // Calculate the centroid of the country
+              center = d3Module.geoCentroid(polygon);
+              
+              // Focus on the selected country with smooth animation
+              globe.pointOfView(
+                { 
+                  lat: center[1], 
+                  lng: center[0], 
+                  altitude: 2.5 
+                },
+                1000 // Animation duration in milliseconds
+              );
+            }
+          }
+        });
+
+        globe.onPolygonHover((polygon: any) => {
+          const countryCode = polygon?.properties?.ISO_A3;
+          setHoveredCountry(countryCode || null);
+          document.body.style.cursor = polygon ? 'pointer' : 'default';
+        });
+
+        // Auto-rotate with optimized settings
+        globe.controls().autoRotate = isRotating;
+        globe.controls().autoRotateSpeed = 0.3; // Reduced speed for better performance
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Failed to initialize globe:', err);
+        setError('Failed to initialize globe visualization');
+        setIsLoading(false);
+      }
+    };
+
+    initializeGlobe();
 
     // Cleanup
     return () => {
@@ -94,12 +150,18 @@ const GlobePage: React.FC = () => {
       }
       globeInstanceRef.current = null;
     };
-  }, []); // Empty dependency array for initial setup
+  }, [dependenciesLoaded]); // Only re-run when dependencies are loaded
+
+  // Update rotation state
+  useEffect(() => {
+    if (globeInstanceRef.current) {
+      globeInstanceRef.current.controls().autoRotate = isRotating;
+    }
+  }, [isRotating]);
 
   // Update globe colors when selection/hover changes
   useEffect(() => {
-    if (globeInstanceRef.current) {
-      console.log('Updating globe colors - Selected:', selectedCountry, 'Hovered:', hoveredCountry);
+    if (globeInstanceRef.current && !isLoading) {
       globeInstanceRef.current
         .polygonCapColor((polygon: any) => {
           const countryCode = polygon.properties?.ISO_A3;
@@ -108,7 +170,7 @@ const GlobePage: React.FC = () => {
           } else if (countryCode === hoveredCountry) {
             return '#f59e0b'; // Orange for hovered
           }
-          return 'rgba(59, 130, 246, 0.3)'; // Transparent blue for normal
+          return 'rgba(59, 131, 246, 0.3)'; // Transparent blue for normal
         })
         .polygonSideColor((polygon: any) => {
           const countryCode = polygon.properties?.ISO_A3;
@@ -129,61 +191,84 @@ const GlobePage: React.FC = () => {
           return 0.01; // Normal altitude
         });
     }
-  }, [selectedCountry, hoveredCountry]);
+  }, [selectedCountry, hoveredCountry, isLoading]);
+
+  // Function to reset globe (clear selection and resume rotation)
+  const resetGlobe = () => {
+    setSelectedCountry(null);
+    setHoveredCountry(null);
+    setIsRotating(true);
+    
+    // Reset camera to default position
+    if (globeInstanceRef.current) {
+      globeInstanceRef.current.pointOfView(
+        { lat: 0, lng: 0, altitude: 2.5 },
+        1000
+      );
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen text-white flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner />
+          <p className="mt-4 text-lg">Loading interactive globe...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-2">Globe Loading Error</h2>
+          <p className="text-gray-300 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Interactive World Globe</h1>
-          <p className="text-gray-300 mb-4">
-            Explore countries by clicking on them. Hover to see country codes.
-          </p>
-          {selectedCountry && (
-            <div className="bg-blue-900 p-4 rounded-lg">
-              <h2 className="text-xl font-semibold">Selected Country: {selectedCountry}</h2>
-            </div>
-          )}
-          {hoveredCountry && !selectedCountry && (
-            <div className="bg-orange-900 p-4 rounded-lg">
-              <h2 className="text-xl font-semibold">Hovering: {hoveredCountry}</h2>
-            </div>
-          )}
+          {/* Controls */}
+          <div className="flex gap-4 mb-4">
+            <button
+              onClick={() => setIsRotating(!isRotating)}
+              className="hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+            >
+              {isRotating ? 'Pause Rotation' : 'Resume Rotation'}
+            </button>
+            
+            {selectedCountry && (
+              <button
+                onClick={resetGlobe}
+                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors"
+              >
+                Reset View
+              </button>
+            )}
+          </div>
         </div>
         
         <div className="flex justify-center">
           <div 
             ref={globeRef} 
-            className="bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+            className="overflow-hidden"
             style={{ width: '800px', height: '600px' }}
           />
-        </div>
-        
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Available Countries</h3>
-            <p className="text-gray-300 text-sm">
-              Total: {shortcodesData.length} countries
-            </p>
-            <p className="text-gray-300 text-sm">
-              Displayed: {topologyData.objects.wb_countries.geometries.length} countries
-            </p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Controls</h3>
-            <p className="text-gray-300 text-sm">
-              • Click to select a country<br/>
-              • Hover to highlight<br/>
-              • Globe rotates automatically<br/>
-              • Drag to rotate manually
-            </p>
-          </div>
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Data Source</h3>
-            <p className="text-gray-300 text-sm">
-              Using topology data with actual country boundaries for accurate representation
-            </p>
-          </div>
         </div>
       </div>
     </div>
