@@ -13,6 +13,7 @@ import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { calculateGrowthZScores } from '../utils/whoLMS';
 
 // Lazy load heavy components
 const GlobeVisualization = lazy(() => import("../components/globe/OptimizedGlobeVisualization"));
@@ -322,41 +323,44 @@ const Home: React.FC = () => {
 
   const calculateZScore = () => {
     const { age, weight, height, gender } = calculatorData;
-    if (!age || !weight || !height || !gender) {
-      alert("Please fill in all fields");
+    
+    // Validate inputs
+    const errors = {
+      age: !age,
+      weight: !weight,
+      height: !height,
+      gender: !gender
+    };
+    
+    setCalculatorErrors(errors);
+    
+    // Check if any errors exist
+    if (Object.values(errors).some(error => error)) {
       return;
     }
-    const ageNum = parseFloat(age);
-    const weightNum = parseFloat(weight);
-    const heightNum = parseFloat(height);
-    
-    // Simplified mock calculation
-    const weightZScore = ((weightNum - 12) / 2) + (Math.random() - 0.5) * 0.5;
-    const heightZScore = ((heightNum - 85) / 5) + (Math.random() - 0.5) * 0.5;
-    const wastingZScore = ((weightNum / heightNum) - 0.14) / 0.02 + (Math.random() - 0.5) * 0.5;
-    
-    let weightStatus = 'Normal';
-    let heightStatus = 'Normal';
-    let wastingStatus = 'Normal';
-    
-    if (weightZScore < -2) weightStatus = 'Underweight';
-    else if (weightZScore > 2) weightStatus = 'Overweight';
-    
-    if (heightZScore < -2) heightStatus = 'Stunted';
-    else if (heightZScore > 2) heightStatus = 'Tall';
-    
-    if (wastingZScore < -2) wastingStatus = 'Wasted';
-    else if (wastingZScore > 2) wastingStatus = 'Overweight';
-    
-    setZScoreResult({
-      weightZScore: weightZScore.toFixed(2),
-      heightZScore: heightZScore.toFixed(2),
-      wastingZScore: wastingZScore.toFixed(2),
-      weightStatus,
-      heightStatus,
-      wastingStatus,
-      recommendations: getRecommendations(weightStatus, heightStatus, wastingStatus)
-    });
+
+    try {
+      // Use proper WHO LMS calculation
+      const result = calculateGrowthZScores({
+        ageMonths: parseFloat(age),
+        weightKg: parseFloat(weight),
+        heightCm: parseFloat(height),
+        sex: gender.toLowerCase()
+      });
+
+      setZScoreResult({
+        weightZScore: result.waz.toFixed(2),
+        heightZScore: result.haz.toFixed(2),
+        wastingZScore: result.whzOrBaz.toFixed(2),
+        weightStatus: result.weightStatus,
+        heightStatus: result.heightStatus,
+        wastingStatus: result.nutritionStatus,
+        recommendations: getRecommendations(result.weightStatus, result.heightStatus, result.nutritionStatus)
+      });
+    } catch (error) {
+      console.error('Z-score calculation error:', error);
+      alert('Error calculating z-scores. Please check your inputs and try again.');
+    }
   };
 
   const calculateBMI = () => {
@@ -430,27 +434,42 @@ const Home: React.FC = () => {
 
   const getRecommendations = (weightStatus: string, heightStatus: string, wastingStatus: string) => {
     const recommendations = [];
-    if (weightStatus === "Underweight") {
+    
+    // Weight status recommendations
+    if (weightStatus === "Moderately underweight" || weightStatus === "Severely underweight") {
       recommendations.push("Increase caloric intake with nutrient-dense foods");
       recommendations.push("Consider nutritional supplements under medical supervision");
-    } else if (weightStatus === "Overweight") {
+      recommendations.push("Monitor weight gain progress regularly");
+    } else if (weightStatus === "Overweight" || weightStatus === "Obesity") {
       recommendations.push("Focus on balanced nutrition and physical activity");
       recommendations.push("Limit sugary drinks and processed foods");
-    }
-    if (heightStatus === "Stunted") {
-      recommendations.push("Ensure adequate protein and micronutrient intake");
-      recommendations.push("Monitor for underlying health conditions");
+      recommendations.push("Consult with healthcare provider for weight management");
     }
     
-    if (wastingStatus === 'Wasted') {
+    // Height status recommendations
+    if (heightStatus === "Stunted" || heightStatus === "Severely stunted") {
+      recommendations.push("Ensure adequate protein and micronutrient intake");
+      recommendations.push("Monitor for underlying health conditions");
+      recommendations.push("Consider early intervention programs");
+    }
+    
+    // Nutrition status recommendations
+    if (wastingStatus === 'Wasting' || wastingStatus === 'Severe wasting') {
       recommendations.push('Immediate nutritional intervention may be needed');
       recommendations.push('Consult healthcare provider for specialized care');
+      recommendations.push('Monitor for signs of malnutrition');
+    } else if (wastingStatus === 'Overweight' || wastingStatus === 'Obesity') {
+      recommendations.push('Focus on healthy eating habits and physical activity');
+      recommendations.push('Limit high-calorie, low-nutrient foods');
+      recommendations.push('Encourage regular physical activity appropriate for age');
     }
     
     if (recommendations.length === 0) {
       recommendations.push("Continue with current healthy feeding practices");
       recommendations.push("Regular growth monitoring recommended");
+      recommendations.push("Maintain balanced diet and physical activity");
     }
+    
     return recommendations;
   };
 
@@ -974,11 +993,11 @@ const Home: React.FC = () => {
                           <path
                             d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke={zScoreResult.weightStatus === "Normal" ? "#10B981" : "#EF4444"}
+                            stroke={zScoreResult.weightStatus === "Normal" ? "#10B981" : zScoreResult.weightStatus.includes("underweight") ? "#EF4444" : "#F59E0B"}
                             strokeWidth="6"
                             strokeLinecap="round"
                             strokeDasharray="100 100"
-                            strokeDashoffset={zScoreResult.weightStatus === "Normal" ? "0" : "70"}
+                            strokeDashoffset={zScoreResult.weightStatus === "Normal" ? "0" : zScoreResult.weightStatus.includes("underweight") ? "70" : "40"}
                           />
                         </svg>
                       </div>
@@ -989,7 +1008,11 @@ const Home: React.FC = () => {
                       </div>
                       
                       <div className="text-xs text-gray-600 mb-2">Weight Z-Score</div>
-                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-red-100 text-red-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${
+                        zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : 
+                        zScoreResult.weightStatus.includes("underweight") ? "bg-red-100 text-red-700" : 
+                        "bg-yellow-100 text-yellow-700"
+                      }`}>{zScoreResult.weightStatus}</div>
                     </div>
                     
                     {/* Height Z-Score Gauge */}
@@ -1008,11 +1031,11 @@ const Home: React.FC = () => {
                           <path
                             d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "#10B981" : "#EF4444"}
+                            stroke={zScoreResult.heightStatus === "Normal" ? "#10B981" : zScoreResult.heightStatus.includes("stunted") ? "#EF4444" : "#10B981"}
                             strokeWidth="6"
                             strokeLinecap="round"
                             strokeDasharray="100 100"
-                            strokeDashoffset={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "0" : "70"}
+                            strokeDashoffset={zScoreResult.heightStatus === "Normal" ? "0" : zScoreResult.heightStatus.includes("stunted") ? "70" : "0"}
                           />
                         </svg>
                       </div>
@@ -1023,7 +1046,11 @@ const Home: React.FC = () => {
                       </div>
                       
                       <div className="text-xs text-gray-600 mb-2">Height Z-Score</div>
-                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>{zScoreResult.heightStatus}</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${
+                        zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : 
+                        zScoreResult.heightStatus.includes("stunted") ? "bg-red-100 text-red-700" : 
+                        "bg-green-100 text-green-700"
+                      }`}>{zScoreResult.heightStatus}</div>
                     </div>
                     
                     {/* Wasting Z-Score Gauge */}
@@ -1042,11 +1069,15 @@ const Home: React.FC = () => {
                           <path
                             d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke={zScoreResult.wastingStatus === "Normal" ? "#10B981" : zScoreResult.wastingStatus === "Overweight" ? "#F59E0B" : "#EF4444"}
+                            stroke={zScoreResult.wastingStatus === "Normal" ? "#10B981" : 
+                              zScoreResult.wastingStatus.includes("wasting") ? "#EF4444" : 
+                              zScoreResult.wastingStatus.includes("overweight") || zScoreResult.wastingStatus.includes("obesity") ? "#F59E0B" : "#10B981"}
                             strokeWidth="6"
                             strokeLinecap="round"
                             strokeDasharray="100 100"
-                            strokeDashoffset={zScoreResult.wastingStatus === "Normal" ? "0" : zScoreResult.wastingStatus === "Overweight" ? "40" : "70"}
+                            strokeDashoffset={zScoreResult.wastingStatus === "Normal" ? "0" : 
+                              zScoreResult.wastingStatus.includes("wasting") ? "70" : 
+                              zScoreResult.wastingStatus.includes("overweight") || zScoreResult.wastingStatus.includes("obesity") ? "40" : "0"}
                           />
                         </svg>
                       </div>
@@ -1057,7 +1088,12 @@ const Home: React.FC = () => {
                       </div>
                       
                       <div className="text-xs text-gray-600 mb-2">Wasting Z-Score</div>
-                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>{zScoreResult.wastingStatus}</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${
+                        zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : 
+                        zScoreResult.wastingStatus.includes("wasting") ? "bg-red-100 text-red-700" : 
+                        zScoreResult.wastingStatus.includes("overweight") || zScoreResult.wastingStatus.includes("obesity") ? "bg-yellow-100 text-yellow-700" :
+                        "bg-green-100 text-green-700"
+                      }`}>{zScoreResult.wastingStatus}</div>
                     </div>
                   </div>
                   
