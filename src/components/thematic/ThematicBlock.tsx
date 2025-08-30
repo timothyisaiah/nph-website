@@ -5,42 +5,30 @@ interface ThematicBlockProps {
   description: string;
   image?: string;
   imageAlt?: string;
-  objectives: string[];
 }
 
 const ThematicBlock: React.FC<ThematicBlockProps> = ({ 
   title, 
   description, 
   image, 
-  imageAlt,
-  objectives 
+  imageAlt
 }) => {
   return (
-    <div className="bg-white rounded-lg overflow-hidden hover:shadow-sm transition-shadow duration-300">
-      {image && (
-        <div className="h-48 overflow-hidden">
-          <img 
-            src={image} 
-            alt={imageAlt || title} 
-            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300" 
-          />
-        </div>
-      )}
-      <div className="p-6">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4">{title}</h3>
-        <p className="text-gray-600 mb-4">{description}</p>
-        {objectives.length > 0 && (
-          <div>
-            <h4 className="text-lg font-medium text-gray-800 mb-2">Key Objectives:</h4>
-            <ul className="list-disc list-inside space-y-2 text-gray-600">
-              {objectives.map((objective, index) => (
-                <li key={index} className="hover:text-gray-800 transition-colors duration-200">
-                  {objective}
-                </li>
-              ))}
-            </ul>
+    <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100 h-full">
+      <div className="flex flex-col lg:flex-row h-full">
+        {image && (
+          <div className="lg:w-1/3 lg:h-full overflow-hidden">
+            <img 
+              src={image} 
+              alt={imageAlt || title} 
+              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300" 
+            />
           </div>
         )}
+        <div className="lg:w-2/3 p-6 flex flex-col justify-center">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4 leading-tight">{title}</h3>
+          <p className="text-gray-600 leading-relaxed text-sm">{description}</p>
+        </div>
       </div>
     </div>
   );

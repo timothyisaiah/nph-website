@@ -176,21 +176,21 @@ The study recommends strengthening nutrition-sensitive agriculture, improving ma
               </p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
               {dataBriefs.map((brief) => (
-                <div key={brief.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                  <div className="flex">
+                <div key={brief.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full">
+                  <div className="flex h-full">
                     {/* Chart Image Section (40% width) */}
-                    <div className="w-2/5 p-4">
+                    <div className="w-2/5 h-full overflow-hidden">
                       <img 
                         src={brief.chartImage} 
                         alt={brief.title}
-                        className="w-full h-48 object-cover rounded-lg"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     
                     {/* Content Section (60% width) */}
-                    <div className="w-3/5 p-4">
+                    <div className="w-3/5 p-4 flex flex-col justify-center">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-blue-600 font-medium">{brief.date} | {brief.category}</span>
                       </div>
@@ -208,7 +208,7 @@ The study recommends strengthening nutrition-sensitive agriculture, improving ma
                       
                       <button 
                         onClick={() => handleReadFullBrief(brief)}
-                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200 flex items-center"
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200 flex items-center mt-auto"
                       >
                         Read more →
                       </button>
