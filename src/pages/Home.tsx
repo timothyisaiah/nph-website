@@ -36,22 +36,7 @@ const getTagline = (definition: string) => {
   return match ? match[1] : definition;
 };
 
-// Calculate arc positions for indicators (for future arc overlays)
-const calculateArcPositions = (count: number, radius: number = 380) => {
-  const positions: { x: number; y: number }[] = [];
-  const startAngle = 260; // Top (12 o'clock)
-  const endAngle = 70; // Bottom (6 o'clock)
-  const totalArc = endAngle - startAngle; // -180
-  const angleStep = totalArc / (count - 1); // negative
-  for (let i = 0; i < count; i++) {
-    const angle = startAngle - i * angleStep;
-    const rad = (angle * Math.PI) / 180;
-    const x = radius * Math.cos(rad);
-    const y = radius * Math.sin(rad);
-    positions.push({ x, y });
-  }
-  return positions;
-};
+
 
 // Feeding tips data for carousel (used in Health Tools section)
 const feedingTips = {
@@ -226,7 +211,6 @@ const Home: React.FC = () => {
   const { setSelectedIndicator } = useIndicator();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
-  const [arcPositions, setArcPositions] = useState<{ x: number; y: number }[]>([]);
   const [overlayCountry, setOverlayCountry] = useState<{ value: string; label: string } | null>(null);
   const [overlayData, setOverlayData] = useState<any[]>([]);
   const [overlayLoading, setOverlayLoading] = useState(false);
@@ -275,10 +259,7 @@ const Home: React.FC = () => {
     setError(errorMessage);
   }, []);
 
-  // Calculate arc positions (for future arc overlays)
-  useEffect(() => {
-    setArcPositions(calculateArcPositions(localIndicators.length, 300));
-  }, []);
+
 
   // Fetch available countries for overlay on mount
   useEffect(() => {
