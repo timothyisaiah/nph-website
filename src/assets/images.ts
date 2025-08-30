@@ -1,4 +1,12 @@
 // Public domain images from Unsplash and other free sources
+import monitoringImage from './optimized/Monitoring and Evaluation Image.webp';
+import dataAnalyticsImage from './optimized/Data analytics and system.webp';
+import healthSystemsImage from './optimized/Health system .webp';
+import communityHealthImage from './optimized/Health promotion.webp';
+import healthAndEnvironmentImage from './optimized/Health and Environment.webp';
+import politicalEconomyImage from './optimized/Political Economy.webp';
+import publicHealthImage from './optimized/Public Health.webp';
+
 export const images = {
   hero: {
     url: 'https://images.unsplash.com/photo-1584982751601-97dcc096659c',
@@ -16,7 +24,8 @@ export const images = {
     credit: 'Photo by National Cancer Institute on Unsplash'
   },
   research: {
-    url: 'https://images.unsplash.com/photo-1581093458791-9cd48f326c4e',
+    // url: researchImage,
+    url: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118',
     alt: 'Medical research laboratory',
     credit: 'Photo by CDC on Unsplash'
   },
@@ -26,7 +35,7 @@ export const images = {
     credit: 'Photo by WHO on Unsplash'
   },
   dataAnalysis: {
-    url: 'https://images.unsplash.com/photo-1590247813693-5541d1c609fd',
+    url: dataAnalyticsImage,
     alt: 'Healthcare data analysis',
     credit: 'Photo by CDC on Unsplash'
   },
@@ -37,12 +46,13 @@ export const images = {
     credit: 'Photo by National Cancer Institute on Unsplash'
   },
   healthSystems: {
-    url: 'https://images.unsplash.com/photo-1516549655169-df83a0774514',
+    // url: healthSystemsImage,
+    url: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118',
     alt: 'Modern hospital facility',
     credit: 'Photo by National Cancer Institute on Unsplash'
   },
   communityHealth: {
-    url: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289',
+    url: communityHealthImage,
     alt: 'Community health education session',
     credit: 'Photo by WHO on Unsplash'
   },
@@ -74,8 +84,23 @@ export const images = {
     credit: 'Photo by National Cancer Institute on Unsplash'
   },
   monitoring: {
-    url: 'https://images.unsplash.com/photo-1581056771107-24ca5f033842',
+    url: monitoringImage,
     alt: 'Health monitoring and evaluation',
     credit: 'Photo by CDC on Unsplash'
+  },
+  healthAndEnvironment: {
+    url: healthAndEnvironmentImage,
+    alt: 'Health and environment',
+    credit: 'Photo by National Cancer Institute on Unsplash'
+  },
+  politicalEconomy:{
+    url: politicalEconomyImage,
+    alt: 'Political economy',
+    credit: 'Photo by National Cancer Institute on Unsplash'
+  },
+  publicHealth: {
+    url: publicHealthImage,
+    alt: 'Public health',
+    credit: 'Photo by National Cancer Institute on Unsplash'
   }
 }; 

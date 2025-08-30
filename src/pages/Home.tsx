@@ -2,11 +2,9 @@
 // Main landing page for NPH Solutions website
 // Features: Globe visualization, responsive indicator lists, details panel, health tools, and more
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, Suspense, lazy, startTransition } from 'react';
 import { useNavigate } from "react-router-dom";
-import GlobeVisualization from "../components/globe/GlobeVisualization";
 import MobileCountrySelector from "../components/globe/MobileCountrySelector";
-import FeedingTipsCarousel from "../components/carousel/FeedingTipsCarousel";
 import { useIndicator } from "../context/IndicatorContext";
 import Footer from "../components/layout/Footer";
 import companyLogo from "../assets/Company-logo.jpg";
@@ -14,10 +12,24 @@ import { indicators as localIndicators } from "../data/indicators";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
-import axios from 'axios';
-import Select from 'react-select';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { calculateGrowthZScores } from '../utils/whoLMS';
+
+// Lazy load heavy components
+const GlobeVisualization = lazy(() => import("../components/globe/OptimizedGlobeVisualization"));
+const FeedingTipsCarousel = lazy(() => import("../components/carousel/FeedingTipsCarousel"));
+const Select = lazy(() => import('react-select'));
+const TrendChart = lazy(() => import("../components/data/TrendChart"));
+
+// Lazy load axios for API calls
+let axios: any = null;
+const loadAxios = async () => {
+  if (!axios) {
+    const axiosModule = await import('axios');
+    axios = axiosModule.default;
+  }
+  return axios;
+};
 
 // Helper: Get tagline (first sentence of definition)
 const getTagline = (definition: string) => {
@@ -25,22 +37,7 @@ const getTagline = (definition: string) => {
   return match ? match[1] : definition;
 };
 
-// Calculate arc positions for indicators (for future arc overlays)
-const calculateArcPositions = (count: number, radius: number = 380) => {
-  const positions: { x: number; y: number }[] = [];
-  const startAngle = 260; // Top (12 o'clock)
-  const endAngle = 70; // Bottom (6 o'clock)
-  const totalArc = endAngle - startAngle; // -180
-  const angleStep = totalArc / (count - 1); // negative
-  for (let i = 0; i < count; i++) {
-    const angle = startAngle - i * angleStep;
-    const rad = (angle * Math.PI) / 180;
-    const x = radius * Math.cos(rad);
-    const y = radius * Math.sin(rad);
-    positions.push({ x, y });
-  }
-  return positions;
-};
+
 
 // Feeding tips data for carousel (used in Health Tools section)
 const feedingTips = {
@@ -215,7 +212,6 @@ const Home: React.FC = () => {
   const { setSelectedIndicator } = useIndicator();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
-  const [arcPositions, setArcPositions] = useState<{ x: number; y: number }[]>([]);
   const [overlayCountry, setOverlayCountry] = useState<{ value: string; label: string } | null>(null);
   const [overlayData, setOverlayData] = useState<any[]>([]);
   const [overlayLoading, setOverlayLoading] = useState(false);
@@ -229,42 +225,54 @@ const Home: React.FC = () => {
   // Memoized event handlers for globe
   const handleIndicatorSelect = useCallback(
     (indicatorId: string) => {
-      setSelectedIndicator(indicatorId);
-      navigate(`/data?indicator=${indicatorId}`);
+      startTransition(() => {
+        setSelectedIndicator(indicatorId);
+        navigate(`/data?indicator=${indicatorId}`);
+      });
     },
     [setSelectedIndicator, navigate]
   );
   // Replace handleGlobeCountrySelect to update selectedCountry and selectedGlobeCountry
   const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
-    setSelectedGlobeCountry(country);
-    setSelectedCountry(country.label);
-    setCountryData({
-      indicators: Math.floor(Math.random() * 50) + 10,
-      surveys: Math.floor(Math.random() * 20) + 5,
-      lastUpdated: new Date().toLocaleDateString(),
+    startTransition(() => {
+      setSelectedGlobeCountry(country);
+      setSelectedCountry(country.label);
+      setCountryData({
+        indicators: Math.floor(Math.random() * 50) + 10,
+        surveys: Math.floor(Math.random() * 20) + 5,
+        lastUpdated: new Date().toLocaleDateString(),
+      });
+      // Update overlay country if it matches
+      if (overlayAvailableCountries.find(c => c.value === country.value)) {
+        setOverlayCountry({ value: country.value, label: country.label });
+        
+        // If no indicator is selected, automatically select the first indicator and show overlay
+        if (selectedIdx === null) {
+          setSelectedIdx(0);
+        }
+        
+        // Ensure overlay country is set to the selected country
+        setOverlayCountry({ value: country.value, label: country.label });
+      }
     });
-    // Update overlay country if it matches
-    if (overlayAvailableCountries.find(c => c.value === country.value)) {
-      setOverlayCountry({ value: country.value, label: country.label });
-    }
-  }, [overlayAvailableCountries]);
+  }, [overlayAvailableCountries, selectedIdx]);
   const handleError = useCallback((errorMessage: string) => {
     setError(errorMessage);
   }, []);
 
-  // Calculate arc positions (for future arc overlays)
-  useEffect(() => {
-    setArcPositions(calculateArcPositions(localIndicators.length, 300));
-  }, []);
+
 
   // Fetch available countries for overlay on mount
   useEffect(() => {
-    axios.get('https://api.dhsprogram.com/rest/dhs/countries', { params: { f: 'json' } })
-      .then(res => {
-        const opts = res.data.Data.map((c: any) => ({ value: c.DHS_CountryCode, label: c.CountryName }));
-        setOverlayAvailableCountries(opts);
-        setOverlayCountry(opts.find((c: any) => c.value === 'UG') || opts[0]);
-      });
+    loadAxios().then(axiosInstance => {
+      axiosInstance.get('https://api.dhsprogram.com/rest/dhs/countries', { params: { f: 'json' } })
+        .then((res: any) => {
+          const opts = res.data.Data.map((c: any) => ({ value: c.DHS_CountryCode, label: c.CountryName }));
+          setOverlayAvailableCountries(opts);
+          const defaultCountry = opts.find((c: any) => c.value === 'UG') || opts[0];
+          setOverlayCountry(defaultCountry as { value: string; label: string } | null);
+        });
+    });
   }, []);
 
   // Fetch DHS data for overlay when indicator or country changes
@@ -274,21 +282,23 @@ const Home: React.FC = () => {
     setOverlayLoading(true);
     setOverlayError(null);
     setOverlayData([]);
-    axios.get('https://api.dhsprogram.com/rest/dhs/data', {
-      params: {
-        indicatorIds: indicator.indicatorId,
-        countryIds: overlayCountry.value,
-        surveyYearStart: 1990,
-        surveyYearEnd: new Date().getFullYear(),
-        returnFields: 'CountryName,SurveyYear,Value,CharacteristicLabel',
-        f: 'json',
-      },
-    })
-      .then(res => {
-        setOverlayData(res.data.Data || []);
+    loadAxios().then(axiosInstance => {
+      axiosInstance.get('https://api.dhsprogram.com/rest/dhs/data', {
+        params: {
+          indicatorIds: indicator.indicatorId,
+          countryIds: overlayCountry.value,
+          surveyYearStart: 1990,
+          surveyYearEnd: new Date().getFullYear(),
+          returnFields: 'CountryName,SurveyYear,Value,CharacteristicLabel',
+          f: 'json',
+        },
       })
-      .catch(() => setOverlayError('Failed to load data from DHS.'))
-      .finally(() => setOverlayLoading(false));
+        .then((res: any) => {
+          setOverlayData(res.data.Data || []);
+        })
+        .catch(() => setOverlayError('Failed to load data from DHS.'))
+        .finally(() => setOverlayLoading(false));
+    });
   }, [selectedIdx, overlayCountry]);
 
   // Calculator input change handler
@@ -313,41 +323,44 @@ const Home: React.FC = () => {
 
   const calculateZScore = () => {
     const { age, weight, height, gender } = calculatorData;
-    if (!age || !weight || !height || !gender) {
-      alert("Please fill in all fields");
+    
+    // Validate inputs
+    const errors = {
+      age: !age,
+      weight: !weight,
+      height: !height,
+      gender: !gender
+    };
+    
+    setCalculatorErrors(errors);
+    
+    // Check if any errors exist
+    if (Object.values(errors).some(error => error)) {
       return;
     }
-    const ageNum = parseFloat(age);
-    const weightNum = parseFloat(weight);
-    const heightNum = parseFloat(height);
-    
-    // Simplified mock calculation
-    const weightZScore = ((weightNum - 12) / 2) + (Math.random() - 0.5) * 0.5;
-    const heightZScore = ((heightNum - 85) / 5) + (Math.random() - 0.5) * 0.5;
-    const wastingZScore = ((weightNum / heightNum) - 0.14) / 0.02 + (Math.random() - 0.5) * 0.5;
-    
-    let weightStatus = 'Normal';
-    let heightStatus = 'Normal';
-    let wastingStatus = 'Normal';
-    
-    if (weightZScore < -2) weightStatus = 'Underweight';
-    else if (weightZScore > 2) weightStatus = 'Overweight';
-    
-    if (heightZScore < -2) heightStatus = 'Stunted';
-    else if (heightZScore > 2) heightStatus = 'Tall';
-    
-    if (wastingZScore < -2) wastingStatus = 'Wasted';
-    else if (wastingZScore > 2) wastingStatus = 'Overweight';
-    
-    setZScoreResult({
-      weightZScore: weightZScore.toFixed(2),
-      heightZScore: heightZScore.toFixed(2),
-      wastingZScore: wastingZScore.toFixed(2),
-      weightStatus,
-      heightStatus,
-      wastingStatus,
-      recommendations: getRecommendations(weightStatus, heightStatus, wastingStatus)
-    });
+
+    try {
+      // Use proper WHO LMS calculation
+      const result = calculateGrowthZScores({
+        ageMonths: parseFloat(age),
+        weightKg: parseFloat(weight),
+        heightCm: parseFloat(height),
+        sex: gender.toLowerCase()
+      });
+
+      setZScoreResult({
+        weightZScore: result.waz.toFixed(2),
+        heightZScore: result.haz.toFixed(2),
+        wastingZScore: result.whzOrBaz.toFixed(2),
+        weightStatus: result.weightStatus,
+        heightStatus: result.heightStatus,
+        wastingStatus: result.nutritionStatus,
+        recommendations: getRecommendations(result.weightStatus, result.heightStatus, result.nutritionStatus)
+      });
+    } catch (error) {
+      console.error('Z-score calculation error:', error);
+      alert('Error calculating z-scores. Please check your inputs and try again.');
+    }
   };
 
   const calculateBMI = () => {
@@ -421,40 +434,61 @@ const Home: React.FC = () => {
 
   const getRecommendations = (weightStatus: string, heightStatus: string, wastingStatus: string) => {
     const recommendations = [];
-    if (weightStatus === "Underweight") {
+    
+    // Weight status recommendations
+    if (weightStatus === "Moderately underweight" || weightStatus === "Severely underweight") {
       recommendations.push("Increase caloric intake with nutrient-dense foods");
       recommendations.push("Consider nutritional supplements under medical supervision");
-    } else if (weightStatus === "Overweight") {
+      recommendations.push("Monitor weight gain progress regularly");
+    } else if (weightStatus === "Overweight" || weightStatus === "Obesity") {
       recommendations.push("Focus on balanced nutrition and physical activity");
       recommendations.push("Limit sugary drinks and processed foods");
-    }
-    if (heightStatus === "Stunted") {
-      recommendations.push("Ensure adequate protein and micronutrient intake");
-      recommendations.push("Monitor for underlying health conditions");
+      recommendations.push("Consult with healthcare provider for weight management");
     }
     
-    if (wastingStatus === 'Wasted') {
+    // Height status recommendations
+    if (heightStatus === "Stunted" || heightStatus === "Severely stunted") {
+      recommendations.push("Ensure adequate protein and micronutrient intake");
+      recommendations.push("Monitor for underlying health conditions");
+      recommendations.push("Consider early intervention programs");
+    }
+    
+    // Nutrition status recommendations
+    if (wastingStatus === 'Wasting' || wastingStatus === 'Severe wasting') {
       recommendations.push('Immediate nutritional intervention may be needed');
       recommendations.push('Consult healthcare provider for specialized care');
+      recommendations.push('Monitor for signs of malnutrition');
+    } else if (wastingStatus === 'Overweight' || wastingStatus === 'Obesity') {
+      recommendations.push('Focus on healthy eating habits and physical activity');
+      recommendations.push('Limit high-calorie, low-nutrient foods');
+      recommendations.push('Encourage regular physical activity appropriate for age');
     }
     
     if (recommendations.length === 0) {
       recommendations.push("Continue with current healthy feeding practices");
       recommendations.push("Regular growth monitoring recommended");
+      recommendations.push("Maintain balanced diet and physical activity");
     }
+    
     return recommendations;
   };
 
   // Details panel navigation handlers
   const handleNext = () => {
-    if (selectedIdx === null) setSelectedIdx(0);
-    else setSelectedIdx((selectedIdx + 1) % localIndicators.length);
+    startTransition(() => {
+      if (selectedIdx === null) setSelectedIdx(0);
+      else setSelectedIdx((selectedIdx + 1) % localIndicators.length);
+    });
   };
   const handlePrev = () => {
-    if (selectedIdx === null) setSelectedIdx(localIndicators.length - 1);
-    else setSelectedIdx((selectedIdx - 1 + localIndicators.length) % localIndicators.length);
+    startTransition(() => {
+      if (selectedIdx === null) setSelectedIdx(localIndicators.length - 1);
+      else setSelectedIdx((selectedIdx - 1 + localIndicators.length) % localIndicators.length);
+    });
   };
-  const handleClose = () => setSelectedIdx(null);
+  const handleClose = () => {
+    startTransition(() => setSelectedIdx(null));
+  };
 
   const handleCheckNutrition = () => {
     const { age, weight, height, gender } = calculatorData;
@@ -494,11 +528,8 @@ const Home: React.FC = () => {
           <div className="flex flex-col items-center justify-center px-4 md:px-12 lg:px-24 gap-2 md:gap-4 text-center relative z-10">
             {/* Title and Description (centered, compact) */}
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 leading-tight pt-14">
-                  Narratives of Public Health Solutions LTD
-                </h1>
-                <p className="text-sm md:text-base text-gray-600 mb-2 mx-auto whitespace-nowrap">
                   Unlocking health data for community and policy action
-                </p>
+                </h1>
             {/* Services (compact, inline, centered) */}
             <ul className="flex flex-wrap gap-2 justify-center text-xs md:text-sm text-gray-700 mb-2 pt-0">
               <li className="flex items-center gap-1"><span className="text-green-500 font-bold">✓</span>Public health research</li>
@@ -559,21 +590,41 @@ const Home: React.FC = () => {
         <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{ 
           background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)" 
         }}>
-          {/* Desktop Layout: Globe and Indicator List Side by Side */}
+                               {/* Desktop Layout: Globe and Indicator List Side by Side */}
           <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
-            {/* Globe Visualization (left) */}
+            {/* Globe Visualization (left) with floating country selector */}
             <div className="flex-1 flex justify-center">
               <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
-                <GlobeVisualization 
-                  onError={handleError} 
-                  onCountrySelect={handleGlobeCountrySelect}
-                  showCountryDialog={true} // Show the overlay dialog on desktop
-                  selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-                />
+                <Suspense fallback={
+                  <div className="flex items-center justify-center w-full h-full">
+                    <LoadingSpinner />
+                  </div>
+                }>
+                  <GlobeVisualization 
+                    onCountrySelect={handleGlobeCountrySelect}
+                    selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                    width={800}
+                    height={700}
+                    className="w-full h-full"
+                  />
+                </Suspense>
+                
+                {/* Floating Country Selector Dialog */}
+                <div className="absolute top-4 left-4 z-10">
+                  <MobileCountrySelector
+                    onCountrySelect={handleGlobeCountrySelect}
+                    onCountryClear={() => {
+                      setSelectedGlobeCountry(null);
+                      setSelectedCountry(null);
+                      setCountryData(null);
+                    }}
+                    selectedCountry={selectedGlobeCountry}
+                  />
+                </div>
               </div>
             </div>
             {/* Desktop Indicator List (right) */}
-            <div className="flex-1 flex justify-center">
+            <div className="flex-2 flex justify-center">
               <div className="w-full max-w-2xl">
                 <h2 className="text-lg font-bold mb-3 text-gray-800 text-left" style={{ transform: "translatex(-300px)", textDecoration: "underline" }}>
                   Health Indicators
@@ -603,7 +654,7 @@ const Home: React.FC = () => {
                           padding: "0",
                           "--indicator-color": color,
                         } as React.CSSProperties}
-                        onClick={() => setSelectedIdx(idx)}
+                        onClick={() => startTransition(() => setSelectedIdx(idx))}
                       >
                         <div className="home-arc-number" style={{ borderColor: color }}>{idx + 1}</div>
                         <div className="home-arc-content flex-1 min-w-0">
@@ -622,7 +673,7 @@ const Home: React.FC = () => {
             </div>
           </div>
           {/* Mobile/Tablet Layout: Country Selector + Globe (stacked) */}
-          <div className="lg:hidden w-full max-w-md mx-auto flex flex-col items-center space-y-8 px-4">
+          <div className="lg:hidden w-full flex flex-col items-center space-y-8 px-4">
             
             {/* Mobile Country Selector */}
             <MobileCountrySelector
@@ -636,13 +687,20 @@ const Home: React.FC = () => {
             />
             
             {/* Mobile Globe */}
-            <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative shadow-2xl border border-gray-200">
+            <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative flex items-center justify-center">
+              <Suspense fallback={
+                <div className="flex items-center justify-center w-full h-full">
+                  <LoadingSpinner />
+                </div>
+              }>
               <GlobeVisualization 
-                onError={handleError} 
-                onCountrySelect={handleGlobeCountrySelect}
-                showCountryDialog={false} // Hide the overlay dialog on mobile
-                selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-              />
+                   onCountrySelect={handleGlobeCountrySelect}
+                   selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                   width={330}
+                   height={300}
+                   className="w-full h-full"
+                 />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -673,7 +731,7 @@ const Home: React.FC = () => {
                   <Select
                     options={overlayAvailableCountries}
                     value={overlayCountry}
-                    onChange={(opt) => setOverlayCountry(opt)}
+                    onChange={(opt: any) => setOverlayCountry(opt)}
                     classNamePrefix="react-select"
                     placeholder="Select country..."
                     isSearchable
@@ -724,17 +782,20 @@ const Home: React.FC = () => {
                     )}
                   </>
                 ) : (
-                  <div className="h-48 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={overlayData.sort((a, b) => a.SurveyYear - b.SurveyYear)}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="SurveyYear" />
-                        <YAxis label={{ value: localIndicators[selectedIdx].measurementType, angle: -90, position: 'insideLeft' }} />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="Value" stroke="#4F46E5" name="Value" dot={{ fill: '#4F46E5' }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
+                  <div className="h-64 w-full">
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg">
+                        <LoadingSpinner />
+                      </div>
+                    }>
+                      <TrendChart
+                        data={overlayData}
+                        measurementType={localIndicators[selectedIdx].measurementType}
+                        indicatorName={localIndicators[selectedIdx].label}
+                        countryName={overlayCountry?.label || ''}
+                        height={240}
+                      />
+                    </Suspense>
                   </div>
                 )}
               </div>
@@ -766,7 +827,7 @@ const Home: React.FC = () => {
                   selectedIdx === idx && "selected"
                 )}
                 style={{ borderColor: color }}
-                onClick={() => setSelectedIdx(idx)}
+                                  onClick={() => startTransition(() => setSelectedIdx(idx))}
               >
                 <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
                 <div className="home-tablet-content">
@@ -799,7 +860,7 @@ const Home: React.FC = () => {
                     selectedIdx === idx && "selected"
                   )}
                   style={{ borderColor: color }}
-                  onClick={() => setSelectedIdx(idx)}
+                  onClick={() => startTransition(() => setSelectedIdx(idx))}
                 >
                   <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
                   <div className="home-tablet-content">
@@ -821,7 +882,15 @@ const Home: React.FC = () => {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
             {/* Left Box: Dynamic Health Feeding Tips */}
-            <FeedingTipsCarousel feedingTips={feedingTips} />
+            <Suspense fallback={
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-8 shadow-lg border border-green-200">
+                <div className="flex items-center justify-center h-64">
+                  <LoadingSpinner />
+                </div>
+              </div>
+            }>
+              <FeedingTipsCarousel feedingTips={feedingTips} />
+            </Suspense>
             {/* Middle Box: Child Growth Z-Score Calculator */}
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 shadow-lg border border-blue-200">
               <div className="flex items-center gap-4 mb-6">
@@ -896,7 +965,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
               <button
-                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm md:text-base"
                 onClick={handleCheckNutrition}
               >
                 Check Child Nutrition Status
@@ -924,11 +993,11 @@ const Home: React.FC = () => {
                           <path
                             d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke={zScoreResult.weightStatus === "Normal" ? "#10B981" : "#EF4444"}
+                            stroke={zScoreResult.weightStatus === "Normal" ? "#10B981" : zScoreResult.weightStatus.includes("underweight") ? "#EF4444" : "#F59E0B"}
                             strokeWidth="6"
                             strokeLinecap="round"
                             strokeDasharray="100 100"
-                            strokeDashoffset={zScoreResult.weightStatus === "Normal" ? "0" : "70"}
+                            strokeDashoffset={zScoreResult.weightStatus === "Normal" ? "0" : zScoreResult.weightStatus.includes("underweight") ? "70" : "40"}
                           />
                         </svg>
                       </div>
@@ -939,7 +1008,11 @@ const Home: React.FC = () => {
                       </div>
                       
                       <div className="text-xs text-gray-600 mb-2">Weight Z-Score</div>
-                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.weightStatus === "Underweight" ? "bg-red-100 text-red-700" : "bg-red-100 text-red-700"}`}>{zScoreResult.weightStatus}</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${
+                        zScoreResult.weightStatus === "Normal" ? "bg-green-100 text-green-700" : 
+                        zScoreResult.weightStatus.includes("underweight") ? "bg-red-100 text-red-700" : 
+                        "bg-yellow-100 text-yellow-700"
+                      }`}>{zScoreResult.weightStatus}</div>
                     </div>
                     
                     {/* Height Z-Score Gauge */}
@@ -958,11 +1031,11 @@ const Home: React.FC = () => {
                           <path
                             d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "#10B981" : "#EF4444"}
+                            stroke={zScoreResult.heightStatus === "Normal" ? "#10B981" : zScoreResult.heightStatus.includes("stunted") ? "#EF4444" : "#10B981"}
                             strokeWidth="6"
                             strokeLinecap="round"
                             strokeDasharray="100 100"
-                            strokeDashoffset={zScoreResult.heightStatus === "Normal" || zScoreResult.heightStatus === "Tall" ? "0" : "70"}
+                            strokeDashoffset={zScoreResult.heightStatus === "Normal" ? "0" : zScoreResult.heightStatus.includes("stunted") ? "70" : "0"}
                           />
                         </svg>
                       </div>
@@ -973,7 +1046,11 @@ const Home: React.FC = () => {
                       </div>
                       
                       <div className="text-xs text-gray-600 mb-2">Height Z-Score</div>
-                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.heightStatus === "Stunted" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>{zScoreResult.heightStatus}</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${
+                        zScoreResult.heightStatus === "Normal" ? "bg-green-100 text-green-700" : 
+                        zScoreResult.heightStatus.includes("stunted") ? "bg-red-100 text-red-700" : 
+                        "bg-green-100 text-green-700"
+                      }`}>{zScoreResult.heightStatus}</div>
                     </div>
                     
                     {/* Wasting Z-Score Gauge */}
@@ -992,11 +1069,15 @@ const Home: React.FC = () => {
                           <path
                             d="M 10 45 A 30 30 0 0 1 90 45"
                             fill="none"
-                            stroke={zScoreResult.wastingStatus === "Normal" ? "#10B981" : zScoreResult.wastingStatus === "Overweight" ? "#F59E0B" : "#EF4444"}
+                            stroke={zScoreResult.wastingStatus === "Normal" ? "#10B981" : 
+                              zScoreResult.wastingStatus.includes("wasting") ? "#EF4444" : 
+                              zScoreResult.wastingStatus.includes("overweight") || zScoreResult.wastingStatus.includes("obesity") ? "#F59E0B" : "#10B981"}
                             strokeWidth="6"
                             strokeLinecap="round"
                             strokeDasharray="100 100"
-                            strokeDashoffset={zScoreResult.wastingStatus === "Normal" ? "0" : zScoreResult.wastingStatus === "Overweight" ? "40" : "70"}
+                            strokeDashoffset={zScoreResult.wastingStatus === "Normal" ? "0" : 
+                              zScoreResult.wastingStatus.includes("wasting") ? "70" : 
+                              zScoreResult.wastingStatus.includes("overweight") || zScoreResult.wastingStatus.includes("obesity") ? "40" : "0"}
                           />
                         </svg>
                       </div>
@@ -1007,7 +1088,12 @@ const Home: React.FC = () => {
                       </div>
                       
                       <div className="text-xs text-gray-600 mb-2">Wasting Z-Score</div>
-                      <div className={`text-xs font-medium px-3 py-1 ${zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : zScoreResult.wastingStatus === "Wasted" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>{zScoreResult.wastingStatus}</div>
+                      <div className={`text-xs font-medium px-3 py-1 ${
+                        zScoreResult.wastingStatus === "Normal" ? "bg-green-100 text-green-700" : 
+                        zScoreResult.wastingStatus.includes("wasting") ? "bg-red-100 text-red-700" : 
+                        zScoreResult.wastingStatus.includes("overweight") || zScoreResult.wastingStatus.includes("obesity") ? "bg-yellow-100 text-yellow-700" :
+                        "bg-green-100 text-green-700"
+                      }`}>{zScoreResult.wastingStatus}</div>
                     </div>
                   </div>
                   

@@ -7,10 +7,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:analyze": "npm run build && npx vite-bundle-analyzer dist",
+    "optimize-images": "node scripts/optimize-images.js",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "lighthouse": "npx lighthouse http://localhost:5173 --output=html --output-path=./lighthouse-report.html"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
@@ -19,7 +22,7 @@
     "axios": "^1.9.0",
     "classnames": "^2.5.1",
     "framer-motion": "^12.16.0",
-    "globe.gl": "^2.41.6",
+    "globe.gl": "^2.43.0",
     "postcss": "^8.4.32",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -27,11 +30,14 @@
     "react-select": "^5.10.2",
     "recharts": "^2.15.3",
     "tailwindcss": "^3.4.1",
-    "three": "^0.177.0"
+    "three": "^0.177.0",
+    "topojson-client": "^3.1.0"
   },
   "devDependencies": {
+    "@types/d3-geo": "^3.1.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
+    "@types/topojson-client": "^3.1.5",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -39,6 +45,8 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "gh-pages": "^6.1.0",
+    "sharp": "^0.34.3",
+    "terser": "^5.43.1",
     "typescript": "^5.2.2",
     "vite": "^5.1.0"
   }

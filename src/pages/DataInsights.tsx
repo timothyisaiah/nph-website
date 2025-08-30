@@ -2,37 +2,17 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
 import { images } from '../assets/images';
+import { dataBriefs, type DataBrief } from '../data/dataBriefs';
 
 const DataInsights: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'briefs' | 'visualization'>('briefs');
 
-  const dataBriefs = [
-    {
-      title: 'Maternal and Child Health Indicators in Uganda',
-      date: 'December 2024',
-      description: 'Analysis of key maternal and child health indicators across different regions of Uganda, highlighting disparities and opportunities for intervention.',
-      tags: ['Maternal Health', 'Child Health', 'Uganda']
-    },
-    {
-      title: 'Malaria Prevalence and Prevention Strategies',
-      date: 'November 2024',
-      description: 'Comprehensive review of malaria prevalence data and evaluation of current prevention strategies in East African communities.',
-      tags: ['Malaria', 'Prevention', 'East Africa']
-    },
-    {
-      title: 'Nutritional Status of Children Under Five',
-      date: 'October 2024',
-      description: 'Assessment of nutritional indicators including stunting, wasting, and underweight among children under five years in rural communities.',
-      tags: ['Nutrition', 'Child Health', 'Rural Health']
-    },
-    {
-      title: 'Healthcare Access and Utilization Patterns',
-      date: 'September 2024',
-      description: 'Analysis of healthcare access patterns and utilization rates across different socioeconomic groups and geographic regions.',
-      tags: ['Healthcare Access', 'Health Systems', 'Equity']
-    }
-  ];
+
+
+  const handleReadFullBrief = (brief: DataBrief) => {
+    navigate(`/data-brief/${brief.id}`);
+  };
 
   return (
     <PageLayout
@@ -76,35 +56,51 @@ const DataInsights: React.FC = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {dataBriefs.map((brief, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm text-gray-500">{brief.date}</span>
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">New</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+              {dataBriefs.map((brief) => (
+                <div key={brief.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full">
+                  <div className="flex h-full">
+                    {/* Chart Image Section (40% width) */}
+                    <div className="w-2/5 h-full overflow-hidden">
+                      <img 
+                        src={brief.chartImage} 
+                        alt={brief.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-3">{brief.title}</h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">{brief.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {brief.tags.map((tag, tagIndex) => (
-                        <span
-                          key={tagIndex}
-                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                    
+                    {/* Content Section (60% width) */}
+                    <div className="w-3/5 p-4 flex flex-col justify-center">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-blue-600 font-medium">{brief.date} | {brief.category}</span>
+                      </div>
+                      
+                      <h3 className="text-lg font-bold text-gray-800 mb-3 leading-tight">
+                        {brief.title}
+                      </h3>
+                      
+                      <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                        {brief.excerpt.length > 150 
+                          ? `${brief.excerpt.substring(0, 150)}...` 
+                          : brief.excerpt
+                        }
+                      </p>
+                      
+                      <button 
+                        onClick={() => handleReadFullBrief(brief)}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200 flex items-center mt-auto"
+                      >
+                        Read more →
+                      </button>
                     </div>
-                    <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
-                      Read Full Brief →
-                    </button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
+
+
 
         {activeTab === 'visualization' && (
           <div className="space-y-6">

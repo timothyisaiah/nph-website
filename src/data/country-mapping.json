@@ -1,0 +1,554 @@
+[
+  {
+    "dhsCode": "AF",
+    "countryName": "Afghanistan",
+    "iso3Code": "AFG",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "AL",
+    "countryName": "Albania",
+    "iso3Code": "ALB",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "AO",
+    "countryName": "Angola",
+    "iso3Code": "AGO",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "AM",
+    "countryName": "Armenia",
+    "iso3Code": "ARM",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "AZ",
+    "countryName": "Azerbaijan",
+    "iso3Code": "AZE",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "BD",
+    "countryName": "Bangladesh",
+    "iso3Code": "BGD",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "BJ",
+    "countryName": "Benin",
+    "iso3Code": "BEN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "BO",
+    "countryName": "Bolivia",
+    "iso3Code": "BOL",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "BT",
+    "countryName": "Botswana",
+    "iso3Code": "BTN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "BR",
+    "countryName": "Brazil",
+    "iso3Code": "BRA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "BF",
+    "countryName": "Burkina Faso",
+    "iso3Code": "BFA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "BU",
+    "countryName": "Burundi",
+    "iso3Code": "BDI",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "KH",
+    "countryName": "Cambodia",
+    "iso3Code": "KHM",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "CM",
+    "countryName": "Cameroon",
+    "iso3Code": "CMR",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "CV",
+    "countryName": "Cape Verde",
+    "iso3Code": "CPV",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "CF",
+    "countryName": "Central African Republic",
+    "iso3Code": "CAF",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TD",
+    "countryName": "Chad",
+    "iso3Code": "TCD",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "CO",
+    "countryName": "Colombia",
+    "iso3Code": "COL",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "KM",
+    "countryName": "Comoros",
+    "iso3Code": "COM",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "CG",
+    "countryName": "Congo",
+    "iso3Code": "COG",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "CD",
+    "countryName": "Congo Democratic Republic",
+    "iso3Code": "COD",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "CI",
+    "countryName": "Cote d'Ivoire",
+    "iso3Code": "CIV",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "DR",
+    "countryName": "Dominican Republic",
+    "iso3Code": "DOM",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "EC",
+    "countryName": "Ecuador",
+    "iso3Code": "ECU",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "EG",
+    "countryName": "Egypt",
+    "iso3Code": "EGY",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "ES",
+    "countryName": "El Salvador",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "EK",
+    "countryName": "Equatorial Guinea",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "ER",
+    "countryName": "Eritrea",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "SZ",
+    "countryName": "Eswatini",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "ET",
+    "countryName": "Ethiopia",
+    "iso3Code": "ETH",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "GA",
+    "countryName": "Gabon",
+    "iso3Code": "GAB",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "GM",
+    "countryName": "Gambia",
+    "iso3Code": "GMB",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "GH",
+    "countryName": "Ghana",
+    "iso3Code": "GHA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "GU",
+    "countryName": "Guatemala",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "GN",
+    "countryName": "Guinea",
+    "iso3Code": "GIN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "GY",
+    "countryName": "Guyana",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "HT",
+    "countryName": "Haiti",
+    "iso3Code": "HTI",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "HN",
+    "countryName": "Honduras",
+    "iso3Code": "HND",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "IA",
+    "countryName": "India",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "ID",
+    "countryName": "Indonesia",
+    "iso3Code": "IDN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "JO",
+    "countryName": "Jordan",
+    "iso3Code": "JOR",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "KK",
+    "countryName": "Kazakhstan",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "KE",
+    "countryName": "Kenya",
+    "iso3Code": "KEN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "KY",
+    "countryName": "Kyrgyz Republic",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "LA",
+    "countryName": "Lao People's Democratic Republic",
+    "iso3Code": "LAO",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "LS",
+    "countryName": "Lesotho",
+    "iso3Code": "LSO",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "LB",
+    "countryName": "Liberia",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "MD",
+    "countryName": "Madagascar",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "MW",
+    "countryName": "Malawi",
+    "iso3Code": "MWI",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "MV",
+    "countryName": "Maldives",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "ML",
+    "countryName": "Mali",
+    "iso3Code": "MLI",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "MR",
+    "countryName": "Mauritania",
+    "iso3Code": "MRT",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "MX",
+    "countryName": "Mexico",
+    "iso3Code": "MEX",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "MB",
+    "countryName": "Moldova",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "MA",
+    "countryName": "Morocco",
+    "iso3Code": "MAR",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "MZ",
+    "countryName": "Mozambique",
+    "iso3Code": "MOZ",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "MM",
+    "countryName": "Myanmar",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "NM",
+    "countryName": "Namibia",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "NP",
+    "countryName": "Nepal",
+    "iso3Code": "NPL",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "NC",
+    "countryName": "Nicaragua",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "NI",
+    "countryName": "Niger",
+    "iso3Code": "NIC",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "NG",
+    "countryName": "Nigeria",
+    "iso3Code": "NGA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "OS",
+    "countryName": "Nigeria (Ondo State)",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "PK",
+    "countryName": "Pakistan",
+    "iso3Code": "PAK",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "PG",
+    "countryName": "Papua New Guinea",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "PY",
+    "countryName": "Paraguay",
+    "iso3Code": "PRY",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "PE",
+    "countryName": "Peru",
+    "iso3Code": "PER",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "PH",
+    "countryName": "Philippines",
+    "iso3Code": "PHL",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "RW",
+    "countryName": "Rwanda",
+    "iso3Code": "RWA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "WS",
+    "countryName": "Samoa",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "ST",
+    "countryName": "Sao Tome and Principe",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "SN",
+    "countryName": "Senegal",
+    "iso3Code": "SEN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "SL",
+    "countryName": "Sierra Leone",
+    "iso3Code": "SLE",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "ZA",
+    "countryName": "South Africa",
+    "iso3Code": "ZAF",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "LK",
+    "countryName": "Sri Lanka",
+    "iso3Code": "LKA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "SD",
+    "countryName": "Sudan",
+    "iso3Code": "SDN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TJ",
+    "countryName": "Tajikistan",
+    "iso3Code": null,
+    "hasGeometry": false
+  },
+  {
+    "dhsCode": "TZ",
+    "countryName": "Tanzania",
+    "iso3Code": "TZA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TH",
+    "countryName": "Thailand",
+    "iso3Code": "THA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TL",
+    "countryName": "Timor-Leste",
+    "iso3Code": "TLS",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TG",
+    "countryName": "Togo",
+    "iso3Code": "TGO",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TT",
+    "countryName": "Trinidad and Tobago",
+    "iso3Code": "TTO",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TN",
+    "countryName": "Tunisia",
+    "iso3Code": "TUN",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TR",
+    "countryName": "Turkey",
+    "iso3Code": "TUR",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "TM",
+    "countryName": "Turkmenistan",
+    "iso3Code": "TKM",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "UG",
+    "countryName": "Uganda",
+    "iso3Code": "UGA",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "UA",
+    "countryName": "Ukraine",
+    "iso3Code": "UKR",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "UZ",
+    "countryName": "Uzbekistan",
+    "iso3Code": "UZB",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "VN",
+    "countryName": "Vietnam",
+    "iso3Code": "VNM",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "YE",
+    "countryName": "Yemen",
+    "iso3Code": "YEM",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "ZM",
+    "countryName": "Zambia",
+    "iso3Code": "ZMB",
+    "hasGeometry": true
+  },
+  {
+    "dhsCode": "ZW",
+    "countryName": "Zimbabwe",
+    "iso3Code": "ZWE",
+    "hasGeometry": true
+  }
+]

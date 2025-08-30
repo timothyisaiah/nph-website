@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
 import ServiceCard from '../components/services/ServiceCard';
+import OptimizedImage from '../components/common/OptimizedImage';
 import { images } from '../assets/images';
 
 const services = [
@@ -14,8 +15,8 @@ const services = [
       'Impact Evaluation Methodologies: Randomized trials, difference-in-differences, propensity-score matching and mixed-methods to assess intervention impact.',
       'Data Analysis & Reporting: Performing advanced quantitative and qualitative analyses, and translating results into clear, decision-oriented reports.'
     ],
-    image: images.publicHealthResearch.url,
-    imageAlt: images.publicHealthResearch.alt,
+    image: images.publicHealth.url,
+    imageAlt: images.publicHealth.alt,
     link: '/thematic-areas'
   },
   {
@@ -52,8 +53,8 @@ const services = [
       'Policy advocacy and social accountability to influence public health policy while enhancing citizen voice and accountability in health service delivery.',
       'Health promotion materials development such as toolkits and multimedia content to support campaigns and outreach efforts.'
     ],
-    image: images.community.url,
-    imageAlt: images.community.alt,
+    image: images.communityHealth.url,
+    imageAlt: images.communityHealth.alt,
     link: '/contact'
   }
 ];
@@ -67,14 +68,16 @@ const Services: React.FC = () => {
     >
       <div className="space-y-12">
         {services.map((service, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div key={index} className="bg-white overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* Image Section */}
               <div className="relative h-64 lg:h-full">
-                <img
+                <OptimizedImage
                   src={service.image}
                   alt={service.imageAlt}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority={index === 0} // Load first image immediately
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
               </div>

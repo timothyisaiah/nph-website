@@ -80,9 +80,8 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="text-gray-400 space-y-2">
-              <li>123 Health Avenue</li>
-              <li>Kampala, Uganda</li>
-              <li>Phone: +256 123 456 789</li>
+              <li>P.O. Box 202163, Nakawa</li>
+              <li>Ntinda-Kisaasi Rd</li>
               <li>Email: info@nph-solutions.com</li>
             </ul>
           </div>
