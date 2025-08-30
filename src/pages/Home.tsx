@@ -2,7 +2,7 @@
 // Main landing page for NPH Solutions website
 // Features: Globe visualization, responsive indicator lists, details panel, health tools, and more
 
-import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useCallback, useEffect, Suspense, lazy, startTransition } from 'react';
 import { useNavigate } from "react-router-dom";
 import MobileCountrySelector from "../components/globe/MobileCountrySelector";
 import { useIndicator } from "../context/IndicatorContext";
@@ -18,13 +18,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 const GlobeVisualization = lazy(() => import("../components/globe/OptimizedGlobeVisualization"));
 const FeedingTipsCarousel = lazy(() => import("../components/carousel/FeedingTipsCarousel"));
 const Select = lazy(() => import('react-select'));
-const LineChart = lazy(() => import('recharts').then(module => ({ default: module.LineChart })));
-const Line = lazy(() => import('recharts').then(module => ({ default: module.Line })));
-const XAxis = lazy(() => import('recharts').then(module => ({ default: module.XAxis })));
-const YAxis = lazy(() => import('recharts').then(module => ({ default: module.YAxis })));
-const Tooltip = lazy(() => import('recharts').then(module => ({ default: module.Tooltip })));
-const ResponsiveContainer = lazy(() => import('recharts').then(module => ({ default: module.ResponsiveContainer })));
-const CartesianGrid = lazy(() => import('recharts').then(module => ({ default: module.CartesianGrid })));
+const TrendChart = lazy(() => import("../components/data/TrendChart"));
 
 // Lazy load axios for API calls
 let axios: any = null;
@@ -246,25 +240,37 @@ const Home: React.FC = () => {
   // Memoized event handlers for globe
   const handleIndicatorSelect = useCallback(
     (indicatorId: string) => {
-      setSelectedIndicator(indicatorId);
-      navigate(`/data?indicator=${indicatorId}`);
+      startTransition(() => {
+        setSelectedIndicator(indicatorId);
+        navigate(`/data?indicator=${indicatorId}`);
+      });
     },
     [setSelectedIndicator, navigate]
   );
   // Replace handleGlobeCountrySelect to update selectedCountry and selectedGlobeCountry
   const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
-    setSelectedGlobeCountry(country);
-    setSelectedCountry(country.label);
-    setCountryData({
-      indicators: Math.floor(Math.random() * 50) + 10,
-      surveys: Math.floor(Math.random() * 20) + 5,
-      lastUpdated: new Date().toLocaleDateString(),
+    startTransition(() => {
+      setSelectedGlobeCountry(country);
+      setSelectedCountry(country.label);
+      setCountryData({
+        indicators: Math.floor(Math.random() * 50) + 10,
+        surveys: Math.floor(Math.random() * 20) + 5,
+        lastUpdated: new Date().toLocaleDateString(),
+      });
+      // Update overlay country if it matches
+      if (overlayAvailableCountries.find(c => c.value === country.value)) {
+        setOverlayCountry({ value: country.value, label: country.label });
+        
+        // If no indicator is selected, automatically select the first indicator and show overlay
+        if (selectedIdx === null) {
+          setSelectedIdx(0);
+        }
+        
+        // Ensure overlay country is set to the selected country
+        setOverlayCountry({ value: country.value, label: country.label });
+      }
     });
-    // Update overlay country if it matches
-    if (overlayAvailableCountries.find(c => c.value === country.value)) {
-      setOverlayCountry({ value: country.value, label: country.label });
-    }
-  }, [overlayAvailableCountries]);
+  }, [overlayAvailableCountries, selectedIdx]);
   const handleError = useCallback((errorMessage: string) => {
     setError(errorMessage);
   }, []);
@@ -469,14 +475,20 @@ const Home: React.FC = () => {
 
   // Details panel navigation handlers
   const handleNext = () => {
-    if (selectedIdx === null) setSelectedIdx(0);
-    else setSelectedIdx((selectedIdx + 1) % localIndicators.length);
+    startTransition(() => {
+      if (selectedIdx === null) setSelectedIdx(0);
+      else setSelectedIdx((selectedIdx + 1) % localIndicators.length);
+    });
   };
   const handlePrev = () => {
-    if (selectedIdx === null) setSelectedIdx(localIndicators.length - 1);
-    else setSelectedIdx((selectedIdx - 1 + localIndicators.length) % localIndicators.length);
+    startTransition(() => {
+      if (selectedIdx === null) setSelectedIdx(localIndicators.length - 1);
+      else setSelectedIdx((selectedIdx - 1 + localIndicators.length) % localIndicators.length);
+    });
   };
-  const handleClose = () => setSelectedIdx(null);
+  const handleClose = () => {
+    startTransition(() => setSelectedIdx(null));
+  };
 
   const handleCheckNutrition = () => {
     const { age, weight, height, gender } = calculatorData;
@@ -589,7 +601,6 @@ const Home: React.FC = () => {
                   </div>
                 }>
                   <GlobeVisualization 
-                    onError={handleError} 
                     onCountrySelect={handleGlobeCountrySelect}
                     selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
                     width={800}
@@ -643,7 +654,7 @@ const Home: React.FC = () => {
                           padding: "0",
                           "--indicator-color": color,
                         } as React.CSSProperties}
-                        onClick={() => setSelectedIdx(idx)}
+                        onClick={() => startTransition(() => setSelectedIdx(idx))}
                       >
                         <div className="home-arc-number" style={{ borderColor: color }}>{idx + 1}</div>
                         <div className="home-arc-content flex-1 min-w-0">
@@ -683,7 +694,6 @@ const Home: React.FC = () => {
                 </div>
               }>
                                  <GlobeVisualization 
-                   onError={handleError} 
                    onCountrySelect={handleGlobeCountrySelect}
                    selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
                    width={400}
@@ -772,17 +782,20 @@ const Home: React.FC = () => {
                     )}
                   </>
                 ) : (
-                  <div className="h-48 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={overlayData.sort((a, b) => a.SurveyYear - b.SurveyYear)}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="SurveyYear" />
-                        <YAxis label={{ value: localIndicators[selectedIdx].measurementType, angle: -90, position: 'insideLeft' }} />
-                        <Tooltip />
-                        <Line type="monotone" dataKey="Value" stroke="#4F46E5" name="Value" dot={{ fill: '#4F46E5' }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                    <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
+                  <div className="h-64 w-full">
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg">
+                        <LoadingSpinner />
+                      </div>
+                    }>
+                      <TrendChart
+                        data={overlayData}
+                        measurementType={localIndicators[selectedIdx].measurementType}
+                        indicatorName={localIndicators[selectedIdx].label}
+                        countryName={overlayCountry?.label || ''}
+                        height={240}
+                      />
+                    </Suspense>
                   </div>
                 )}
               </div>
@@ -814,7 +827,7 @@ const Home: React.FC = () => {
                   selectedIdx === idx && "selected"
                 )}
                 style={{ borderColor: color }}
-                onClick={() => setSelectedIdx(idx)}
+                                  onClick={() => startTransition(() => setSelectedIdx(idx))}
               >
                 <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
                 <div className="home-tablet-content">
@@ -847,7 +860,7 @@ const Home: React.FC = () => {
                     selectedIdx === idx && "selected"
                   )}
                   style={{ borderColor: color }}
-                  onClick={() => setSelectedIdx(idx)}
+                  onClick={() => startTransition(() => setSelectedIdx(idx))}
                 >
                   <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
                   <div className="home-tablet-content">
