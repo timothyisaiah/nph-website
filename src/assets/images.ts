@@ -1,11 +1,11 @@
 // Public domain images from Unsplash and other free sources
-import monitoringImage from './images/services/Monitoring and Evaluation Image.png';
-import dataAnalyticsImage from './images/services/Data analytics and system.jpg';
-import healthSystemsImage from './images/services/Health system .png';
-import communityHealthImage from './images/services/Health promotion.png';
-import healthAndEnvironmentImage from './images/services/Health and Environment.jpg';
-import politicalEconomyImage from './images/services/Political Economy.jpg';
-import publicHealthImage from './images/services/Public Health.jpg';
+import monitoringImage from './optimized/Monitoring and Evaluation Image.webp';
+import dataAnalyticsImage from './optimized/Data analytics and system.webp';
+import healthSystemsImage from './optimized/Health system .webp';
+import communityHealthImage from './optimized/Health promotion.webp';
+import healthAndEnvironmentImage from './optimized/Health and Environment.webp';
+import politicalEconomyImage from './optimized/Political Economy.webp';
+import publicHealthImage from './optimized/Public Health.webp';
 
 export const images = {
   hero: {

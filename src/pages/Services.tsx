@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
 import ServiceCard from '../components/services/ServiceCard';
+import OptimizedImage from '../components/common/OptimizedImage';
 import { images } from '../assets/images';
 
 const services = [
@@ -71,10 +72,12 @@ const Services: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* Image Section */}
               <div className="relative h-64 lg:h-full">
-                <img
+                <OptimizedImage
                   src={service.image}
                   alt={service.imageAlt}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority={index === 0} // Load first image immediately
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
               </div>

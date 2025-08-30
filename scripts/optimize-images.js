@@ -1,16 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Check if sharp is installed
+let sharp;
 try {
-  require('sharp');
+  sharp = (await import('sharp')).default;
 } catch (error) {
   console.log('Installing sharp for image optimization...');
   execSync('npm install --save-dev sharp', { stdio: 'inherit' });
+  sharp = (await import('sharp')).default;
 }
-
-const sharp = require('sharp');
 
 const assetsDir = path.join(__dirname, '../src/assets');
 const imagesDir = path.join(assetsDir, 'images');
