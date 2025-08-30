@@ -38,8 +38,25 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Add padding to body when navbar becomes fixed (homepage only)
+  useEffect(() => {
+    if (isHomePage) {
+      if (isScrolled) {
+        document.body.style.paddingTop = '64px'; // 16 * 4 = 64px (h-16)
+      } else {
+        document.body.style.paddingTop = '0px';
+      }
+    }
+    
+    return () => {
+      if (isHomePage) {
+        document.body.style.paddingTop = '0px';
+      }
+    };
+  }, [isScrolled, isHomePage]);
+
   return (
-    <nav className={`${isHomePage ? 'absolute top-0 left-0 right-0 z-50' : 'relative'} w-full transition-all duration-300 bg-gray-900 shadow-md`}>
+    <nav className={`${isHomePage ? (isScrolled ? 'fixed top-0 left-0 right-0 z-50' : 'absolute top-0 left-0 right-0 z-50') : 'sticky top-0 z-50'} w-full transition-all duration-300 bg-gray-900 shadow-md`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
