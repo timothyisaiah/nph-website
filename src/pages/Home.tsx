@@ -2,7 +2,7 @@
 // Main landing page for NPH Solutions website
 // Features: Globe visualization, responsive indicator lists, details panel, health tools, and more
 
-import React, { useState, useCallback, useMemo, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react';
 import { useNavigate } from "react-router-dom";
 import MobileCountrySelector from "../components/globe/MobileCountrySelector";
 import { useIndicator } from "../context/IndicatorContext";
@@ -578,9 +578,9 @@ const Home: React.FC = () => {
         <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{ 
           background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)" 
         }}>
-          {/* Desktop Layout: Globe and Indicator List Side by Side */}
+                               {/* Desktop Layout: Globe and Indicator List Side by Side */}
           <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
-            {/* Globe Visualization (left) */}
+            {/* Globe Visualization (left) with floating country selector */}
             <div className="flex-1 flex justify-center">
               <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
                 <Suspense fallback={
@@ -591,14 +591,29 @@ const Home: React.FC = () => {
                   <GlobeVisualization 
                     onError={handleError} 
                     onCountrySelect={handleGlobeCountrySelect}
-                    showCountryDialog={true} // Show the overlay dialog on desktop
                     selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                    width={800}
+                    height={700}
+                    className="w-full h-full"
                   />
                 </Suspense>
+                
+                {/* Floating Country Selector Dialog */}
+                <div className="absolute top-4 left-4 z-10">
+                  <MobileCountrySelector
+                    onCountrySelect={handleGlobeCountrySelect}
+                    onCountryClear={() => {
+                      setSelectedGlobeCountry(null);
+                      setSelectedCountry(null);
+                      setCountryData(null);
+                    }}
+                    selectedCountry={selectedGlobeCountry}
+                  />
+                </div>
               </div>
             </div>
             {/* Desktop Indicator List (right) */}
-            <div className="flex-1 flex justify-center">
+            <div className="flex-2 flex justify-center">
               <div className="w-full max-w-2xl">
                 <h2 className="text-lg font-bold mb-3 text-gray-800 text-left" style={{ transform: "translatex(-300px)", textDecoration: "underline" }}>
                   Health Indicators
@@ -667,12 +682,14 @@ const Home: React.FC = () => {
                   <LoadingSpinner />
                 </div>
               }>
-                <GlobeVisualization 
-                  onError={handleError} 
-                  onCountrySelect={handleGlobeCountrySelect}
-                  showCountryDialog={false} // Hide the overlay dialog on mobile
-                  selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-                />
+                                 <GlobeVisualization 
+                   onError={handleError} 
+                   onCountrySelect={handleGlobeCountrySelect}
+                   selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
+                   width={400}
+                   height={400}
+                   className="w-full h-full"
+                 />
               </Suspense>
             </div>
           </div>
@@ -704,7 +721,7 @@ const Home: React.FC = () => {
                   <Select
                     options={overlayAvailableCountries}
                     value={overlayCountry}
-                    onChange={(opt) => setOverlayCountry(opt)}
+                    onChange={(opt: any) => setOverlayCountry(opt)}
                     classNamePrefix="react-select"
                     placeholder="Select country..."
                     isSearchable
