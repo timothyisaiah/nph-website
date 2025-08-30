@@ -673,7 +673,7 @@ const Home: React.FC = () => {
             </div>
           </div>
           {/* Mobile/Tablet Layout: Country Selector + Globe (stacked) */}
-          <div className="lg:hidden w-full max-w-md mx-auto flex flex-col items-center space-y-8 px-4">
+          <div className="lg:hidden w-full flex flex-col items-center space-y-8 px-4">
             
             {/* Mobile Country Selector */}
             <MobileCountrySelector
@@ -687,17 +687,17 @@ const Home: React.FC = () => {
             />
             
             {/* Mobile Globe */}
-            <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative shadow-2xl border border-gray-200">
+            <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative flex items-center justify-center">
               <Suspense fallback={
                 <div className="flex items-center justify-center w-full h-full">
                   <LoadingSpinner />
                 </div>
               }>
-                                 <GlobeVisualization 
+              <GlobeVisualization 
                    onCountrySelect={handleGlobeCountrySelect}
                    selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-                   width={400}
-                   height={400}
+                   width={330}
+                   height={300}
                    className="w-full h-full"
                  />
               </Suspense>
@@ -965,7 +965,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
               <button
-                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm md:text-base"
                 onClick={handleCheckNutrition}
               >
                 Check Child Nutrition Status
