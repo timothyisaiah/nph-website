@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
-import ServiceCard from '../components/services/ServiceCard';
 import OptimizedImage from '../components/common/OptimizedImage';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import { images } from '../assets/images';
+
+// Lazy load the ServiceCard component to reduce initial bundle size
+const ServiceCard = lazy(() => import('../components/services/ServiceCard'));
 
 const services = [
   {
@@ -59,6 +62,60 @@ const services = [
   }
 ];
 
+// Service item component with optimized image loading
+const ServiceItem: React.FC<{ service: typeof services[0]; index: number }> = ({ service, index }) => {
+  return (
+    <div className="bg-white overflow-hidden shadow-lg rounded-lg">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        {/* Image Section with optimized loading */}
+        <div className="relative h-64 lg:h-full">
+          <OptimizedImage
+            src={service.image}
+            alt={service.imageAlt}
+            className="w-full h-full"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            priority={index === 0} // Only load first image immediately
+            placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+        </div>
+        
+        {/* Content Section */}
+        <div className="p-6 lg:p-8">
+          <h3 className="text-xl lg:text-2xl font-bold text-gray-800 mb-4">{service.title}</h3>
+          <p className="text-gray-600 mb-6 leading-relaxed text-sm lg:text-base">{service.description}</p>
+          
+          {service.detailedServices && (
+            <div>
+              <h4 className="text-base lg:text-lg font-semibold text-gray-800 mb-3">Our Services Include:</h4>
+              <ul className="space-y-2">
+                {service.detailedServices.map((item, itemIndex) => (
+                  <li key={itemIndex} className="flex items-start">
+                    <span className="text-blue-600 mr-2 mt-1 flex-shrink-0">•</span>
+                    <span className="text-gray-700 text-sm lg:text-base">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          <div className="mt-6">
+            <Link
+              to={service.link}
+              className="inline-flex items-center px-4 lg:px-6 py-2 lg:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm lg:text-base"
+            >
+              Learn More
+              <svg className="ml-2 w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Services: React.FC = () => {
   return (
     <PageLayout
@@ -66,55 +123,11 @@ const Services: React.FC = () => {
       intro="We provide specialized public health services that combine research excellence, data-driven insights, and community engagement to address complex health challenges and improve population health outcomes across Africa."
       bgImage={images.services.url}
     >
-      <div className="space-y-12">
+      <div className="space-y-8 lg:space-y-12">
         {services.map((service, index) => (
-          <div key={index} className="bg-white overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-              {/* Image Section */}
-              <div className="relative h-64 lg:h-full">
-                <OptimizedImage
-                  src={service.image}
-                  alt={service.imageAlt}
-                  className="w-full h-full"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority={index === 0} // Load first image immediately
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-              </div>
-              
-              {/* Content Section */}
-              <div className="p-8">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">{service.title}</h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">{service.description}</p>
-                
-                {service.detailedServices && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3">Our Services Include:</h4>
-                    <ul className="space-y-2">
-                      {service.detailedServices.map((item, itemIndex) => (
-                        <li key={itemIndex} className="flex items-start">
-                          <span className="text-blue-600 mr-2 mt-1">•</span>
-                          <span className="text-gray-700">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                
-                <div className="mt-6">
-                  <Link
-                    to={service.link}
-                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                  >
-                    Learn More
-                    <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Suspense key={index} fallback={<LoadingSpinner />}>
+            <ServiceItem service={service} index={index} />
+          </Suspense>
         ))}
       </div>
     </PageLayout>
