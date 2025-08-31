@@ -14,7 +14,7 @@ const thematicAreas = [
     title: 'Health and Environment',
     description: 'Using a political ecology of health perspective, we examine the complex interplay between environmental degradation and public health. We analyse how industrialization, agribusiness, extractive economies, and climate change degrade ecosystems and produce adverse health outcomes ranging from respiratory and waterborne illnesses to displacement and food insecurity. Our work supports integrated environmental health responses, including regulatory frameworks, urban resilience planning, and environmental justice movements, while promoting sustainable and equitable development.',
     image: images.healthAndEnvironment.url,
-    imageAlt: images.globalHealth.alt
+    imageAlt: images.healthAndEnvironment.alt
   },
   {
     title: 'Globalization and Health',
@@ -32,7 +32,7 @@ const thematicAreas = [
     title: 'Political Economy of Health and Development',
     description: 'We apply a critical political economy lens to interrogate dominant development paradigms and their impact on public health. We analyse the historical and structural drivers of health improvements, challenging simplistic biomedical and economic growth narratives. Our work addresses the politics of aid, donor-recipient dynamics, and the contradictions within development frameworks such as the Sustainable Development Goals. We advocate for governance reforms that resist corporate capture and advance health justice through rights-based, redistributive, and decolonial approaches to development.',
     image: images.politicalEconomy.url,
-    imageAlt: images.healthPolicy.alt
+    imageAlt: images.politicalEconomy.alt
   },
   {
     title: 'Epidemiologic Profiles of Global Health and Disease',

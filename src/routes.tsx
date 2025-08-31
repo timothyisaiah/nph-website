@@ -5,7 +5,7 @@ import About from './pages/About';
 import ThematicAreas from './pages/ThematicAreas';
 import Publications from './pages/Publications';
 import Services from './pages/Services';
-import Blog from './pages/Blog';
+
 import Contact from './pages/Contact';
 import ErrorPage from './pages/Error';
 import DataCanvas from './components/data/DataCanvas';
@@ -38,10 +38,7 @@ export const router = createBrowserRouter([
         path: 'services',
         element: <Services />,
       },
-      {
-        path: 'blog',
-        element: <Blog />,
-      },
+
       {
         path: 'contact',
         element: <Contact />,

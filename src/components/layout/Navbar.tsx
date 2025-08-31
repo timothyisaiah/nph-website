@@ -15,7 +15,6 @@ const Navbar = () => {
     { name: 'Thematic Areas', path: '/thematic-areas' },
     { name: 'Publications', path: '/publications' },
     { name: 'Services', path: '/services' },
-    // { name: 'Blog', path: '/blog' },
     { name: 'Data Insights', path: '/data' },
     { name: 'Contact', path: '/contact' },
   ];
@@ -25,7 +24,8 @@ const Navbar = () => {
     if (path === '/') {
       return location.pathname === '/';
     }
-    return location.pathname.startsWith(path);
+    // For other paths, check for exact match only
+    return location.pathname === path;
   };
 
   // Handle scroll effect
