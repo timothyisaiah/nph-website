@@ -57,11 +57,17 @@ const DataInsights: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-              {dataBriefs.map((brief) => (
-                <div key={brief.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full">
-                  <div className="flex h-full">
-                    {/* Chart Image Section (40% width) */}
-                    <div className="w-2/5 h-full overflow-hidden">
+              {dataBriefs
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map((brief) => (
+                <div 
+                  key={brief.id} 
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full cursor-pointer"
+                  onClick={() => handleReadFullBrief(brief)}
+                >
+                  <div className="flex flex-col h-full">
+                    {/* Chart Image Section - Full width, corner to corner */}
+                    <div className="w-full h-48 overflow-hidden">
                       <img 
                         src={brief.chartImage} 
                         alt={brief.title}
@@ -69,8 +75,8 @@ const DataInsights: React.FC = () => {
                       />
                     </div>
                     
-                    {/* Content Section (60% width) */}
-                    <div className="w-3/5 p-4 flex flex-col justify-center">
+                    {/* Content Section - Full width below image */}
+                    <div className="flex-1 p-4 flex flex-col">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-blue-600 font-medium">{brief.date} | {brief.category}</span>
                       </div>
@@ -79,19 +85,16 @@ const DataInsights: React.FC = () => {
                         {brief.title}
                       </h3>
                       
-                      <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                      <p className="text-gray-600 text-sm leading-relaxed mb-4 flex-1">
                         {brief.excerpt.length > 150 
                           ? `${brief.excerpt.substring(0, 150)}...` 
                           : brief.excerpt
                         }
                       </p>
                       
-                      <button 
-                        onClick={() => handleReadFullBrief(brief)}
-                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200 flex items-center mt-auto"
-                      >
+                      <div className="text-blue-600 font-medium text-sm flex items-center">
                         Read more →
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>

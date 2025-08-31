@@ -7,7 +7,6 @@ const Header = () => {
     { name: 'Thematic Areas', path: '/thematic-areas' },
     { name: 'Publications', path: '/publications' },
     { name: 'Our Services', path: '/services' },
-    // { name: 'Blog', path: '/blog' },
     { name: 'Data Insights', path: '/data' },
     { name: 'Contact', path: '/contact' },
   ];
