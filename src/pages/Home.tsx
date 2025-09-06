@@ -221,13 +221,19 @@ const Home: React.FC = () => {
   
   // Demographic data state
   const [demographicData, setDemographicData] = useState<{
-    population?: { value: number; year: number };
-    genderParity?: { value: number; year: number };
-    wealthParity?: { value: number; year: number };
-    residence?: { urban: number; rural: number; year: number };
-    education?: { primary: number; secondary: number; tertiary: number; year: number };
+    population?: { value: number; year: number; source?: string };
+    genderParity?: { value: number; year: number; source?: string };
+    wealthParity?: { value: number; year: number; source?: string };
+    residence?: { urban: number; rural: number; year: number; source?: string };
+    education?: { 
+      primary?: { value: number; year: number; source?: string } | number; 
+      secondary?: { value: number; year: number; source?: string } | number; 
+      tertiary?: { value: number; year: number; source?: string } | number; 
+      year?: number;
+      source?: string;
+    };
     currency?: string;
-    gdpPerCapita?: { value: number; year: number };
+    gdpPerCapita?: { value: number; year: number; source?: string };
   }>({});
   const [demographicLoading, setDemographicLoading] = useState(false);
   const [showNutritionDisclaimer, setShowNutritionDisclaimer] = useState(false);
@@ -244,6 +250,51 @@ const Home: React.FC = () => {
     },
     [setSelectedIndicator, navigate]
   );
+
+  // Function to fetch demographic data for a country
+  const fetchDemographicData = useCallback(async (countryCode: string) => {
+    setDemographicLoading(true);
+    // Clear existing data to show loading state
+    setDemographicData({});
+    try {
+      const axiosInstance = await loadAxios();
+      
+      // Try multiple data sources in order of preference
+      const dataSources = [
+        () => fetchFromWorldBank(countryCode, axiosInstance),
+        () => fetchFromRestCountries(countryCode, axiosInstance)
+        // Note: DHS removed as it doesn't provide population-level demographic data
+      ];
+
+      let demographicData = null;
+      
+      for (let i = 0; i < dataSources.length; i++) {
+        try {
+          demographicData = await dataSources[i]();
+          
+          if (demographicData && Object.keys(demographicData).length > 1) {
+            break; // Use first successful source
+          }
+        } catch (error) {
+          continue;
+        }
+      }
+
+      if (demographicData && Object.keys(demographicData).length > 1) {
+        setDemographicData(demographicData);
+      } else {
+        // Fallback to hardcoded data
+        const fallbackData = getFallbackDemographicData(countryCode);
+        setDemographicData(fallbackData);
+      }
+    } catch (error) {
+      const fallbackData = getFallbackDemographicData(countryCode);
+      setDemographicData(fallbackData);
+    } finally {
+      setDemographicLoading(false);
+    }
+  }, []);
+
   // Replace handleGlobeCountrySelect to update selectedCountry and selectedGlobeCountry
   const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
     startTransition(() => {
@@ -254,8 +305,11 @@ const Home: React.FC = () => {
         surveys: Math.floor(Math.random() * 20) + 5,
         lastUpdated: new Date().toLocaleDateString(),
       });
+      
       // Update overlay country if it matches
-      if (overlayAvailableCountries.find(c => c.value === country.value)) {
+      const foundCountry = overlayAvailableCountries.find(c => c.value === country.value);
+      
+      if (foundCountry) {
         setOverlayCountry({ value: country.value, label: country.label });
         
         // If no indicator is selected, automatically select the first indicator and show overlay
@@ -263,11 +317,11 @@ const Home: React.FC = () => {
           setSelectedIdx(0);
         }
         
-        // Ensure overlay country is set to the selected country
-        setOverlayCountry({ value: country.value, label: country.label });
+        // Fetch demographic data immediately when country is selected
+        fetchDemographicData(country.value);
       }
     });
-  }, [overlayAvailableCountries, selectedIdx]);
+  }, [overlayAvailableCountries, selectedIdx, fetchDemographicData]);
   const handleError = useCallback((errorMessage: string) => {
     setError(errorMessage);
   }, []);
@@ -283,233 +337,249 @@ const Home: React.FC = () => {
           setOverlayAvailableCountries(opts);
           const defaultCountry = opts.find((c: any) => c.value === 'UG') || opts[0];
           setOverlayCountry(defaultCountry as { value: string; label: string } | null);
+        })
+        .catch((error: any) => {
+          // Silently handle error
         });
     });
   }, []);
 
-
-
-  // Function to fetch demographic data for a country
-  const fetchDemographicData = useCallback(async (countryCode: string) => {
-    setDemographicLoading(true);
-    try {
-      const axiosInstance = await loadAxios();
+  // World Bank API data fetcher
+  const fetchFromWorldBank = async (countryCode: string, axiosInstance: any) => {
+    const countryMapping: { [key: string]: string } = {
+      'UG': 'UG', 'KE': 'KE', 'TZ': 'TZ', 'RW': 'RW', 'ET': 'ET',
+      'NG': 'NG', 'ZA': 'ZA', 'EG': 'EG', 'GH': 'GH', 'MA': 'MA'
+    };
+    
+    const wbCountryCode = countryMapping[countryCode] || countryCode;
+    
+    const indicators = {
+      // Core indicators you need
+      population: 'SP.POP.TOTL', // Total population
+      gdpPerCapita: 'NY.GDP.PCAP.CD', // GDP per capita
+      urbanPopulation: 'SP.URB.TOTL.IN.ZS', // Urban population % (for residence distribution)
       
-      // Define demographic indicators to fetch (using real DHS indicator IDs)
-      const demographicIndicators = {
-        // Using common DHS indicators that provide demographic breakdowns
-        population: 'FE_FRTR_W_TFR', // Total fertility rate (for population context)
-        genderParity: 'CN_NUTS_C_HA2', // Children stunted (for gender breakdown)
-        wealthParity: 'CN_NUTS_C_WH2', // Children wasted (for wealth breakdown)
-        residence: 'CN_NUTS_C_WHP', // Children overweight (for residence breakdown)
-        education: 'CN_IYCB_C_EXB', // Exclusive breastfeeding (for education breakdown)
-        gdpPerCapita: 'CM_ECMT_C_U5M' // Under-five mortality (for economic context)
-      };
-
-      // Fetch demographic data in parallel
-      const demographicPromises = Object.entries(demographicIndicators).map(async ([key, indicatorId]) => {
-        try {
-          const response = await axiosInstance.get('https://api.dhsprogram.com/rest/dhs/data', {
-            params: {
-              indicatorIds: indicatorId,
-              countryIds: countryCode,
-              surveyYearStart: 2015,
-              surveyYearEnd: new Date().getFullYear(),
-              returnFields: 'Value,SurveyYear,CharacteristicLabel',
-              f: 'json',
-            },
-          });
-          return { key, data: response.data.Data || [] };
-        } catch (error) {
-          console.warn(`Failed to fetch ${key} data:`, error);
-          return { key, data: [] };
-        }
-      });
-
-      const results = await Promise.all(demographicPromises);
+      // Gender parity indicators (literacy rates)
+      femaleLiteracy: 'SE.ADT.LITR.FE.ZS', // Female literacy rate
+      maleLiteracy: 'SE.ADT.LITR.MA.ZS', // Male literacy rate
       
-      // Process demographic data
-      const processedData: any = {};
-      
-      results.forEach(({ key, data }) => {
-        if (data.length > 0) {
-          const latest = data.sort((a: any, b: any) => b.SurveyYear - a.SurveyYear)[0];
-          
-          switch (key) {
-            case 'population':
-              // Use fertility rate as a population indicator
-              processedData.population = {
-                value: Math.round(latest.Value * 1000000), // Convert fertility rate to population estimate
-                year: latest.SurveyYear
-              };
-              break;
-            case 'genderParity':
-              // Use stunting data with gender breakdown
-              const genderData = data.filter((d: any) => 
-                d.CharacteristicLabel && (d.CharacteristicLabel.includes('Male') || d.CharacteristicLabel.includes('Female'))
-              );
-              if (genderData.length >= 2) {
-                const male = genderData.find((d: any) => d.CharacteristicLabel.includes('Male'));
-                const female = genderData.find((d: any) => d.CharacteristicLabel.includes('Female'));
-                const maleValue = male?.Value || 0;
-                const femaleValue = female?.Value || 0;
-                processedData.genderParity = {
-                  value: femaleValue > 0 ? maleValue / femaleValue : 1,
-                  year: latest.SurveyYear
-                };
-              } else {
-                processedData.genderParity = {
-                  value: latest.Value,
-                  year: latest.SurveyYear
-                };
-              }
-              break;
-            case 'wealthParity':
-              // Use wasting data with wealth breakdown
-              const wealthData = data.filter((d: any) => 
-                d.CharacteristicLabel && (
-                  d.CharacteristicLabel.includes('Poorest') || 
-                  d.CharacteristicLabel.includes('Richest')
-                )
-              );
-              if (wealthData.length >= 2) {
-                const poorest = wealthData.find((d: any) => d.CharacteristicLabel.includes('Poorest'));
-                const richest = wealthData.find((d: any) => d.CharacteristicLabel.includes('Richest'));
-                const poorestValue = poorest?.Value || 0;
-                const richestValue = richest?.Value || 0;
-                processedData.wealthParity = {
-                  value: richestValue > 0 ? poorestValue / richestValue : 1,
-                  year: latest.SurveyYear
-                };
-              } else {
-                processedData.wealthParity = {
-                  value: latest.Value,
-                  year: latest.SurveyYear
-                };
-              }
-              break;
-            case 'residence':
-              // Process urban/rural breakdown
-              const residenceData = data.filter((d: any) => 
-                d.CharacteristicLabel && (d.CharacteristicLabel.includes('Urban') || d.CharacteristicLabel.includes('Rural'))
-              );
-              if (residenceData.length >= 2) {
-                const urban = residenceData.find((d: any) => d.CharacteristicLabel.includes('Urban'));
-                const rural = residenceData.find((d: any) => d.CharacteristicLabel.includes('Rural'));
-                processedData.residence = {
-                  urban: urban?.Value || 0,
-                  rural: rural?.Value || 0,
-                  year: latest.SurveyYear
-                };
-              } else {
-                // Fallback: estimate urban/rural split based on typical patterns
-                processedData.residence = {
-                  urban: 30, // 30% urban
-                  rural: 70, // 70% rural
-                  year: latest.SurveyYear
-                };
-              }
-              break;
-            case 'education':
-              // Process education levels
-              const educationData = data.filter((d: any) => 
-                d.CharacteristicLabel && (
-                  d.CharacteristicLabel.includes('Primary') || 
-                  d.CharacteristicLabel.includes('Secondary') || 
-                  d.CharacteristicLabel.includes('Higher') ||
-                  d.CharacteristicLabel.includes('No education')
-                )
-              );
-              if (educationData.length >= 3) {
-                const primary = educationData.find((d: any) => d.CharacteristicLabel.includes('Primary'));
-                const secondary = educationData.find((d: any) => d.CharacteristicLabel.includes('Secondary'));
-                const tertiary = educationData.find((d: any) => d.CharacteristicLabel.includes('Higher'));
-                processedData.education = {
-                  primary: primary?.Value || 0,
-                  secondary: secondary?.Value || 0,
-                  tertiary: tertiary?.Value || 0,
-                  year: latest.SurveyYear
-                };
-              } else {
-                // Fallback: typical education distribution
-                processedData.education = {
-                  primary: 45,
-                  secondary: 35,
-                  tertiary: 20,
-                  year: latest.SurveyYear
-                };
-              }
-              break;
-            case 'gdpPerCapita':
-              // Use under-five mortality as economic indicator (inverse relationship)
-              processedData.gdpPerCapita = {
-                value: Math.max(500, 5000 - (latest.Value * 50)), // Estimate GDP based on mortality
-                year: latest.SurveyYear
-              };
-              break;
+      // Education indicators
+      primaryEnrollment: 'SE.PRM.NENR', // Primary enrollment rate
+      secondaryEnrollment: 'SE.SEC.NENR', // Secondary enrollment rate
+      tertiaryEnrollment: 'SE.TER.ENRR' // Tertiary enrollment rate
+    };
+
+    const promises = Object.entries(indicators).map(async ([key, indicator]) => {
+      try {
+        const response = await axiosInstance.get('https://api.worldbank.org/v2/country/' + wbCountryCode + '/indicator/' + indicator, {
+          params: {
+            format: 'json',
+            date: '2020:2023',
+            per_page: 1
           }
+        });
+        
+        const data = response.data[1];
+        if (data && data.length > 0) {
+          const latest = data[0];
+          return {
+            key,
+            value: latest.value,
+            year: latest.date
+          };
         }
-      });
+        return null;
+      } catch (error) {
+        return null;
+      }
+    });
 
-      // Add currency information (this would typically come from a different API)
-      processedData.currency = getCurrencyForCountry(countryCode);
+    const results = await Promise.all(promises);
+    const processedData: any = {};
+
+    results.forEach(result => {
+      if (result) {
+        switch (result.key) {
+          case 'population':
+            processedData.population = {
+              value: Math.round(result.value),
+              year: result.year,
+              source: 'World Bank'
+            };
+            break;
+          case 'gdpPerCapita':
+            processedData.gdpPerCapita = {
+              value: Math.round(result.value),
+              year: result.year,
+              source: 'World Bank'
+            };
+            break;
+          case 'urbanPopulation':
+            processedData.residence = {
+              urban: result.value,
+              rural: 100 - result.value,
+              year: result.year,
+              source: 'World Bank'
+            };
+            break;
+          case 'femaleLiteracy':
+          case 'maleLiteracy':
+            // Store for gender parity calculation (only if value is not null)
+            if (result.value !== null) {
+              if (!processedData.literacyRates) processedData.literacyRates = {};
+              processedData.literacyRates[result.key] = {
+                value: result.value,
+                year: result.year,
+                source: 'World Bank'
+              };
+            }
+            break;
+          case 'primaryEnrollment':
+          case 'secondaryEnrollment':
+          case 'tertiaryEnrollment':
+            // Store for education levels (only if value is not null)
+            if (result.value !== null) {
+              if (!processedData.education) processedData.education = {};
+              const level = result.key.replace('Enrollment', '');
+              processedData.education[level] = {
+                value: result.value,
+                year: result.year,
+                source: 'World Bank'
+              };
+            }
+            break;
+        }
+      }
+    });
+
+    // Calculate gender parity index from literacy rates
+    if (processedData.literacyRates?.femaleLiteracy && processedData.literacyRates?.maleLiteracy) {
+      const femaleRate = processedData.literacyRates.femaleLiteracy.value;
+      const maleRate = processedData.literacyRates.maleLiteracy.value;
+      processedData.genderParity = {
+        value: maleRate > 0 ? femaleRate / maleRate : 1,
+        year: processedData.literacyRates.femaleLiteracy.year,
+        source: 'World Bank (calculated from literacy rates)'
+      };
+    } else {
+      // If no literacy data available, set a default gender parity
+      processedData.genderParity = {
+        value: 0.95, // Default gender parity
+        year: 2023,
+        source: 'Default estimate'
+      };
+    }
+
+    processedData.currency = getCurrencyForCountry(countryCode);
+    return processedData;
+  };
+
+  // REST Countries API data fetcher
+  const fetchFromRestCountries = async (countryCode: string, axiosInstance: any) => {
+    const countryMapping: { [key: string]: string } = {
+      'UG': 'UGA', 'KE': 'KEN', 'TZ': 'TZA', 'RW': 'RWA', 'ET': 'ETH',
+      'NG': 'NGA', 'ZA': 'ZAF', 'EG': 'EGY', 'GH': 'GHA', 'MA': 'MAR'
+    };
+    
+    const iso3Code = countryMapping[countryCode] || countryCode;
+    
+    try {
+      const response = await axiosInstance.get(`https://restcountries.com/v3.1/alpha/${iso3Code}`);
+      const country = response.data[0];
       
-      // Add fallback data if no demographic data was found
-      if (Object.keys(processedData).length <= 1) { // Only currency was added
-        const fallbackData = getFallbackDemographicData(countryCode);
-        setDemographicData({ ...processedData, ...fallbackData });
-      } else {
-        setDemographicData(processedData);
+      if (country) {
+        const result = {
+          population: {
+            value: country.population,
+            year: 2023,
+            source: 'REST Countries API'
+          },
+          currency: Object.keys(country.currencies || {})[0] || getCurrencyForCountry(countryCode),
+          area: country.area,
+          capital: country.capital?.[0],
+          region: country.region,
+          subregion: country.subregion,
+          languages: Object.values(country.languages || {}),
+          // Estimate urban/rural based on region
+          residence: {
+            urban: getEstimatedUrbanPercentage(country.region),
+            rural: 100 - getEstimatedUrbanPercentage(country.region),
+            year: 2023,
+            source: 'REST Countries API (estimated from region)'
+          }
+        };
+        return result;
       }
     } catch (error) {
-      console.error('Failed to fetch demographic data:', error);
-    } finally {
-      setDemographicLoading(false);
+      // Silently handle error
     }
-  }, []);
+    return null;
+  };
+
 
   // Helper function to get fallback demographic data for a country
   const getFallbackDemographicData = (countryCode: string) => {
-    // Fallback demographic data for countries where DHS data might not be available
+    // Fallback demographic data for countries where APIs might not be available
     const fallbackData: { [key: string]: any } = {
-      population: { value: 50000000, year: 2023 }, // Default population
-      genderParity: { value: 0.95, year: 2023 }, // Default gender parity
-      wealthParity: { value: 0.8, year: 2023 }, // Default wealth parity
-      residence: { urban: 35, rural: 65, year: 2023 }, // Default urban/rural split
-      education: { primary: 50, secondary: 30, tertiary: 20, year: 2023 }, // Default education levels
-      gdpPerCapita: { value: 2000, year: 2023 } // Default GDP per capita
+      population: { value: 50000000, year: 2023, source: 'Fallback data' }, // Default population
+      genderParity: { value: 0.95, year: 2023, source: 'Fallback data' }, // Default gender parity
+      residence: { urban: 35, rural: 65, year: 2023, source: 'Fallback data' }, // Default urban/rural split
+      education: { primary: 50, secondary: 30, tertiary: 20, year: 2023, source: 'Fallback data' }, // Default education levels
+      gdpPerCapita: { value: 2000, year: 2023, source: 'Fallback data' } // Default GDP per capita
     };
     
     // Country-specific fallback data
     const countrySpecificData: { [key: string]: any } = {
       'UG': { // Uganda
-        population: { value: 48582300, year: 2023 },
-        gdpPerCapita: { value: 1056, year: 2023 },
-        residence: { urban: 25, rural: 75, year: 2023 }
+        population: { value: 48582300, year: 2023, source: 'Country-specific fallback' },
+        gdpPerCapita: { value: 1056, year: 2023, source: 'Country-specific fallback' },
+        residence: { urban: 25, rural: 75, year: 2023, source: 'Country-specific fallback' },
+        genderParity: { value: 0.98, year: 2023, source: 'Country-specific fallback' },
+        education: { primary: 85, secondary: 45, tertiary: 8, year: 2023, source: 'Country-specific fallback' }
       },
       'KE': { // Kenya
-        population: { value: 56983400, year: 2023 },
-        gdpPerCapita: { value: 2047, year: 2023 },
-        residence: { urban: 30, rural: 70, year: 2023 }
+        population: { value: 56983400, year: 2023, source: 'Country-specific fallback' },
+        gdpPerCapita: { value: 2047, year: 2023, source: 'Country-specific fallback' },
+        residence: { urban: 30, rural: 70, year: 2023, source: 'Country-specific fallback' },
+        genderParity: { value: 0.97, year: 2023, source: 'Country-specific fallback' },
+        education: { primary: 90, secondary: 60, tertiary: 15, year: 2023, source: 'Country-specific fallback' }
       },
       'TZ': { // Tanzania
-        population: { value: 65497000, year: 2023 },
-        gdpPerCapita: { value: 1200, year: 2023 },
-        residence: { urban: 35, rural: 65, year: 2023 }
+        population: { value: 65497000, year: 2023, source: 'Country-specific fallback' },
+        gdpPerCapita: { value: 1200, year: 2023, source: 'Country-specific fallback' },
+        residence: { urban: 35, rural: 65, year: 2023, source: 'Country-specific fallback' },
+        genderParity: { value: 0.96, year: 2023, source: 'Country-specific fallback' },
+        education: { primary: 80, secondary: 40, tertiary: 6, year: 2023, source: 'Country-specific fallback' }
       },
       'RW': { // Rwanda
-        population: { value: 14095000, year: 2023 },
-        gdpPerCapita: { value: 966, year: 2023 },
-        residence: { urban: 20, rural: 80, year: 2023 }
+        population: { value: 14095000, year: 2023, source: 'Country-specific fallback' },
+        gdpPerCapita: { value: 966, year: 2023, source: 'Country-specific fallback' },
+        residence: { urban: 20, rural: 80, year: 2023, source: 'Country-specific fallback' },
+        genderParity: { value: 0.99, year: 2023, source: 'Country-specific fallback' },
+        education: { primary: 95, secondary: 50, tertiary: 12, year: 2023, source: 'Country-specific fallback' }
       },
       'ET': { // Ethiopia
-        population: { value: 126527000, year: 2023 },
-        gdpPerCapita: { value: 1028, year: 2023 },
-        residence: { urban: 25, rural: 75, year: 2023 }
+        population: { value: 126527000, year: 2023, source: 'Country-specific fallback' },
+        gdpPerCapita: { value: 1028, year: 2023, source: 'Country-specific fallback' },
+        residence: { urban: 25, rural: 75, year: 2023, source: 'Country-specific fallback' },
+        genderParity: { value: 0.94, year: 2023, source: 'Country-specific fallback' },
+        education: { primary: 75, secondary: 35, tertiary: 5, year: 2023, source: 'Country-specific fallback' }
       }
     };
     
     return countrySpecificData[countryCode] || fallbackData;
+  };
+
+  // Helper function to estimate urban percentage based on region
+  const getEstimatedUrbanPercentage = (region: string): number => {
+    const regionEstimates: { [key: string]: number } = {
+      'Africa': 45,
+      'Asia': 55,
+      'Europe': 75,
+      'Americas': 80,
+      'Oceania': 70
+    };
+    return regionEstimates[region] || 50; // Default to 50% if region not found
   };
 
   // Helper function to get currency for a country
@@ -564,7 +634,9 @@ const Home: React.FC = () => {
 
   // Fetch DHS data for overlay when indicator or country changes
   useEffect(() => {
-    if (selectedIdx === null || !overlayCountry) return;
+    if (selectedIdx === null || !overlayCountry) {
+      return;
+    }
     const indicator = localIndicators[selectedIdx];
     setOverlayLoading(true);
     setOverlayError(null);
@@ -1079,7 +1151,14 @@ const Home: React.FC = () => {
                               </div>
                             ) : Object.keys(demographicData).length > 0 ? (
                               <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-3">Country Demographics</h3>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                                  Country Demographics
+                                  {demographicData.population?.value === 50000000 && (
+                                    <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                                      Fallback Data
+                                    </span>
+                                  )}
+                                </h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                   {demographicData.population && (
                                     <div className="bg-white p-3 rounded border">
@@ -1087,7 +1166,10 @@ const Home: React.FC = () => {
                                       <div className="text-2xl font-bold text-blue-600">
                                         {demographicData.population.value.toLocaleString()}
                                       </div>
-                                      <div className="text-xs text-gray-500">{demographicData.population.year}</div>
+                                      <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500">{demographicData.population.year}</span>
+                                        <span className="text-blue-600 font-medium">{demographicData.population.source}</span>
+                                      </div>
                                     </div>
                                   )}
                                   
@@ -1096,6 +1178,10 @@ const Home: React.FC = () => {
                                       <div className="font-medium text-gray-700">Currency</div>
                                       <div className="text-lg font-semibold text-green-600">
                                         {demographicData.currency}
+                                      </div>
+                                      <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500">-</span>
+                                        <span className="text-green-600 font-medium">Currency mapping</span>
                                       </div>
                                     </div>
                                   )}
@@ -1106,7 +1192,10 @@ const Home: React.FC = () => {
                                       <div className="text-lg font-semibold text-purple-600">
                                         ${demographicData.gdpPerCapita.value.toLocaleString()}
                                       </div>
-                                      <div className="text-xs text-gray-500">{demographicData.gdpPerCapita.year}</div>
+                                      <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500">{demographicData.gdpPerCapita.year}</span>
+                                        <span className="text-purple-600 font-medium">{demographicData.gdpPerCapita.source}</span>
+                                      </div>
                                     </div>
                                   )}
                                   
@@ -1116,7 +1205,10 @@ const Home: React.FC = () => {
                                       <div className="text-lg font-semibold text-pink-600">
                                         {demographicData.genderParity.value.toFixed(2)}
                                       </div>
-                                      <div className="text-xs text-gray-500">{demographicData.genderParity.year}</div>
+                                      <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500">{demographicData.genderParity.year}</span>
+                                        <span className="text-pink-600 font-medium">{demographicData.genderParity.source}</span>
+                                      </div>
                                     </div>
                                   )}
                                   
@@ -1137,7 +1229,10 @@ const Home: React.FC = () => {
                                           <div className="text-xs text-gray-500">Rural</div>
                                         </div>
                                       </div>
-                                      <div className="text-xs text-gray-500 mt-1">{demographicData.residence.year}</div>
+                                      <div className="flex justify-between items-center text-xs mt-1">
+                                        <span className="text-gray-500">{demographicData.residence.year}</span>
+                                        <span className="text-orange-600 font-medium">{demographicData.residence.source}</span>
+                                      </div>
                                     </div>
                                   )}
                                   
@@ -1147,24 +1242,75 @@ const Home: React.FC = () => {
                                       <div className="grid grid-cols-3 gap-2 text-center">
                                         <div>
                                           <div className="text-sm font-semibold text-blue-600">
-                                            {demographicData.education.primary.toFixed(1)}%
+                                            {(() => {
+                                              const primary = demographicData.education.primary;
+                                              if (typeof primary === 'object' && primary?.value) {
+                                                return primary.value.toFixed(1) + '%';
+                                              } else if (typeof primary === 'number') {
+                                                return primary.toFixed(1) + '%';
+                                              }
+                                              return 'N/A';
+                                            })()}
                                           </div>
                                           <div className="text-xs text-gray-500">Primary</div>
                                         </div>
                                         <div>
                                           <div className="text-sm font-semibold text-green-600">
-                                            {demographicData.education.secondary.toFixed(1)}%
+                                            {(() => {
+                                              const secondary = demographicData.education.secondary;
+                                              if (typeof secondary === 'object' && secondary?.value) {
+                                                return secondary.value.toFixed(1) + '%';
+                                              } else if (typeof secondary === 'number') {
+                                                return secondary.toFixed(1) + '%';
+                                              }
+                                              return 'N/A';
+                                            })()}
                                           </div>
                                           <div className="text-xs text-gray-500">Secondary</div>
                                         </div>
                                         <div>
                                           <div className="text-sm font-semibold text-purple-600">
-                                            {demographicData.education.tertiary.toFixed(1)}%
+                                            {(() => {
+                                              const tertiary = demographicData.education.tertiary;
+                                              if (typeof tertiary === 'object' && tertiary?.value) {
+                                                return tertiary.value.toFixed(1) + '%';
+                                              } else if (typeof tertiary === 'number') {
+                                                return tertiary.toFixed(1) + '%';
+                                              }
+                                              return 'N/A';
+                                            })()}
                                           </div>
                                           <div className="text-xs text-gray-500">Tertiary</div>
                                         </div>
                                       </div>
-                                      <div className="text-xs text-gray-500 mt-1">{demographicData.education.year}</div>
+                                      <div className="flex justify-between items-center text-xs mt-1">
+                                        <span className="text-gray-500">
+                                          {(() => {
+                                            const primary = demographicData.education.primary;
+                                            const secondary = demographicData.education.secondary;
+                                            const tertiary = demographicData.education.tertiary;
+                                            
+                                            if (typeof primary === 'object' && primary?.year) return primary.year;
+                                            if (typeof secondary === 'object' && secondary?.year) return secondary.year;
+                                            if (typeof tertiary === 'object' && tertiary?.year) return tertiary.year;
+                                            if (demographicData.education.year) return demographicData.education.year;
+                                            return 'N/A';
+                                          })()}
+                                        </span>
+                                        <span className="text-blue-600 font-medium">
+                                          {(() => {
+                                            const primary = demographicData.education.primary;
+                                            const secondary = demographicData.education.secondary;
+                                            const tertiary = demographicData.education.tertiary;
+                                            
+                                            if (typeof primary === 'object' && primary?.source) return primary.source;
+                                            if (typeof secondary === 'object' && secondary?.source) return secondary.source;
+                                            if (typeof tertiary === 'object' && tertiary?.source) return tertiary.source;
+                                            if (demographicData.education.source) return demographicData.education.source;
+                                            return 'N/A';
+                                          })()}
+                                        </span>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
