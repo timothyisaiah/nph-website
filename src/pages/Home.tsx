@@ -819,13 +819,8 @@ const Home: React.FC = () => {
     <>
       {/* Main Page Container */}
       <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
-        {/* Redesigned Full-Width Hero Section with Logo as Background */}
-        <div className="w-full bg-green-100/90 border-b border-blue-100 pb-0 pt-6 md:pt-10 relative overflow-hidden">
-          {/* Background Logo */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none select-none"
-            style={{ backgroundImage: `url(${companyLogo})` }}
-          />
+        {/* Redesigned Full-Width Hero Section with Solid Background */}
+        <div className="w-full border-b border-blue-100 pb-0 pt-6 md:pt-10 relative overflow-hidden" style={{ backgroundColor: '#e2f6e5' }}>
           <div className="flex flex-col items-center justify-center px-4 md:px-12 lg:px-24 gap-2 md:gap-4 text-center relative z-10">
             {/* Title and Description (centered, compact) */}
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 leading-tight pt-14">

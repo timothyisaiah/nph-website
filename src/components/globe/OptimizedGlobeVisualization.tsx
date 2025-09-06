@@ -103,6 +103,37 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
         const startTime = Date.now();
         const minLoadTime = 1000; // 1 second minimum loading time for smaller component
         
+        // Preload critical resources with resource hints
+        const preloadResources = () => {
+          // Preload earth texture image
+          const textureLink = document.createElement('link');
+          textureLink.rel = 'preload';
+          textureLink.href = '//unpkg.com/three-globe/example/img/earth-blue-marble.jpg';
+          textureLink.as = 'image';
+          textureLink.crossOrigin = 'anonymous';
+          document.head.appendChild(textureLink);
+          
+          // Preload additional globe textures (night lights, etc.)
+          const nightTextureLink = document.createElement('link');
+          nightTextureLink.rel = 'prefetch';
+          nightTextureLink.href = '//unpkg.com/three-globe/example/img/earth-night.jpg';
+          nightTextureLink.as = 'image';
+          nightTextureLink.crossOrigin = 'anonymous';
+          document.head.appendChild(nightTextureLink);
+          
+          // Preload WebGL context resources
+          const webglLink = document.createElement('link');
+          webglLink.rel = 'prefetch';
+          webglLink.href = '//unpkg.com/three-globe/example/img/earth-topology.png';
+          webglLink.as = 'image';
+          webglLink.crossOrigin = 'anonymous';
+          document.head.appendChild(webglLink);
+        };
+        
+        // Execute resource preloading
+        preloadResources();
+        
+        // Load dependencies in parallel
         await Promise.all([
           import('globe.gl'),
           import('topojson-client'),
