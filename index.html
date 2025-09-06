@@ -5,12 +5,36 @@
     <link rel="icon" href="/assets/Company-logo-C263dUiW.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NPH Solutions</title>
-    <script type="module" crossorigin src="/assets/index-C3WJVjEJ.js"></script>
+    
+    <!-- DNS Prefetch for external CDNs -->
+    <link rel="dns-prefetch" href="//unpkg.com">
+    <link rel="dns-prefetch" href="//api.dhsprogram.com">
+    
+    <!-- Preload critical globe dependencies -->
+    <link rel="modulepreload" href="/assets/OptimizedGlobeVisualization-DH3EAhQn.tsx">
+    <link rel="modulepreload" href="/assets/globe.gl.min-mgTf_lIT.js">
+    <link rel="modulepreload" href="/node_modules/three/build/three.min.js">
+    <link rel="modulepreload" href="/assets/d3-geo.min-IXY6P_0W.js">
+    <link rel="modulepreload" href="/assets/topojson-client.min-Cip9SWCs.js">
+    
+    <!-- Preload country data files -->
+    <link rel="modulepreload" href="/assets/country-mapping-DJcSO41T.json">
+    <link rel="modulepreload" href="/assets/topology-DuwrvmWU.js">
+    <link rel="modulepreload" href="data:text/javascript;base64,Y29uc3QgUj1bIkFCVyIsIkFGRyIsIkFHTyIsIkFMQiIsIkFORCIsIkFSRSIsIkFSRyIsIkFSTSIsIkFTTSIsIkFURyIsIkFVUyIsIkFVVCIsIkFaRSIsIkJESSIsIkJFTCIsIkJFTiIsIkJGQSIsIkJHRCIsIkJHUiIsIkJIUiIsIkJIUyIsIkJJSCIsIkJMUiIsIkJMWiIsIkJNVSIsIkJPTCIsIkJSQSIsIkJSQiIsIkJSTiIsIkJUTiIsIkJXQSIsIkNBRiIsIkNBTiIsIkNIRSIsIkNISSIsIkNITCIsIkNITiIsIkNJViIsIkNNUiIsIkNPRCIsIkNPRyIsIkNPTCIsIkNPTSIsIkNQViIsIkNSSSIsIkNVQiIsIkNVVyIsIkNZTSIsIkNZUCIsIkNaRSIsIkRFVSIsIkRKSSIsIkRNQSIsIkROSyIsIkRPTSIsIkRaQSIsIkVDVSIsIkVHWSIsIkVSSSIsIkVTUCIsIkVTVCIsIkVUSCIsIkZJTiIsIkZKSSIsIkZSQSIsIkZSTyIsIkZTTSIsIkdBQiIsIkdCUiIsIkdFTyIsIkdIQSIsIkdJQiIsIkdJTiIsIkdNQiIsIkdOQiIsIkdOUSIsIkdSQyIsIkdSRCIsIkdSTCIsIkdUTSIsIkdVTSIsIkdVWSIsIkhLRyIsIkhORCIsIkhSViIsIkhUSSIsIkhVTiIsIklETiIsIklNTiIsIklORCIsIklSTCIsIklSTiIsIklSUSIsIklTTCIsIklTUiIsIklUQSIsIkpBTSIsIkpPUiIsIkpQTiIsIktBWiIsIktFTiIsIktHWiIsIktITSIsIktJUiIsIktOQSIsIktPUiIsIktXVCIsIkxBTyIsIkxCTiIsIkxCUiIsIkxCWSIsIkxDQSIsIkxJRSIsIkxLQSIsIkxTTyIsIkxUVSIsIkxVWCIsIkxWQSIsIk1BQyIsIk1BRiIsIk1BUiIsIk1DTyIsIk1EQSIsIk1ERyIsIk1EViIsIk1FWCIsIk1ITCIsIk1LRCIsIk1MSSIsIk1MVCIsIk1NUiIsIk1ORSIsIk1ORyIsIk1OUCIsIk1PWiIsIk1SVCIsIk1VUyIsIk1XSSIsIk1ZUyIsIk5BTSIsIk5DTCIsIk5FUiIsIk5HQSIsIk5JQyIsIk5MRCIsIk5PUiIsIk5QTCIsIk5SVSIsIk5aTCIsIk9NTiIsIlBBSyIsIlBBTiIsIlBFUiIsIlBITCIsIlBMVyIsIlBORyIsIlBPTCIsIlBSSSIsIlBSSyIsIlBSVCIsIlBSWSIsIlBTRSIsIlBZRiIsIlFBVCIsIlJPVSIsIlJVUyIsIlJXQSIsIlNBVSIsIlNETiIsIlNFTiIsIlNHUCIsIlNMQiIsIlNMRSIsIlNMViIsIlNNUiIsIlNPTSIsIlNSQiIsIlNTRCIsIlNUUCIsIlNVUiIsIlNWSyIsIlNWTiIsIlNXRSIsIlNXWiIsIlNYTSIsIlNZQyIsIlNZUiIsIlRDQSIsIlRDRCIsIlRHTyIsIlRIQSIsIlRKSyIsIlRLTSIsIlRMUyIsIlRPTiIsIlRUTyIsIlRVTiIsIlRVUiIsIlRVViIsIlRXTiIsIlRaQSIsIlVHQSIsIlVLUiIsIlVSWSIsIlVTQSIsIlVaQiIsIlZDVCIsIlZFTiIsIlZHQiIsIlZJUiIsIlZOTSIsIlZVVCIsIldTTSIsIlhLWCIsIllFTSIsIlpBRiIsIlpNQiIsIlpXRSJdO2V4cG9ydHtSIGFzIGRlZmF1bHR9Ow0K">
+    <link rel="modulepreload" href="/assets/country-centroids-S19rcyJ2.json">
+    
+    <!-- Preload earth texture image -->
+    <link rel="preload" href="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg" as="image" crossorigin="anonymous">
+    
+    <!-- Prefetch additional resources -->
+    <link rel="prefetch" href="/node_modules/framer-motion/dist/framer-motion.min.js">
+    <link rel="prefetch" href="/node_modules/react-select/dist/react-select.min.js">
+    <script type="module" crossorigin src="/assets/index-CpMj3tQQ.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/globe-DNmk-Lhc.js">
     <link rel="modulepreload" crossorigin href="/assets/charts-DtUhLTl8.js">
     <link rel="modulepreload" crossorigin href="/assets/ui-B8I6I4YF.js">
     <link rel="modulepreload" crossorigin href="/assets/utils-CfquK42v.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-DdKvShjA.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-B0UYUsy7.css">
   </head>
   <body>
     <div id="root"></div>
