@@ -4,39 +4,135 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/assets/Company-logo-C263dUiW.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NPH Solutions</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>NPH Solutions - Public Health Research & Data Analytics</title>
+    <meta name="title" content="NPH Solutions - Public Health Research & Data Analytics">
+    <meta name="description" content="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.">
+    <meta name="keywords" content="public health, health research, data analytics, monitoring evaluation, health promotion, Africa health, DHS data, health systems, epidemiology, health policy">
+    <meta name="author" content="NPH Solutions">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nph-solutions.com/">
+    <meta property="og:title" content="NPH Solutions - Public Health Research & Data Analytics">
+    <meta property="og:description" content="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.">
+    <meta property="og:image" content="https://nph-solutions.com/src/assets/Company-logo.jpg">
+    <meta property="og:site_name" content="NPH Solutions">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://nph-solutions.com/">
+    <meta property="twitter:title" content="NPH Solutions - Public Health Research & Data Analytics">
+    <meta property="twitter:description" content="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.">
+    <meta property="twitter:image" content="https://nph-solutions.com/src/assets/Company-logo.jpg">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="msapplication-TileColor" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="NPH Solutions">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://nph-solutions.com/">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "NPH Solutions",
+      "url": "https://nph-solutions.com",
+      "logo": "https://nph-solutions.com/src/assets/Company-logo.jpg",
+      "description": "NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services across Africa.",
+      "foundingDate": "2020",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "Uganda"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": "info@nph-solutions.com"
+      },
+      "sameAs": [
+        "https://nph-solutions.com"
+      ],
+      "service": [
+        {
+          "@type": "Service",
+          "name": "Public Health Research",
+          "description": "Comprehensive public health research and analysis services"
+        },
+        {
+          "@type": "Service", 
+          "name": "Monitoring & Evaluation",
+          "description": "Health program monitoring and evaluation services"
+        },
+        {
+          "@type": "Service",
+          "name": "Data Systems",
+          "description": "Health data management and analytics systems"
+        },
+        {
+          "@type": "Service",
+          "name": "Health Promotion",
+          "description": "Community health promotion and education services"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Africa"
+      }
+    }
+    </script>
+    
+    <!-- Website Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "NPH Solutions",
+      "url": "https://nph-solutions.com",
+      "description": "Public health research and data analytics platform for Africa",
+      "publisher": {
+        "@type": "Organization",
+        "name": "NPH Solutions"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://nph-solutions.com/data?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
     
     <!-- DNS Prefetch for external CDNs -->
     <link rel="dns-prefetch" href="//unpkg.com">
     <link rel="dns-prefetch" href="//api.dhsprogram.com">
     
-    <!-- Preload critical globe dependencies -->
-    <link rel="modulepreload" href="/assets/OptimizedGlobeVisualization-DH3EAhQn.tsx">
-    <link rel="modulepreload" href="/assets/globe.gl.min-mgTf_lIT.js">
-    <link rel="modulepreload" href="/node_modules/three/build/three.min.js">
-    <link rel="modulepreload" href="/assets/d3-geo.min-IXY6P_0W.js">
-    <link rel="modulepreload" href="/assets/topojson-client.min-Cip9SWCs.js">
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://api.dhsprogram.com" crossorigin>
     
-    <!-- Preload country data files -->
-    <link rel="modulepreload" href="/assets/country-mapping-DJcSO41T.json">
-    <link rel="modulepreload" href="/assets/topology-DuwrvmWU.js">
-    <link rel="modulepreload" href="data:text/javascript;base64,Y29uc3QgUj1bIkFCVyIsIkFGRyIsIkFHTyIsIkFMQiIsIkFORCIsIkFSRSIsIkFSRyIsIkFSTSIsIkFTTSIsIkFURyIsIkFVUyIsIkFVVCIsIkFaRSIsIkJESSIsIkJFTCIsIkJFTiIsIkJGQSIsIkJHRCIsIkJHUiIsIkJIUiIsIkJIUyIsIkJJSCIsIkJMUiIsIkJMWiIsIkJNVSIsIkJPTCIsIkJSQSIsIkJSQiIsIkJSTiIsIkJUTiIsIkJXQSIsIkNBRiIsIkNBTiIsIkNIRSIsIkNISSIsIkNITCIsIkNITiIsIkNJViIsIkNNUiIsIkNPRCIsIkNPRyIsIkNPTCIsIkNPTSIsIkNQViIsIkNSSSIsIkNVQiIsIkNVVyIsIkNZTSIsIkNZUCIsIkNaRSIsIkRFVSIsIkRKSSIsIkRNQSIsIkROSyIsIkRPTSIsIkRaQSIsIkVDVSIsIkVHWSIsIkVSSSIsIkVTUCIsIkVTVCIsIkVUSCIsIkZJTiIsIkZKSSIsIkZSQSIsIkZSTyIsIkZTTSIsIkdBQiIsIkdCUiIsIkdFTyIsIkdIQSIsIkdJQiIsIkdJTiIsIkdNQiIsIkdOQiIsIkdOUSIsIkdSQyIsIkdSRCIsIkdSTCIsIkdUTSIsIkdVTSIsIkdVWSIsIkhLRyIsIkhORCIsIkhSViIsIkhUSSIsIkhVTiIsIklETiIsIklNTiIsIklORCIsIklSTCIsIklSTiIsIklSUSIsIklTTCIsIklTUiIsIklUQSIsIkpBTSIsIkpPUiIsIkpQTiIsIktBWiIsIktFTiIsIktHWiIsIktITSIsIktJUiIsIktOQSIsIktPUiIsIktXVCIsIkxBTyIsIkxCTiIsIkxCUiIsIkxCWSIsIkxDQSIsIkxJRSIsIkxLQSIsIkxTTyIsIkxUVSIsIkxVWCIsIkxWQSIsIk1BQyIsIk1BRiIsIk1BUiIsIk1DTyIsIk1EQSIsIk1ERyIsIk1EViIsIk1FWCIsIk1ITCIsIk1LRCIsIk1MSSIsIk1MVCIsIk1NUiIsIk1ORSIsIk1ORyIsIk1OUCIsIk1PWiIsIk1SVCIsIk1VUyIsIk1XSSIsIk1ZUyIsIk5BTSIsIk5DTCIsIk5FUiIsIk5HQSIsIk5JQyIsIk5MRCIsIk5PUiIsIk5QTCIsIk5SVSIsIk5aTCIsIk9NTiIsIlBBSyIsIlBBTiIsIlBFUiIsIlBITCIsIlBMVyIsIlBORyIsIlBPTCIsIlBSSSIsIlBSSyIsIlBSVCIsIlBSWSIsIlBTRSIsIlBZRiIsIlFBVCIsIlJPVSIsIlJVUyIsIlJXQSIsIlNBVSIsIlNETiIsIlNFTiIsIlNHUCIsIlNMQiIsIlNMRSIsIlNMViIsIlNNUiIsIlNPTSIsIlNSQiIsIlNTRCIsIlNUUCIsIlNVUiIsIlNWSyIsIlNWTiIsIlNXRSIsIlNXWiIsIlNYTSIsIlNZQyIsIlNZUiIsIlRDQSIsIlRDRCIsIlRHTyIsIlRIQSIsIlRKSyIsIlRLTSIsIlRMUyIsIlRPTiIsIlRUTyIsIlRVTiIsIlRVUiIsIlRVViIsIlRXTiIsIlRaQSIsIlVHQSIsIlVLUiIsIlVSWSIsIlVTQSIsIlVaQiIsIlZDVCIsIlZFTiIsIlZHQiIsIlZJUiIsIlZOTSIsIlZVVCIsIldTTSIsIlhLWCIsIllFTSIsIlpBRiIsIlpNQiIsIlpXRSJdO2V4cG9ydHtSIGFzIGRlZmF1bHR9Ow0K">
-    <link rel="modulepreload" href="/assets/country-centroids-S19rcyJ2.json">
-    
-    <!-- Preload earth texture image -->
-    <link rel="preload" href="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg" as="image" crossorigin="anonymous">
-    
-    <!-- Prefetch additional resources -->
-    <link rel="prefetch" href="/node_modules/framer-motion/dist/framer-motion.min.js">
-    <link rel="prefetch" href="/node_modules/react-select/dist/react-select.min.js">
-    <script type="module" crossorigin src="/assets/index-ChxblqKt.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/globe-DNmk-Lhc.js">
-    <link rel="modulepreload" crossorigin href="/assets/charts-DtUhLTl8.js">
-    <link rel="modulepreload" crossorigin href="/assets/ui-B8I6I4YF.js">
-    <link rel="modulepreload" crossorigin href="/assets/utils-CfquK42v.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-BCa8yeP7.css">
+    <!-- Resource hints for better performance -->
+    <link rel="preload" href="data:application/octet-stream;base64,aW1wb3J0IHsgU3RyaWN0TW9kZSB9IGZyb20gJ3JlYWN0JwppbXBvcnQgeyBjcmVhdGVSb290IH0gZnJvbSAncmVhY3QtZG9tL2NsaWVudCcKaW1wb3J0ICcuL2luZGV4LmNzcycKaW1wb3J0IEFwcCBmcm9tICcuL0FwcCcKCmNyZWF0ZVJvb3QoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3Jvb3QnKSEpLnJlbmRlcigKICA8U3RyaWN0TW9kZT4KICAgIDxBcHAgLz4KICA8L1N0cmljdE1vZGU+LAopCg==" as="script">
+    <script type="module" crossorigin src="/assets/index-D4oFbbqt.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/globe-DxtTiRKZ.js">
+    <link rel="modulepreload" crossorigin href="/assets/charts-hSH86lU2.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-CrMzEqHc.js">
+    <link rel="modulepreload" crossorigin href="/assets/utils-VdGFcvbg.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-DNwg8gUO.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   </body>
 </html>
