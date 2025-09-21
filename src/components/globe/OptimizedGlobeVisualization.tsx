@@ -164,7 +164,9 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
       const globe = new Globe(globeRef.current)
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
         .backgroundColor('rgba(255, 255, 255, 0)')
-        .polygonsData(geoJSONData.features)
+        .polygonsData(geoJSONData.features.filter((feature: any) => 
+          feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'
+        ))
         .polygonCapColor((polygon: any) => {
           const countryCode = polygon.properties?.ISO_A3;
           if (countryCode === internalSelectedCountry) {
