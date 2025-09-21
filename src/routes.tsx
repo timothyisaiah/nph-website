@@ -58,5 +58,9 @@ export const router = createBrowserRouter([
     ],
   },
 ], {
-  basename: '/' // Updated to match your GitHub Pages URL path
+  basename: '/', // Updated to match your GitHub Pages URL path
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
 });

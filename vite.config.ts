@@ -22,7 +22,12 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true
       }
-    }
+    },
+    // Performance optimizations for Core Web Vitals
+    target: 'esnext',
+    cssCodeSplit: true,
+    sourcemap: false,
+    reportCompressedSize: false
   },
   optimizeDeps: {
     include: [

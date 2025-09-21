@@ -5,9 +5,8 @@
 import React, { useState, useCallback, useEffect, Suspense, lazy, startTransition } from 'react';
 import { useNavigate } from "react-router-dom";
 import MobileCountrySelector from "../components/globe/MobileCountrySelector";
-import { useIndicator } from "../context/IndicatorContext";
 import Footer from "../components/layout/Footer";
-import companyLogo from "../assets/Company-logo.jpg";
+import SEOHead from "../components/seo/SEOHead";
 import { indicators as localIndicators } from "../data/indicators";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,11 +30,6 @@ const loadAxios = async () => {
   return axios;
 };
 
-// Helper: Get tagline (first sentence of definition)
-const getTagline = (definition: string) => {
-  const match = definition.match(/^(.*?\.|\!|\?)(\s|$)/);
-  return match ? match[1] : definition;
-};
 
 
 
@@ -178,10 +172,7 @@ const feedingTips = {
 // Remove indicatorsWithDHS mapping and use localIndicators directly
 
 const Home: React.FC = () => {
-  // State for error, selected country, indicator, and calculator
-  const [error, setError] = useState<string | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [countryData, setCountryData] = useState<any>(null);
+  // State for calculator
   const [calculatorData, setCalculatorData] = useState({
     age: '',
     weight: '',
@@ -209,7 +200,6 @@ const Home: React.FC = () => {
     gender: false
   });
   const navigate = useNavigate();
-  const { setSelectedIndicator } = useIndicator();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   const [overlayCountry, setOverlayCountry] = useState<{ value: string; label: string } | null>(null);
@@ -236,20 +226,9 @@ const Home: React.FC = () => {
     gdpPerCapita?: { value: number; year: number; source?: string };
   }>({});
   const [demographicLoading, setDemographicLoading] = useState(false);
-  const [showNutritionDisclaimer, setShowNutritionDisclaimer] = useState(false);
   const [selectedGlobeCountry, setSelectedGlobeCountry] = useState<{ value: string; label: string } | null>(null);
   const [showNutritionModal, setShowNutritionModal] = useState(false);
 
-  // Memoized event handlers for globe
-  const handleIndicatorSelect = useCallback(
-    (indicatorId: string) => {
-      startTransition(() => {
-        setSelectedIndicator(indicatorId);
-        navigate(`/data?indicator=${indicatorId}`);
-      });
-    },
-    [setSelectedIndicator, navigate]
-  );
 
   // Function to fetch demographic data for a country
   const fetchDemographicData = useCallback(async (countryCode: string) => {
@@ -299,12 +278,6 @@ const Home: React.FC = () => {
   const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
     startTransition(() => {
       setSelectedGlobeCountry(country);
-      setSelectedCountry(country.label);
-      setCountryData({
-        indicators: Math.floor(Math.random() * 50) + 10,
-        surveys: Math.floor(Math.random() * 20) + 5,
-        lastUpdated: new Date().toLocaleDateString(),
-      });
       
       // Update overlay country if it matches
       const foundCountry = overlayAvailableCountries.find(c => c.value === country.value);
@@ -322,9 +295,6 @@ const Home: React.FC = () => {
       }
     });
   }, [overlayAvailableCountries, selectedIdx, fetchDemographicData]);
-  const handleError = useCallback((errorMessage: string) => {
-    setError(errorMessage);
-  }, []);
 
 
 
@@ -338,7 +308,7 @@ const Home: React.FC = () => {
           const defaultCountry = opts.find((c: any) => c.value === 'UG') || opts[0];
           setOverlayCountry(defaultCountry as { value: string; label: string } | null);
         })
-        .catch((error: any) => {
+        .catch(() => {
           // Silently handle error
         });
     });
@@ -753,7 +723,6 @@ const Home: React.FC = () => {
       return;
     }
 
-    const ageNum = parseFloat(age);
     const weightNum = parseFloat(weight);
     const heightNum = parseFloat(height);
 
@@ -889,6 +858,32 @@ const Home: React.FC = () => {
 
   return (
     <>
+      <SEOHead
+        title="NPH Solutions - Public Health Research & Data Analytics"
+        description="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa."
+        keywords="public health, health research, data analytics, monitoring evaluation, health promotion, Africa health, DHS data, health systems, epidemiology, health policy, Uganda health, Kenya health, Tanzania health"
+        url="/"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "NPH Solutions - Public Health Research & Data Analytics",
+          "description": "NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.",
+          "url": "https://nph-solutions.com/",
+          "mainEntity": {
+            "@type": "Organization",
+            "name": "NPH Solutions",
+            "url": "https://nph-solutions.com",
+            "logo": "https://nph-solutions.com/src/assets/Company-logo.jpg",
+            "description": "Public health research and data analytics organization serving Africa",
+            "service": [
+              "Public Health Research",
+              "Monitoring & Evaluation", 
+              "Data Systems",
+              "Health Promotion"
+            ]
+          }
+        }}
+      />
       {/* Main Page Container */}
       <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
         {/* Redesigned Full-Width Hero Section with Solid Background */}
@@ -983,8 +978,6 @@ const Home: React.FC = () => {
                     onCountrySelect={handleGlobeCountrySelect}
                     onCountryClear={() => {
                       setSelectedGlobeCountry(null);
-                      setSelectedCountry(null);
-                      setCountryData(null);
                     }}
                     selectedCountry={selectedGlobeCountry}
                   />
@@ -1048,8 +1041,6 @@ const Home: React.FC = () => {
               onCountrySelect={handleGlobeCountrySelect}
               onCountryClear={() => {
                 setSelectedGlobeCountry(null);
-                setSelectedCountry(null);
-                setCountryData(null);
               }}
               selectedCountry={selectedGlobeCountry}
             />

@@ -4,31 +4,128 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="src/assets/Company-logo.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NPH Solutions</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>NPH Solutions - Public Health Research & Data Analytics</title>
+    <meta name="title" content="NPH Solutions - Public Health Research & Data Analytics">
+    <meta name="description" content="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.">
+    <meta name="keywords" content="public health, health research, data analytics, monitoring evaluation, health promotion, Africa health, DHS data, health systems, epidemiology, health policy">
+    <meta name="author" content="NPH Solutions">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nph-solutions.com/">
+    <meta property="og:title" content="NPH Solutions - Public Health Research & Data Analytics">
+    <meta property="og:description" content="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.">
+    <meta property="og:image" content="https://nph-solutions.com/src/assets/Company-logo.jpg">
+    <meta property="og:site_name" content="NPH Solutions">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://nph-solutions.com/">
+    <meta property="twitter:title" content="NPH Solutions - Public Health Research & Data Analytics">
+    <meta property="twitter:description" content="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.">
+    <meta property="twitter:image" content="https://nph-solutions.com/src/assets/Company-logo.jpg">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="msapplication-TileColor" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="NPH Solutions">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://nph-solutions.com/">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "NPH Solutions",
+      "url": "https://nph-solutions.com",
+      "logo": "https://nph-solutions.com/src/assets/Company-logo.jpg",
+      "description": "NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services across Africa.",
+      "foundingDate": "2020",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "Uganda"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "email": "info@nph-solutions.com"
+      },
+      "sameAs": [
+        "https://nph-solutions.com"
+      ],
+      "service": [
+        {
+          "@type": "Service",
+          "name": "Public Health Research",
+          "description": "Comprehensive public health research and analysis services"
+        },
+        {
+          "@type": "Service", 
+          "name": "Monitoring & Evaluation",
+          "description": "Health program monitoring and evaluation services"
+        },
+        {
+          "@type": "Service",
+          "name": "Data Systems",
+          "description": "Health data management and analytics systems"
+        },
+        {
+          "@type": "Service",
+          "name": "Health Promotion",
+          "description": "Community health promotion and education services"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Africa"
+      }
+    }
+    </script>
+    
+    <!-- Website Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "NPH Solutions",
+      "url": "https://nph-solutions.com",
+      "description": "Public health research and data analytics platform for Africa",
+      "publisher": {
+        "@type": "Organization",
+        "name": "NPH Solutions"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://nph-solutions.com/data?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
     
     <!-- DNS Prefetch for external CDNs -->
     <link rel="dns-prefetch" href="//unpkg.com">
     <link rel="dns-prefetch" href="//api.dhsprogram.com">
     
-    <!-- Preload critical globe dependencies -->
-    <link rel="modulepreload" href="/src/components/globe/OptimizedGlobeVisualization.tsx">
-    <link rel="modulepreload" href="/node_modules/globe.gl/dist/globe.gl.min.js">
-    <link rel="modulepreload" href="/node_modules/three/build/three.min.js">
-    <link rel="modulepreload" href="/node_modules/d3-geo/dist/d3-geo.min.js">
-    <link rel="modulepreload" href="/node_modules/topojson-client/dist/topojson-client.min.js">
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://api.dhsprogram.com" crossorigin>
     
-    <!-- Preload country data files -->
-    <link rel="modulepreload" href="/src/data/country-mapping.json">
-    <link rel="modulepreload" href="/src/data/topology.js">
-    <link rel="modulepreload" href="/src/data/shortcodes.js">
-    <link rel="modulepreload" href="/src/data/country-centroids.json">
-    
-    <!-- Preload earth texture image -->
-    <link rel="preload" href="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg" as="image" crossorigin="anonymous">
-    
-    <!-- Prefetch additional resources -->
-    <link rel="prefetch" href="/node_modules/framer-motion/dist/framer-motion.min.js">
-    <link rel="prefetch" href="/node_modules/react-select/dist/react-select.min.js">
+    <!-- Resource hints for better performance -->
+    <link rel="preload" href="/src/main.tsx" as="script">
+    <link rel="preload" href="/src/index.css" as="style">
   </head>
   <body>
     <div id="root"></div>

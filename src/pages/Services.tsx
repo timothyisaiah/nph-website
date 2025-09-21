@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
 import OptimizedImage from '../components/common/OptimizedImage';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import SEOHead from '../components/seo/SEOHead';
 import { images } from '../assets/images';
 
 // Lazy load the ServiceCard component to reduce initial bundle size
-const ServiceCard = lazy(() => import('../components/services/ServiceCard'));
+// const ServiceCard = lazy(() => import('../components/services/ServiceCard'));
 
 const services = [
   {
@@ -118,11 +119,68 @@ const ServiceItem: React.FC<{ service: typeof services[0]; index: number }> = ({
 
 const Services: React.FC = () => {
   return (
-    <PageLayout
-      title="Our Services"
-      intro="We provide specialized public health services that combine research excellence, data-driven insights, and community engagement to address complex health challenges and improve population health outcomes across Africa."
-      bgImage={images.services.url}
-    >
+    <>
+      <SEOHead
+        title="Our Services - Public Health Research & Data Analytics"
+        description="NPH Solutions provides specialized public health services including research excellence, data-driven insights, monitoring & evaluation, health promotion, and community engagement across Africa."
+        keywords="public health services, health research services, data analytics services, monitoring evaluation services, health promotion services, Africa health services, Uganda health research, Kenya health services"
+        url="/services"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "name": "Public Health Services",
+          "description": "NPH Solutions provides specialized public health services including research excellence, data-driven insights, monitoring & evaluation, health promotion, and community engagement across Africa.",
+          "url": "https://nph-solutions.com/services",
+          "provider": {
+            "@type": "Organization",
+            "name": "NPH Solutions"
+          },
+          "serviceType": "Public Health Services",
+          "areaServed": {
+            "@type": "Place",
+            "name": "Africa"
+          },
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Public Health Services",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Public Health Research"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Monitoring & Evaluation"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Data Systems"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Health Promotion"
+                }
+              }
+            ]
+          }
+        }}
+      />
+      <PageLayout
+        title="Our Services"
+        intro="We provide specialized public health services that combine research excellence, data-driven insights, and community engagement to address complex health challenges and improve population health outcomes across Africa."
+        bgImage={images.services.url}
+      >
       <div className="space-y-8 lg:space-y-12">
         {services.map((service, index) => (
           <Suspense key={index} fallback={<LoadingSpinner />}>
@@ -130,7 +188,8 @@ const Services: React.FC = () => {
           </Suspense>
         ))}
       </div>
-    </PageLayout>
+      </PageLayout>
+    </>
   );
 };
 

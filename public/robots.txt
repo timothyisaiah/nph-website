@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://nph-solutions.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Disallow admin or private areas (if any)
+# Disallow: /admin/
+# Disallow: /private/
+
+# Allow all public content
+Allow: /data/
+Allow: /about/
+Allow: /services/
+Allow: /publications/
+Allow: /contact/
+Allow: /thematic-areas/
+
+# Block access to source files and build artifacts
+Disallow: /src/
+Disallow: /node_modules/
+Disallow: /*.json$
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /*.ts$
+Disallow: /*.tsx$
