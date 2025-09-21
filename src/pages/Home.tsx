@@ -6,6 +6,7 @@ import React, { useState, useCallback, useEffect, Suspense, lazy, startTransitio
 import { useNavigate } from "react-router-dom";
 import MobileCountrySelector from "../components/globe/MobileCountrySelector";
 import Footer from "../components/layout/Footer";
+import SEOHead from "../components/seo/SEOHead";
 import { indicators as localIndicators } from "../data/indicators";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
@@ -857,6 +858,32 @@ const Home: React.FC = () => {
 
   return (
     <>
+      <SEOHead
+        title="NPH Solutions - Public Health Research & Data Analytics"
+        description="NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa."
+        keywords="public health, health research, data analytics, monitoring evaluation, health promotion, Africa health, DHS data, health systems, epidemiology, health policy, Uganda health, Kenya health, Tanzania health"
+        url="/"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "NPH Solutions - Public Health Research & Data Analytics",
+          "description": "NPH Solutions provides comprehensive public health research, monitoring & evaluation, data systems, and health promotion services. Unlocking health data for community and policy action across Africa.",
+          "url": "https://nph-solutions.com/",
+          "mainEntity": {
+            "@type": "Organization",
+            "name": "NPH Solutions",
+            "url": "https://nph-solutions.com",
+            "logo": "https://nph-solutions.com/src/assets/Company-logo.jpg",
+            "description": "Public health research and data analytics organization serving Africa",
+            "service": [
+              "Public Health Research",
+              "Monitoring & Evaluation", 
+              "Data Systems",
+              "Health Promotion"
+            ]
+          }
+        }}
+      />
       {/* Main Page Container */}
       <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
         {/* Redesigned Full-Width Hero Section with Solid Background */}

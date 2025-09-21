@@ -1,11 +1,39 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { images } from '../assets/images';
 import companyLogo from '../assets/Company-logo.jpg';
+import SEOHead from '../components/seo/SEOHead';
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEOHead
+        title="About NPH Solutions - Public Health Research Organization"
+        description="Learn about NPH Solutions, a leading public health research organization providing comprehensive health data analytics, monitoring & evaluation, and health promotion services across Africa."
+        keywords="about NPH Solutions, public health organization, health research company, Africa health, health data analytics, monitoring evaluation, health promotion, Uganda health research"
+        url="/about"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "About NPH Solutions",
+          "description": "Learn about NPH Solutions, a leading public health research organization providing comprehensive health data analytics, monitoring & evaluation, and health promotion services across Africa.",
+          "url": "https://nph-solutions.com/about",
+          "mainEntity": {
+            "@type": "Organization",
+            "name": "NPH Solutions",
+            "description": "Public health research and data analytics organization serving Africa",
+            "foundingDate": "2020",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "Uganda"
+            },
+            "areaServed": {
+              "@type": "Place",
+              "name": "Africa"
+            }
+          }
+        }}
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* Top Section - Company Overview + Slogan */}
       <section className="bg-white">
         <div className="container mx-auto px-4 py-16">
@@ -111,7 +139,8 @@ const About = () => {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 };
 
