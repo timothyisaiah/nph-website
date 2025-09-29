@@ -16,6 +16,7 @@
     "lighthouse": "npx lighthouse http://localhost:5173 --output=html --output-path=./lighthouse-report.html"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@heroicons/react": "^2.1.1",
     "@types/three": "^0.177.0",
     "autoprefixer": "^10.4.16",

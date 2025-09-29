@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import PageLayout from '../components/common/PageLayout';
 import FormInput from '../components/form/FormInput';
+import { EMAILJS_CONFIG, type EmailTemplateParams } from '../config/emailjs';
 
 interface FormData {
   name: string;
@@ -82,9 +84,24 @@ const Contact: React.FC = () => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Prepare email template parameters
+      const templateParams: EmailTemplateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        to_email: 'jlule04@gmail.com', // Replace with your email address
+      };
+
+      // Send email using EmailJS
+      await emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        templateParams as Record<string, unknown>,
+        EMAILJS_CONFIG.PUBLIC_KEY
+      );
+
       setIsSuccess(true);
       setFormData({
         name: '',
@@ -92,14 +109,16 @@ const Contact: React.FC = () => {
         subject: '',
         message: '',
       });
+      
       // Reset success message after 5 seconds
       setTimeout(() => {
         setIsSuccess(false);
       }, 5000);
     } catch (error) {
+      console.error('EmailJS Error:', error);
       setErrors({
         ...errors,
-        submit: 'Failed to send message. Please try again.',
+        submit: 'Failed to send message. Please try again or contact us directly.',
       });
     } finally {
       setIsSubmitting(false);
