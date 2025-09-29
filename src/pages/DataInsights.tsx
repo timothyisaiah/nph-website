@@ -93,7 +93,7 @@ const DataInsights: React.FC = () => {
                       </p>
                       
                       <div className="text-blue-600 font-medium text-sm flex items-center">
-                        Read more →
+                        Read more...
                       </div>
                     </div>
                   </div>

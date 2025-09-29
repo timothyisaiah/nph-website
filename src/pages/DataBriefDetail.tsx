@@ -191,7 +191,7 @@ const DataBriefDetail: React.FC = () => {
                     onClick={() => navigate(`/data-brief/${relatedBrief.id}`)}
                     className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200"
                   >
-                    Read more →
+                    Read more...
                   </button>
                 </div>
               ))}
