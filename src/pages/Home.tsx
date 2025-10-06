@@ -201,6 +201,10 @@ const Home: React.FC = () => {
   });
   const navigate = useNavigate();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  
+  // Screen size detection for responsive globe instances
+  const [screenSize, setScreenSize] = useState({ width: typeof window !== 'undefined' ? window.innerWidth : 0, height: typeof window !== 'undefined' ? window.innerHeight : 0 });
+  const [currentDeviceType, setCurrentDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
 
   const [overlayCountry, setOverlayCountry] = useState<{ value: string; label: string } | null>(null);
   const [overlayData, setOverlayData] = useState<any[]>([]);
@@ -229,6 +233,31 @@ const Home: React.FC = () => {
   const [selectedGlobeCountry, setSelectedGlobeCountry] = useState<{ value: string; label: string } | null>(null);
   const [showNutritionModal, setShowNutritionModal] = useState(false);
 
+  // Screen size detection and device type tracking
+  useEffect(() => {
+    const updateScreenSize = () => {
+      const width = window.innerWidth;
+      setScreenSize({ width, height: window.innerHeight });
+      
+      // Determine device type based on Tailwind breakpoints
+      if (width < 768) {
+        setCurrentDeviceType('mobile');
+      } else if (width >= 768 && width < 1024) {
+        setCurrentDeviceType('tablet');
+      } else {
+        setCurrentDeviceType('desktop');
+      }
+    };
+
+    // Set initial size
+    updateScreenSize();
+
+    // Add event listener
+    window.addEventListener('resize', updateScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
 
   // Function to fetch demographic data for a country
   const fetchDemographicData = useCallback(async (countryCode: string) => {
@@ -964,6 +993,7 @@ const Home: React.FC = () => {
                   </div>
                 }>
                   <GlobeVisualization 
+                    key="desktop-globe"
                     onCountrySelect={handleGlobeCountrySelect}
                     selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
                     width={800}
@@ -1047,22 +1077,65 @@ const Home: React.FC = () => {
               selectedCountry={selectedGlobeCountry}
             />
             
-            {/* Mobile Globe */}
-            <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden relative flex items-center justify-center">
-              <Suspense fallback={
-                <div className="flex items-center justify-center w-full h-full">
-                  <LoadingSpinner />
-                </div>
-              }>
-              <GlobeVisualization 
-                   onCountrySelect={handleGlobeCountrySelect}
-                   selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-                   width={330}
-                   height={300}
-                   className="w-full h-full"
-                 />
-              </Suspense>
-            </div>
+            {/* Mobile Globe (< 768px) */}
+            {currentDeviceType === 'mobile' && (
+              <div className="w-full h-[400px] rounded-xl overflow-hidden relative flex items-center justify-center">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center w-full h-full">
+                    <LoadingSpinner />
+                  </div>
+                }>
+                  <GlobeVisualization 
+                    key="mobile-globe"
+                    onCountrySelect={handleGlobeCountrySelect}
+                    selectedCountry={selectedGlobeCountry}
+                    width={330}
+                    height={300}
+                    className="w-full h-full"
+                  />
+                </Suspense>
+              </div>
+            )}
+
+            {/* Tablet Globe (768px - 1024px) */}
+            {currentDeviceType === 'tablet' && (
+              <div className="w-full h-[500px] rounded-xl overflow-hidden relative flex items-center justify-center">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center w-full h-full">
+                    <LoadingSpinner />
+                  </div>
+                }>
+                  <GlobeVisualization 
+                    key="tablet-globe"
+                    onCountrySelect={handleGlobeCountrySelect}
+                    selectedCountry={selectedGlobeCountry}
+                    width={Math.min(600, screenSize.width - 32)}
+                    height={450}
+                    className="w-full h-full"
+                  />
+                </Suspense>
+              </div>
+            )}
+
+            {/* Desktop Globe (≥ 1024px) - Fallback for lg:hidden */}
+            {currentDeviceType === 'desktop' && (
+              <div className="w-full h-[500px] rounded-xl overflow-hidden relative flex items-center justify-center">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center w-full h-full">
+                    <LoadingSpinner />
+                  </div>
+                }>
+                  <GlobeVisualization 
+                    key="desktop-mobile-view-globe"
+                    onCountrySelect={handleGlobeCountrySelect}
+                    selectedCountry={selectedGlobeCountry}
+                    width={600}
+                    height={500}
+                    className="w-full h-full"
+                  />
+                </Suspense>
+              </div>
+            )}
           </div>
         </div>
         {/* Details/Story Panel: Shows indicator details on all screen sizes */}
