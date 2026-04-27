@@ -123,9 +123,34 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://api.dhsprogram.com" crossorigin>
     
-    <!-- Resource hints for better performance -->
-    <link rel="preload" href="/src/main.tsx" as="script">
-    <link rel="preload" href="/src/index.css" as="style">
+    <!--
+      Note: Vite injects hashed <script> and <link rel="stylesheet"> tags for the
+      real entry points at build time, so we don't preload /src/main.tsx or
+      /src/index.css here — those paths only exist in dev mode and would generate
+      "preloaded but not used" data-URL warnings in production.
+    -->
+
+    <!--
+      SPA redirect restorer for GitHub Pages.
+      When public/404.html bounces an unknown path through `?/encoded/path`,
+      this restores the original URL with history.replaceState BEFORE React Router boots,
+      so deep links like /data-brief/<id> work on direct hits and refreshes.
+      Reference: https://github.com/rafgraph/spa-github-pages
+    -->
+    <script type="text/javascript">
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      })(window.location);
+    </script>
   </head>
   <body>
     <div id="root"></div>

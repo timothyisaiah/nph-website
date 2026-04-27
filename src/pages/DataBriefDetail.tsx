@@ -60,6 +60,55 @@ const DataBriefDetail: React.FC = () => {
     setLoading(false);
   }, [briefId, navigate]);
 
+  const seoKeywords = useMemo(() => {
+    if (!brief) return '';
+    const titleTerms = extractKeywordsFromTitle(brief.title);
+    const baseTerms = [
+      brief.category.toLowerCase(),
+      'public health data',
+      'NPH Solutions',
+      'data brief',
+      'Africa health',
+      'sub-Saharan Africa',
+      'DHS data',
+      'health research'
+    ];
+    return Array.from(new Set([...baseTerms, ...titleTerms])).join(', ');
+  }, [brief]);
+
+  const articleStructuredData = useMemo(() => {
+    if (!brief) return undefined;
+    const datePublished = safeISODate(brief.date);
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      'headline': brief.title,
+      'description': brief.excerpt,
+      'image': [toAbsoluteImage(brief.chartImage)],
+      'datePublished': datePublished,
+      'dateModified': datePublished,
+      'author': {
+        '@type': 'Person',
+        'name': brief.author
+      },
+      'publisher': {
+        '@type': 'Organization',
+        'name': 'NPH Solutions',
+        'logo': {
+          '@type': 'ImageObject',
+          'url': `${SITE_ORIGIN}/src/assets/Company-logo.jpg`
+        }
+      },
+      'mainEntityOfPage': {
+        '@type': 'WebPage',
+        '@id': `${SITE_ORIGIN}/data-brief/${brief.id}`
+      },
+      'articleSection': brief.category,
+      'keywords': seoKeywords,
+      'inLanguage': 'en'
+    };
+  }, [brief, seoKeywords]);
+
   const handleDownloadDocx = (brief: DataBrief) => {
     // Create a link element to trigger download
     const link = document.createElement('a');
@@ -113,55 +162,6 @@ const DataBriefDetail: React.FC = () => {
       </PageLayout>
     );
   }
-
-  const seoKeywords = useMemo(() => {
-    if (!brief) return '';
-    const titleTerms = extractKeywordsFromTitle(brief.title);
-    const baseTerms = [
-      brief.category.toLowerCase(),
-      'public health data',
-      'NPH Solutions',
-      'data brief',
-      'Africa health',
-      'sub-Saharan Africa',
-      'DHS data',
-      'health research'
-    ];
-    return Array.from(new Set([...baseTerms, ...titleTerms])).join(', ');
-  }, [brief]);
-
-  const articleStructuredData = useMemo(() => {
-    if (!brief) return undefined;
-    const datePublished = safeISODate(brief.date);
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'Article',
-      'headline': brief.title,
-      'description': brief.excerpt,
-      'image': [toAbsoluteImage(brief.chartImage)],
-      'datePublished': datePublished,
-      'dateModified': datePublished,
-      'author': {
-        '@type': 'Person',
-        'name': brief.author
-      },
-      'publisher': {
-        '@type': 'Organization',
-        'name': 'NPH Solutions',
-        'logo': {
-          '@type': 'ImageObject',
-          'url': `${SITE_ORIGIN}/src/assets/Company-logo.jpg`
-        }
-      },
-      'mainEntityOfPage': {
-        '@type': 'WebPage',
-        '@id': `${SITE_ORIGIN}/data-brief/${brief.id}`
-      },
-      'articleSection': brief.category,
-      'keywords': seoKeywords,
-      'inLanguage': 'en'
-    };
-  }, [brief, seoKeywords]);
 
   return (
     <>
