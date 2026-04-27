@@ -13,6 +13,8 @@ Crawl-delay: 1
 
 # Allow all public content
 Allow: /data/
+Allow: /data-brief/
+Allow: /data-explorer/
 Allow: /about/
 Allow: /services/
 Allow: /publications/
