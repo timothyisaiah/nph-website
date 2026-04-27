@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
+import SEOHead from '../components/seo/SEOHead';
 import { images } from '../assets/images';
 import { dataBriefs, type DataBrief } from '../data/dataBriefs';
 
@@ -8,13 +9,55 @@ const DataInsights: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'briefs' | 'visualization'>('briefs');
 
+  const seoKeywords = useMemo(() => {
+    const categories = Array.from(new Set(dataBriefs.map(b => b.category)));
+    const titleTerms = dataBriefs
+      .map(b => b.title.replace(/[^a-zA-Z0-9\s\-]/g, '').trim())
+      .slice(0, 8);
+    const baseTerms = [
+      'public health data Africa',
+      'DHS data briefs',
+      'sub-Saharan Africa health statistics',
+      'maternal health',
+      'child health',
+      'reproductive health',
+      'nutrition Africa',
+      'public health research Uganda',
+      'health data visualization',
+      'STATcompiler'
+    ];
+    return [...baseTerms, ...categories, ...titleTerms].join(', ');
+  }, []);
 
+  const itemListStructuredData = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'name': 'NPH Solutions Data Briefs',
+    'description': 'A collection of evidence-based public health data briefs covering maternal health, child health, nutrition, reproductive health, and more across Sub-Saharan Africa.',
+    'url': 'https://nph-solutions.com/data',
+    'numberOfItems': dataBriefs.length,
+    'itemListElement': dataBriefs.map((brief, index) => ({
+      '@type': 'ListItem',
+      'position': index + 1,
+      'url': `https://nph-solutions.com/data-brief/${brief.id}`,
+      'name': brief.title
+    }))
+  }), []);
 
   const handleReadFullBrief = (brief: DataBrief) => {
     navigate(`/data-brief/${brief.id}`);
   };
 
   return (
+    <>
+    <SEOHead
+      title="Data Insights & Public Health Data Briefs - NPH Solutions"
+      description="Explore data-driven public health briefs from NPH Solutions covering maternal and child health, nutrition, reproductive health, FGM, vaccination, neonatal mortality, contraception, electricity access, and more across Africa."
+      keywords={seoKeywords}
+      url="/data"
+      type="website"
+      structuredData={itemListStructuredData}
+    />
     <PageLayout
       title="Data Insights"
       intro="Health data enhances the ability to advocate for or enact needed changes to health policies and services. Explore our data briefs and interactive visualizations to gain insights into public health trends and patterns."
@@ -178,6 +221,7 @@ const DataInsights: React.FC = () => {
         )}
       </div>
     </PageLayout>
+    </>
   );
 };
 

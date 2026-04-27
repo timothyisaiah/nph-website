@@ -6,6 +6,8 @@
   "homepage": "https://nph-solutions.com",
   "scripts": {
     "dev": "vite",
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "prebuild": "node scripts/generate-sitemap.js",
     "build": "tsc && vite build",
     "build:analyze": "npm run build && npx vite-bundle-analyzer dist",
     "optimize-images": "node scripts/optimize-images.js",

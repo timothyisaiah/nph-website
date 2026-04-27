@@ -1,8 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
+import SEOHead from '../components/seo/SEOHead';
 import { images } from '../assets/images';
 import { dataBriefs, type DataBrief } from '../data/dataBriefs';
+
+const SITE_ORIGIN = 'https://nph-solutions.com';
+
+const STOP_WORDS = new Set([
+  'the', 'a', 'an', 'and', 'or', 'but', 'of', 'in', 'on', 'at', 'to', 'for',
+  'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  'as', 'that', 'this', 'these', 'those', 'it', 'its', 'why', 'how', 'what',
+  'when', 'where', 'who', 'whom', 'which', 'than', 'into', 'about', 'over',
+  'under', 'more', 'less', 'not', 'no', 'so', 'such', 'can', 'could', 'should',
+  'would', 'will', 'has', 'have', 'had', 'do', 'does', 'did', 'their', 'them',
+  'they', 'our', 'us', 'we', 'you', 'your', 'his', 'her', 'he', 'she', 'if',
+  'because', 'while', 'between', 'against', 'also', 'still', 'only', 'most'
+]);
+
+const extractKeywordsFromTitle = (title: string): string[] => {
+  return Array.from(new Set(
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+  ));
+};
+
+const toAbsoluteImage = (image: string): string => {
+  if (!image) return `${SITE_ORIGIN}/src/assets/Company-logo.jpg`;
+  if (/^https?:\/\//i.test(image)) return image;
+  if (image.startsWith('/')) return `${SITE_ORIGIN}${image}`;
+  return `${SITE_ORIGIN}/${image}`;
+};
+
+const safeISODate = (dateStr: string): string | undefined => {
+  const ts = Date.parse(dateStr);
+  if (Number.isNaN(ts)) return undefined;
+  return new Date(ts).toISOString();
+};
 
 const DataBriefDetail: React.FC = () => {
   const { briefId } = useParams<{ briefId: string }>();
@@ -77,7 +114,72 @@ const DataBriefDetail: React.FC = () => {
     );
   }
 
+  const seoKeywords = useMemo(() => {
+    if (!brief) return '';
+    const titleTerms = extractKeywordsFromTitle(brief.title);
+    const baseTerms = [
+      brief.category.toLowerCase(),
+      'public health data',
+      'NPH Solutions',
+      'data brief',
+      'Africa health',
+      'sub-Saharan Africa',
+      'DHS data',
+      'health research'
+    ];
+    return Array.from(new Set([...baseTerms, ...titleTerms])).join(', ');
+  }, [brief]);
+
+  const articleStructuredData = useMemo(() => {
+    if (!brief) return undefined;
+    const datePublished = safeISODate(brief.date);
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      'headline': brief.title,
+      'description': brief.excerpt,
+      'image': [toAbsoluteImage(brief.chartImage)],
+      'datePublished': datePublished,
+      'dateModified': datePublished,
+      'author': {
+        '@type': 'Person',
+        'name': brief.author
+      },
+      'publisher': {
+        '@type': 'Organization',
+        'name': 'NPH Solutions',
+        'logo': {
+          '@type': 'ImageObject',
+          'url': `${SITE_ORIGIN}/src/assets/Company-logo.jpg`
+        }
+      },
+      'mainEntityOfPage': {
+        '@type': 'WebPage',
+        '@id': `${SITE_ORIGIN}/data-brief/${brief.id}`
+      },
+      'articleSection': brief.category,
+      'keywords': seoKeywords,
+      'inLanguage': 'en'
+    };
+  }, [brief, seoKeywords]);
+
   return (
+    <>
+    <SEOHead
+      title={brief.title}
+      description={brief.excerpt}
+      keywords={seoKeywords}
+      image={toAbsoluteImage(brief.chartImage)}
+      url={`/data-brief/${brief.id}`}
+      type="article"
+      structuredData={articleStructuredData}
+      article={{
+        publishedTime: safeISODate(brief.date),
+        author: brief.author,
+        section: brief.category,
+        tags: extractKeywordsFromTitle(brief.title)
+      }}
+    />
     <PageLayout
       title={brief.title}
       intro={`${brief.category} • ${brief.date} • by ${brief.author}`}
@@ -199,6 +301,7 @@ const DataBriefDetail: React.FC = () => {
         </div>
       </div>
     </PageLayout>
+    </>
   );
 };
 

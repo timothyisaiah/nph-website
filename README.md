@@ -1,54 +1,202 @@
-# React + TypeScript + Vite
+# NPH Solutions Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The official website of **NPH Solutions Ltd** — a Uganda-registered public health research company that turns African public health data into evidence for community and policy action.
 
-Currently, two official plugins are available:
+> *"Unlocking health data for community and policy action"*
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This repository contains the source code for [nph-solutions.com](https://nph-solutions.com): a single-page React + TypeScript application that publishes the company's services, thematic research areas, peer-reviewed publications, and an open library of data briefs, plus an interactive DHS / STATcompiler data explorer.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## What the site does
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+The site is structured around **six public-facing sections**:
+
+| Route | Page | Purpose |
+| --- | --- | --- |
+| `/` | **Home** | Landing experience with an interactive 3D globe of African countries (powered by `globe.gl` / `three.js`), live DHS indicator look-ups, child growth z-score tools, and feeding-tips carousels. |
+| `/about` | **About** | Company overview, vision, slogan, and call-to-action. |
+| `/services` | **Services** | Detailed catalogue of consultancy offerings — Public Health Research, Monitoring & Evaluation, Data Systems & Analytics, and Health Promotion. |
+| `/thematic-areas` | **Thematic Areas** | The six research themes the company works across (Health Equity & Social Determinants, Health & Environment, Globalization & Health, Health Care Systems, Political Economy of Health, Epidemiologic Profiles). |
+| `/data` | **Data Insights** | A two-tab hub: the **Data Briefs** library and the **Data Visualization** entry point to the explorer. |
+| `/data-brief/:briefId` | **Data Brief Detail** | A standalone, SEO-optimised page for each of the 26+ data briefs, with chart, summary, full report, downloadable `.docx`, and "Other Data Briefs" cross-links. |
+| `/data-explorer` | **Data Explorer** | An interactive STATcompiler explorer that hits the live DHS API to compare indicators across countries and time. |
+| `/publications` | **Publications** | List of peer-reviewed and grey-literature outputs. |
+| `/contact` | **Contact** | EmailJS-powered contact form. |
+
+### The Data Briefs library
+
+The `/data-brief/*` routes are the editorial heart of the site. Each brief is an evidence-based public-health story (maternal health, child nutrition, FGM, vaccination coverage, neonatal mortality, electricity access, contraception, etc.) with a chart, narrative, author, category, and downloadable Word document. Briefs are defined in `src/data/dataBriefs.ts` and rendered automatically — adding a new brief there immediately:
+
+1. Appears on the `/data` listing,
+2. Gets a routable detail page,
+3. Is added to `public/sitemap.xml` (via the prebuild generator),
+4. Ships with article-level SEO, Open Graph, Twitter Card, and `Article` JSON-LD structured data.
+
+### Data Explorer
+
+`/data-explorer` connects to the DHS Program API (`api.dhsprogram.com`) via `axios`, lets the user pick countries and indicators, and renders comparative charts with `recharts`.
+
+### SEO
+
+Every page renders a `<SEOHead>` (`src/components/seo/SEOHead.tsx`) that emits canonical URLs, Open Graph + Twitter cards, and JSON-LD. Listing pages emit `ItemList` schema; brief detail pages emit `Article` schema with `datePublished`, `author`, `articleSection`, and `keywords`. The sitemap is auto-generated from the dataBriefs source so search engines discover every brief URL.
+
+---
+
+## Tech stack
+
+- **React 18** + **TypeScript** + **Vite 5** (HMR, fast builds)
+- **React Router 6** (`createBrowserRouter`)
+- **Tailwind CSS** for styling, **PostCSS** + **Autoprefixer**
+- **Framer Motion** for animations
+- **Recharts** for charts in the data explorer and trend views
+- **globe.gl** + **three.js** + **topojson-client** for the 3D Africa globe on the home page
+- **react-helmet-async** for per-route SEO and structured data
+- **react-select** for searchable dropdowns
+- **axios** for DHS API calls
+- **@emailjs/browser** for the contact form
+- **gh-pages** for deployment to GitHub Pages
+- **sharp** for the image optimisation pipeline
+
+---
+
+## Project structure
+
+```
+nph-website/
+├── public/                   # Static assets served as-is
+│   ├── databriefs/           # Per-brief chart PNGs and downloadable .docx files
+│   ├── sitemap.xml           # Auto-generated by scripts/generate-sitemap.js
+│   ├── robots.txt
+│   └── manifest.json
+├── scripts/
+│   ├── generate-sitemap.js   # Reads src/data/dataBriefs.ts and writes public/sitemap.xml
+│   ├── optimize-images.js    # Converts source images to optimised WebP via sharp
+│   ├── optimize-service-images.js
+│   ├── downloadCountries.js  # DHS country metadata fetcher
+│   └── mapCountries.js
+├── src/
+│   ├── assets/               # Imported images, charts, optimised WebP
+│   ├── components/
+│   │   ├── carousel/         # Feeding tips carousel
+│   │   ├── common/           # PageLayout, OptimizedImage, LoadingSpinner, ...
+│   │   ├── data/             # DataCanvas (the explorer), TrendChart
+│   │   ├── globe/            # 3D globe + mobile fallback selector
+│   │   ├── layout/           # MainLayout, Header, Footer
+│   │   ├── seo/SEOHead.tsx   # Central SEO/JSON-LD component
+│   │   ├── publications/, services/, shared/, thematic/, form/, error/
+│   ├── context/              # IndicatorContext, etc.
+│   ├── data/
+│   │   ├── dataBriefs.ts     # Source of truth for every data brief
+│   │   ├── indicators.ts     # DHS indicator catalogue
+│   │   ├── dhs-countries.json, country-centroids.json, topology.js, ...
+│   ├── pages/                # Route-level components (Home, About, DataInsights, ...)
+│   ├── utils/                # whoLMS growth z-score utilities, helpers
+│   ├── routes.tsx            # Router definition
+│   └── main.tsx              # App entry
+├── index.html                # Static meta tags + JSON-LD shell
+├── tailwind.config.js
+├── vite.config.ts
+└── package.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Getting started
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+### Prerequisites
+
+- **Node.js 18+** and **npm 9+**
+
+### Install
+
+```bash
+npm install
 ```
+
+### Run the dev server
+
+```bash
+npm run dev
+```
+
+Then open the URL Vite prints (default `http://localhost:5173`).
+
+### Build for production
+
+```bash
+npm run build
+```
+
+This runs in two steps:
+1. `prebuild` regenerates `public/sitemap.xml` from `src/data/dataBriefs.ts`.
+2. `tsc && vite build` type-checks and produces an optimised bundle in `dist/`.
+
+### Preview the production build locally
+
+```bash
+npm run preview
+```
+
+### Deploy to GitHub Pages
+
+```bash
+npm run deploy
+```
+
+This runs `predeploy` (which runs `build`, which runs `prebuild`) and then publishes `dist/` to the `gh-pages` branch via the `gh-pages` package. The `homepage` field in `package.json` and `public/CNAME` together point the deployment at `https://nph-solutions.com`.
+
+---
+
+## NPM scripts
+
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server with HMR. |
+| `npm run build` | Generate sitemap, type-check, and produce a production bundle. |
+| `npm run build:analyze` | Run `build` then open the bundle analyser. |
+| `npm run preview` | Serve the production `dist/` locally. |
+| `npm run lint` | ESLint over `*.ts` / `*.tsx` files. |
+| `npm run generate-sitemap` | Regenerate `public/sitemap.xml` from `src/data/dataBriefs.ts`. |
+| `npm run optimize-images` | Convert source images to optimised WebP via sharp. |
+| `npm run deploy` | Build and publish to GitHub Pages. |
+| `npm run lighthouse` | Run a Lighthouse audit against the local dev server. |
+
+---
+
+## Adding a new data brief
+
+1. Drop the chart image in `public/databriefs/` (or import it through `src/assets/images.ts` if it's an internal asset).
+2. Add the downloadable `.docx` file to `public/databriefs/`.
+3. Append a new entry to the `dataBriefs` array in `src/data/dataBriefs.ts`:
+
+   ```ts
+   {
+     id: 'unique-slug-2026',           // becomes /data-brief/unique-slug-2026
+     title: '...',
+     date: 'Jan 5, 2026',              // human-readable, also parsed for sitemap lastmod
+     author: 'Author Name',
+     category: 'Maternal Health',      // free-form; used as articleSection in SEO
+     excerpt: 'Short summary used for cards and meta description.',
+     fullContent: `Multiple paragraphs separated by \n\n.`,
+     chartImage: '/databriefs/your-chart.png',
+     docxFile: 'Your downloadable file.docx'
+   }
+   ```
+
+4. Rebuild — `prebuild` will regenerate the sitemap, the listing will pick the brief up, and search engines will see a new article page complete with structured data.
+
+---
+
+## Conventions
+
+- **Routing** — keep all route definitions in `src/routes.tsx`. Pages live in `src/pages/`.
+- **SEO** — every top-level page should render `<SEOHead>` with at minimum a `title`, `description`, and `url`. Pass `type="article"` and an `Article` JSON-LD object for editorial pages.
+- **Images** — prefer optimised WebP through `src/assets/images.ts`. Use `OptimizedImage` for responsive loading.
+- **Heavy components** — code-split with `React.lazy` (see `Home.tsx` for the globe / charts patterns).
+
+---
+
+## License & attribution
+
+Copyright © NPH Solutions Ltd. Code in this repository is proprietary to NPH Solutions unless explicitly stated otherwise. Data brief content is © the respective authors. DHS data accessed via the [DHS Program API](https://api.dhsprogram.com/) under their published terms of use.
