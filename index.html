@@ -123,8 +123,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://api.dhsprogram.com" crossorigin>
     
-    <!-- Resource hints for better performance -->
-    <link rel="preload" href="data:application/octet-stream;base64,aW1wb3J0IHsgU3RyaWN0TW9kZSB9IGZyb20gJ3JlYWN0JwppbXBvcnQgeyBjcmVhdGVSb290IH0gZnJvbSAncmVhY3QtZG9tL2NsaWVudCcKaW1wb3J0ICcuL2luZGV4LmNzcycKaW1wb3J0IEFwcCBmcm9tICcuL0FwcCcKCmNyZWF0ZVJvb3QoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3Jvb3QnKSEpLnJlbmRlcigKICA8U3RyaWN0TW9kZT4KICAgIDxBcHAgLz4KICA8L1N0cmljdE1vZGU+LAopCg==" as="script">
+    <!--
+      Note: Vite injects hashed <script> and <link rel="stylesheet"> tags for the
+      real entry points at build time, so we don't preload /src/main.tsx or
+      /src/index.css here — those paths only exist in dev mode and would generate
+      "preloaded but not used" data-URL warnings in production.
+    -->
 
     <!--
       SPA redirect restorer for GitHub Pages.
@@ -147,7 +151,7 @@
         }
       })(window.location);
     </script>
-    <script type="module" crossorigin src="/assets/index-C9Jf1RJf.js"></script>
+    <script type="module" crossorigin src="/assets/index-CsmQawYr.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/globe-DxtTiRKZ.js">
     <link rel="modulepreload" crossorigin href="/assets/charts-hSH86lU2.js">
     <link rel="modulepreload" crossorigin href="/assets/ui-CrMzEqHc.js">
