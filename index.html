@@ -125,6 +125,28 @@
     
     <!-- Resource hints for better performance -->
     <link rel="preload" href="data:application/octet-stream;base64,aW1wb3J0IHsgU3RyaWN0TW9kZSB9IGZyb20gJ3JlYWN0JwppbXBvcnQgeyBjcmVhdGVSb290IH0gZnJvbSAncmVhY3QtZG9tL2NsaWVudCcKaW1wb3J0ICcuL2luZGV4LmNzcycKaW1wb3J0IEFwcCBmcm9tICcuL0FwcCcKCmNyZWF0ZVJvb3QoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3Jvb3QnKSEpLnJlbmRlcigKICA8U3RyaWN0TW9kZT4KICAgIDxBcHAgLz4KICA8L1N0cmljdE1vZGU+LAopCg==" as="script">
+
+    <!--
+      SPA redirect restorer for GitHub Pages.
+      When public/404.html bounces an unknown path through `?/encoded/path`,
+      this restores the original URL with history.replaceState BEFORE React Router boots,
+      so deep links like /data-brief/<id> work on direct hits and refreshes.
+      Reference: https://github.com/rafgraph/spa-github-pages
+    -->
+    <script type="text/javascript">
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function (s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      })(window.location);
+    </script>
     <script type="module" crossorigin src="/assets/index-C9Jf1RJf.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/globe-DxtTiRKZ.js">
     <link rel="modulepreload" crossorigin href="/assets/charts-hSH86lU2.js">
