@@ -171,6 +171,49 @@ const feedingTips = {
 
 // Remove indicatorsWithDHS mapping and use localIndicators directly
 
+// Skeleton placeholder for demographic cards. Mirrors the dimensions of
+// the populated card so swapping it for real content does not shift
+// surrounding layout. Used by the country demographics section while
+// individual upstream requests are still in-flight.
+const DemographicCardSkeleton: React.FC<{
+  label: string;
+  wide?: boolean;
+  subColumns?: number;
+  valueHeightClass?: string;
+}> = ({ label, wide = false, subColumns, valueHeightClass = 'h-6' }) => (
+  <div
+    className={classNames(
+      'bg-white p-3 rounded border animate-pulse',
+      wide && 'col-span-2'
+    )}
+    aria-busy="true"
+    aria-label={`Loading ${label}`}
+  >
+    <div className="font-medium text-gray-700 mb-2">{label}</div>
+    {subColumns ? (
+      <div
+        className={classNames(
+          'grid gap-2 text-center',
+          subColumns === 2 ? 'grid-cols-2' : 'grid-cols-3'
+        )}
+      >
+        {Array.from({ length: subColumns }).map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <div className="h-5 w-12 bg-gray-200 rounded" />
+            <div className="h-3 w-10 bg-gray-100 rounded" />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className={classNames('bg-gray-200 rounded w-1/2 mb-2', valueHeightClass)} />
+    )}
+    <div className="flex justify-between items-center text-xs mt-2">
+      <div className="h-3 w-10 bg-gray-100 rounded" />
+      <div className="h-3 w-20 bg-gray-100 rounded" />
+    </div>
+  </div>
+);
+
 const Home: React.FC = () => {
   // State for calculator
   const [calculatorData, setCalculatorData] = useState({
@@ -230,6 +273,9 @@ const Home: React.FC = () => {
     gdpPerCapita?: { value: number; year: number; source?: string };
   }>({});
   const [demographicLoading, setDemographicLoading] = useState(false);
+  // Tracks which demographic fields are still being fetched so each card
+  // can render its own skeleton independently of the others.
+  const [demographicLoadingFields, setDemographicLoadingFields] = useState<Set<string>>(new Set());
   const [selectedGlobeCountry, setSelectedGlobeCountry] = useState<{ value: string; label: string } | null>(null);
   const [showNutritionModal, setShowNutritionModal] = useState(false);
 
@@ -259,49 +305,89 @@ const Home: React.FC = () => {
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
 
-  // Function to fetch demographic data for a country
+  // Function to fetch demographic data for a country.
+  // Streams individual fields into state as each upstream request resolves
+  // so the UI can swap skeletons for real cards independently.
   const fetchDemographicData = useCallback(async (countryCode: string) => {
+    const expectedFields = ['population', 'currency', 'gdpPerCapita', 'genderParity', 'residence', 'education'] as const;
+    type DemographicField = typeof expectedFields[number];
+
     setDemographicLoading(true);
-    // Clear existing data to show loading state
     setDemographicData({});
+    setDemographicLoadingFields(new Set(expectedFields));
+
+    // Local mirror so we can synchronously decide which fields still need
+    // a fallback after the streaming requests settle.
+    const setFields = new Set<string>();
+
+    const setField = (field: DemographicField, value: any) => {
+      if (value == null || setFields.has(field)) return;
+      setFields.add(field);
+      setDemographicData(prev => ({ ...prev, [field]: value }));
+      setDemographicLoadingFields(prev => {
+        if (!prev.has(field)) return prev;
+        const next = new Set(prev);
+        next.delete(field);
+        return next;
+      });
+    };
+
+    // Education arrives in pieces (primary/secondary/tertiary). Keep the
+    // card visible as soon as any level lands but allow subsequent levels
+    // to merge in.
+    const setEducationPartial = (value: any) => {
+      if (value == null) return;
+      setFields.add('education');
+      setDemographicData(prev => ({ ...prev, education: { ...(prev.education || {}), ...value } }));
+      setDemographicLoadingFields(prev => {
+        if (!prev.has('education')) return prev;
+        const next = new Set(prev);
+        next.delete('education');
+        return next;
+      });
+    };
+
+    // Currency is a synchronous lookup; resolve it immediately.
+    setField('currency', getCurrencyForCountry(countryCode));
+
     try {
       const axiosInstance = await loadAxios();
-      
-      // Try multiple data sources in order of preference
-      const dataSources = [
-        () => fetchFromWorldBank(countryCode, axiosInstance),
-        () => fetchFromRestCountries(countryCode, axiosInstance)
-        // Note: DHS removed as it doesn't provide population-level demographic data
-      ];
 
-      let demographicData = null;
-      
-      for (let i = 0; i < dataSources.length; i++) {
-        try {
-          demographicData = await dataSources[i]();
-          
-          if (demographicData && Object.keys(demographicData).length > 1) {
-            break; // Use first successful source
-          }
-        } catch (error) {
-          continue;
+      await fetchFromWorldBank(countryCode, axiosInstance, (field, value) => {
+        if (field === 'education') {
+          setEducationPartial(value);
+        } else {
+          setField(field as DemographicField, value);
         }
-      }
+      });
 
-      if (demographicData && Object.keys(demographicData).length > 1) {
-        setDemographicData(demographicData);
-      } else {
-        // Fallback to hardcoded data
-        const fallbackData = getFallbackDemographicData(countryCode);
-        setDemographicData(fallbackData);
-      }
+      // Anything World Bank could not provide falls back to country-specific data.
+      const fallbackData = getFallbackDemographicData(countryCode);
+      expectedFields.forEach(f => {
+        if (!setFields.has(f) && fallbackData[f] != null) {
+          if (f === 'education') {
+            setEducationPartial(fallbackData[f]);
+          } else {
+            setField(f, fallbackData[f]);
+          }
+        }
+      });
     } catch (error) {
       const fallbackData = getFallbackDemographicData(countryCode);
-      setDemographicData(fallbackData);
+      expectedFields.forEach(f => {
+        if (!setFields.has(f) && fallbackData[f] != null) {
+          if (f === 'education') {
+            setEducationPartial(fallbackData[f]);
+          } else {
+            setField(f, fallbackData[f]);
+          }
+        }
+      });
     } finally {
       setDemographicLoading(false);
+      setDemographicLoadingFields(new Set());
     }
-    // fetchFromWorldBank/fetchFromRestCountries are stable module-level helpers
+    // fetchFromWorldBank/getFallbackDemographicData/getCurrencyForCountry are stable module-level helpers
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -345,8 +431,15 @@ const Home: React.FC = () => {
     });
   }, []);
 
-  // World Bank API data fetcher
-  const fetchFromWorldBank = async (countryCode: string, axiosInstance: any) => {
+  // World Bank API data fetcher.
+  // When `onPartial` is provided, each demographic field is emitted as
+  // soon as its underlying indicator request resolves, allowing the UI
+  // to render cards progressively instead of waiting for every request.
+  const fetchFromWorldBank = async (
+    countryCode: string,
+    axiosInstance: any,
+    onPartial?: (field: string, value: any) => void
+  ) => {
     const countryMapping: { [key: string]: string } = {
       'UG': 'UG', 'KE': 'KE', 'TZ': 'TZ', 'RW': 'RW', 'ET': 'ET',
       'NG': 'NG', 'ZA': 'ZA', 'EG': 'EG', 'GH': 'GH', 'MA': 'MA'
@@ -370,6 +463,11 @@ const Home: React.FC = () => {
       tertiaryEnrollment: 'SE.TER.ENRR' // Tertiary enrollment rate
     };
 
+    const processedData: any = {};
+
+    // Each indicator request resolves independently and emits its derived
+    // demographic field via `onPartial` as soon as it lands. The aggregate
+    // `processedData` is still returned for callers that expect a snapshot.
     const promises = Object.entries(indicators).map(async ([key, indicator]) => {
       try {
         const response = await axiosInstance.get('https://api.worldbank.org/v2/country/' + wbCountryCode + '/indicator/' + indicator, {
@@ -379,144 +477,109 @@ const Home: React.FC = () => {
             per_page: 1
           }
         });
-        
+
         const data = response.data[1];
-        if (data && data.length > 0) {
-          const latest = data[0];
-          return {
-            key,
-            value: latest.value,
-            year: latest.date
-          };
-        }
-        return null;
-      } catch (error) {
-        return null;
-      }
-    });
+        if (!data || data.length === 0) return null;
 
-    const results = await Promise.all(promises);
-    const processedData: any = {};
+        const latest = data[0];
+        const result = { key, value: latest.value, year: latest.date };
 
-    results.forEach(result => {
-      if (result) {
-        switch (result.key) {
+        switch (key) {
           case 'population':
-            processedData.population = {
-              value: Math.round(result.value),
-              year: result.year,
-              source: 'World Bank'
-            };
+            if (result.value !== null) {
+              processedData.population = {
+                value: Math.round(result.value),
+                year: result.year,
+                source: 'World Bank'
+              };
+              onPartial?.('population', processedData.population);
+            }
             break;
           case 'gdpPerCapita':
-            processedData.gdpPerCapita = {
-              value: Math.round(result.value),
-              year: result.year,
-              source: 'World Bank'
-            };
+            if (result.value !== null) {
+              processedData.gdpPerCapita = {
+                value: Math.round(result.value),
+                year: result.year,
+                source: 'World Bank'
+              };
+              onPartial?.('gdpPerCapita', processedData.gdpPerCapita);
+            }
             break;
           case 'urbanPopulation':
-            processedData.residence = {
-              urban: result.value,
-              rural: 100 - result.value,
-              year: result.year,
-              source: 'World Bank'
-            };
+            if (result.value !== null) {
+              processedData.residence = {
+                urban: result.value,
+                rural: 100 - result.value,
+                year: result.year,
+                source: 'World Bank'
+              };
+              onPartial?.('residence', processedData.residence);
+            }
             break;
           case 'femaleLiteracy':
           case 'maleLiteracy':
-            // Store for gender parity calculation (only if value is not null)
             if (result.value !== null) {
               if (!processedData.literacyRates) processedData.literacyRates = {};
-              processedData.literacyRates[result.key] = {
+              processedData.literacyRates[key] = {
                 value: result.value,
                 year: result.year,
                 source: 'World Bank'
               };
+              // Once both literacy rates are in we can emit the parity card.
+              if (
+                processedData.literacyRates.femaleLiteracy &&
+                processedData.literacyRates.maleLiteracy &&
+                !processedData.genderParity
+              ) {
+                const femaleRate = processedData.literacyRates.femaleLiteracy.value;
+                const maleRate = processedData.literacyRates.maleLiteracy.value;
+                processedData.genderParity = {
+                  value: maleRate > 0 ? femaleRate / maleRate : 1,
+                  year: processedData.literacyRates.femaleLiteracy.year,
+                  source: 'World Bank (calculated from literacy rates)'
+                };
+                onPartial?.('genderParity', processedData.genderParity);
+              }
             }
             break;
           case 'primaryEnrollment':
           case 'secondaryEnrollment':
           case 'tertiaryEnrollment':
-            // Store for education levels (only if value is not null)
             if (result.value !== null) {
               if (!processedData.education) processedData.education = {};
-              const level = result.key.replace('Enrollment', '');
+              const level = key.replace('Enrollment', '');
               processedData.education[level] = {
                 value: result.value,
                 year: result.year,
                 source: 'World Bank'
               };
+              // Emit a snapshot of education so far; subsequent levels merge in.
+              onPartial?.('education', { ...processedData.education });
             }
             break;
         }
+
+        return result;
+      } catch (error) {
+        return null;
       }
     });
 
-    // Calculate gender parity index from literacy rates
-    if (processedData.literacyRates?.femaleLiteracy && processedData.literacyRates?.maleLiteracy) {
-      const femaleRate = processedData.literacyRates.femaleLiteracy.value;
-      const maleRate = processedData.literacyRates.maleLiteracy.value;
+    await Promise.allSettled(promises);
+
+    // If literacy data was unavailable, fall back to a default parity.
+    if (!processedData.genderParity) {
       processedData.genderParity = {
-        value: maleRate > 0 ? femaleRate / maleRate : 1,
-        year: processedData.literacyRates.femaleLiteracy.year,
-        source: 'World Bank (calculated from literacy rates)'
-      };
-    } else {
-      // If no literacy data available, set a default gender parity
-      processedData.genderParity = {
-        value: 0.95, // Default gender parity
+        value: 0.95,
         year: 2023,
         source: 'Default estimate'
       };
+      onPartial?.('genderParity', processedData.genderParity);
     }
 
     processedData.currency = getCurrencyForCountry(countryCode);
     return processedData;
   };
-
-  // REST Countries API data fetcher
-  const fetchFromRestCountries = async (countryCode: string, axiosInstance: any) => {
-    const countryMapping: { [key: string]: string } = {
-      'UG': 'UGA', 'KE': 'KEN', 'TZ': 'TZA', 'RW': 'RWA', 'ET': 'ETH',
-      'NG': 'NGA', 'ZA': 'ZAF', 'EG': 'EGY', 'GH': 'GHA', 'MA': 'MAR'
-    };
-    
-    const iso3Code = countryMapping[countryCode] || countryCode;
-    
-    try {
-      const response = await axiosInstance.get(`https://restcountries.com/v3.1/alpha/${iso3Code}`);
-      const country = response.data[0];
-      
-      if (country) {
-        const result = {
-          population: {
-            value: country.population,
-            year: 2023,
-            source: 'REST Countries API'
-          },
-          currency: Object.keys(country.currencies || {})[0] || getCurrencyForCountry(countryCode),
-          area: country.area,
-          capital: country.capital?.[0],
-          region: country.region,
-          subregion: country.subregion,
-          languages: Object.values(country.languages || {}),
-          // Estimate urban/rural based on region
-          residence: {
-            urban: getEstimatedUrbanPercentage(country.region),
-            rural: 100 - getEstimatedUrbanPercentage(country.region),
-            year: 2023,
-            source: 'REST Countries API (estimated from region)'
-          }
-        };
-        return result;
-      }
-    } catch (error) {
-      // Silently handle error
-    }
-    return null;
-  };
-
 
   // Helper function to get fallback demographic data for a country
   const getFallbackDemographicData = (countryCode: string) => {
@@ -569,18 +632,6 @@ const Home: React.FC = () => {
     };
     
     return countrySpecificData[countryCode] || fallbackData;
-  };
-
-  // Helper function to estimate urban percentage based on region
-  const getEstimatedUrbanPercentage = (region: string): number => {
-    const regionEstimates: { [key: string]: number } = {
-      'Africa': 45,
-      'Asia': 55,
-      'Europe': 75,
-      'Americas': 80,
-      'Oceania': 70
-    };
-    return regionEstimates[region] || 50; // Default to 50% if region not found
   };
 
   // Helper function to get currency for a country
@@ -643,12 +694,16 @@ const Home: React.FC = () => {
     setOverlayError(null);
     setOverlayData([]);
     
-    // Fetch both indicator data and demographic data
-    const fetchData = async () => {
+    // Kick off demographic fetch in parallel. It manages its own loading
+    // state (per-field skeletons) so it must not gate `overlayLoading`,
+    // otherwise the whole panel shows a single spinner and the skeletons
+    // never get a chance to render.
+    fetchDemographicData(overlayCountry.value);
+
+    const fetchIndicatorData = async () => {
       try {
         const axiosInstance = await loadAxios();
-        
-        // Fetch indicator data
+
         const indicatorResponse = await axiosInstance.get('https://api.dhsprogram.com/rest/dhs/data', {
           params: {
             indicatorIds: indicator.indicatorId,
@@ -659,20 +714,16 @@ const Home: React.FC = () => {
             f: 'json',
           },
         });
-        
+
         setOverlayData(indicatorResponse.data.Data || []);
-        
-        // Fetch demographic data
-        await fetchDemographicData(overlayCountry.value);
-        
       } catch (error) {
         setOverlayError('Failed to load data from DHS.');
       } finally {
         setOverlayLoading(false);
       }
     };
-    
-    fetchData();
+
+    fetchIndicatorData();
   }, [selectedIdx, overlayCountry, fetchDemographicData]);
 
   // Calculator input change handler
@@ -1212,12 +1263,7 @@ const Home: React.FC = () => {
                             <div className="text-xs text-gray-500 mt-2">Source: DHS STATcompiler</div>
                             
                             {/* Demographic Information Section */}
-                            {demographicLoading ? (
-                              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                                <div className="text-sm font-medium text-gray-700 mb-2">Loading demographic data...</div>
-                                <LoadingSpinner />
-                              </div>
-                            ) : Object.keys(demographicData).length > 0 ? (
+                            {(demographicLoading || Object.keys(demographicData).length > 0) ? (
                               <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-3">
                                   Country Demographics
@@ -1228,7 +1274,7 @@ const Home: React.FC = () => {
                                   )}
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
-                                  {demographicData.population && (
+                                  {demographicData.population ? (
                                     <div className="bg-white p-3 rounded border">
                                       <div className="font-medium text-gray-700">Population</div>
                                       <div className="text-2xl font-bold text-blue-600">
@@ -1239,9 +1285,11 @@ const Home: React.FC = () => {
                                         <span className="text-blue-600 font-medium">{demographicData.population.source}</span>
                                       </div>
                                     </div>
-                                  )}
+                                  ) : demographicLoadingFields.has('population') ? (
+                                    <DemographicCardSkeleton label="Population" valueHeightClass="h-7" />
+                                  ) : null}
                                   
-                                  {demographicData.currency && (
+                                  {demographicData.currency ? (
                                     <div className="bg-white p-3 rounded border">
                                       <div className="font-medium text-gray-700">Currency</div>
                                       <div className="text-lg font-semibold text-green-600">
@@ -1252,9 +1300,11 @@ const Home: React.FC = () => {
                                         <span className="text-green-600 font-medium">Currency mapping</span>
                                       </div>
                                     </div>
-                                  )}
+                                  ) : demographicLoadingFields.has('currency') ? (
+                                    <DemographicCardSkeleton label="Currency" />
+                                  ) : null}
                                   
-                                  {demographicData.gdpPerCapita && (
+                                  {demographicData.gdpPerCapita ? (
                                     <div className="bg-white p-3 rounded border">
                                       <div className="font-medium text-gray-700">GDP per Capita</div>
                                       <div className="text-lg font-semibold text-purple-600">
@@ -1265,9 +1315,11 @@ const Home: React.FC = () => {
                                         <span className="text-purple-600 font-medium">{demographicData.gdpPerCapita.source}</span>
                                       </div>
                                     </div>
-                                  )}
+                                  ) : demographicLoadingFields.has('gdpPerCapita') ? (
+                                    <DemographicCardSkeleton label="GDP per Capita" />
+                                  ) : null}
                                   
-                                  {demographicData.genderParity && (
+                                  {demographicData.genderParity ? (
                                     <div className="bg-white p-3 rounded border">
                                       <div className="font-medium text-gray-700">Gender Parity Index</div>
                                       <div className="text-lg font-semibold text-pink-600">
@@ -1278,9 +1330,11 @@ const Home: React.FC = () => {
                                         <span className="text-pink-600 font-medium">{demographicData.genderParity.source}</span>
                                       </div>
                                     </div>
-                                  )}
+                                  ) : demographicLoadingFields.has('genderParity') ? (
+                                    <DemographicCardSkeleton label="Gender Parity Index" />
+                                  ) : null}
                                   
-                                  {demographicData.residence && (
+                                  {demographicData.residence ? (
                                     <div className="bg-white p-3 rounded border col-span-2">
                                       <div className="font-medium text-gray-700 mb-2">Residence Distribution</div>
                                       <div className="flex justify-between items-center">
@@ -1302,9 +1356,11 @@ const Home: React.FC = () => {
                                         <span className="text-orange-600 font-medium">{demographicData.residence.source}</span>
                                       </div>
                                     </div>
-                                  )}
+                                  ) : demographicLoadingFields.has('residence') ? (
+                                    <DemographicCardSkeleton label="Residence Distribution" wide subColumns={2} />
+                                  ) : null}
                                   
-                                  {demographicData.education && (
+                                  {demographicData.education ? (
                                     <div className="bg-white p-3 rounded border col-span-2">
                                       <div className="font-medium text-gray-700 mb-2">Education Levels</div>
                                       <div className="grid grid-cols-3 gap-2 text-center">
@@ -1380,7 +1436,9 @@ const Home: React.FC = () => {
                                         </span>
                                       </div>
                                     </div>
-                                  )}
+                                  ) : demographicLoadingFields.has('education') ? (
+                                    <DemographicCardSkeleton label="Education Levels" wide subColumns={3} />
+                                  ) : null}
                                 </div>
                               </div>
                             ) : null}
