@@ -301,6 +301,8 @@ const Home: React.FC = () => {
     } finally {
       setDemographicLoading(false);
     }
+    // fetchFromWorldBank/fetchFromRestCountries are stable module-level helpers
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Replace handleGlobeCountrySelect to update selectedCountry and selectedGlobeCountry

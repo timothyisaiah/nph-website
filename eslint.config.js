@@ -23,6 +23,9 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Allow `any` for untyped third-party integrations
+      // (globe.gl callbacks, recharts formatters, axios DHS API responses, etc.)
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 )

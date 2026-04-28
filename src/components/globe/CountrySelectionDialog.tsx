@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Select from 'react-select';
-// @ts-ignore
 import countryMapping from '../../data/country-mapping.json';
 
 interface Country {

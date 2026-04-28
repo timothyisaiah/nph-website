@@ -12,7 +12,7 @@ const DataInsights: React.FC = () => {
   const seoKeywords = useMemo(() => {
     const categories = Array.from(new Set(dataBriefs.map(b => b.category)));
     const titleTerms = dataBriefs
-      .map(b => b.title.replace(/[^a-zA-Z0-9\s\-]/g, '').trim())
+      .map(b => b.title.replace(/[^a-zA-Z0-9\s-]/g, '').trim())
       .slice(0, 8);
     const baseTerms = [
       'public health data Africa',

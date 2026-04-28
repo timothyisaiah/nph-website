@@ -3,12 +3,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import * as d3 from 'd3-geo';
 import * as topojson from 'topojson-client';
 
-// Import data with type assertions
-// @ts-ignore
 import topologyData from '../../data/topology.js';
-// @ts-ignore
-import shortcodesData from '../../data/shortcodes.js';
-// @ts-ignore
 import countryMapping from '../../data/country-mapping.json';
 
 // Throttling and debouncing utilities
@@ -62,7 +57,10 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
   const [globeLoaded, setGlobeLoaded] = useState(false);
   const [dependenciesLoaded, setDependenciesLoaded] = useState(false);
 
-  // Throttled and debounced event handlers for better performance
+  // Throttled and debounced event handlers for better performance.
+  // The throttle/debounce wrappers are intentional and create stable references
+  // that should not be recreated on every render — hence the empty deps array.
+  /* eslint-disable react-hooks/exhaustive-deps */
   const throttledSetHoveredCountry = useCallback(
     throttle((countryCode: string | null) => {
       setHoveredCountry(countryCode);
@@ -83,6 +81,7 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
     }, 50), // 50ms throttling for cursor updates
     []
   );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Convert TopoJSON to GeoJSON - computed synchronously since topology data is static
   const geoJSONData = React.useMemo(() => {
@@ -224,11 +223,8 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
               
               // Focus on the selected country
               if (polygon) {
-                let center: [number, number];
-                
-                // Calculate the centroid of the country
-                center = d3.geoCentroid(polygon);
-                
+                const center: [number, number] = d3.geoCentroid(polygon);
+
                 // Focus on the selected country with smooth animation
                 globe.pointOfView(
                   { 
@@ -272,6 +268,9 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
       }
       setIsLoading(false);
     }
+    // The closure captures throttled/debounced helpers and live state via refs;
+    // adding them as deps would re-init the globe on every hover/select change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height, onCountrySelect, onError, globeLoaded, dependenciesLoaded]);
 
   // Initialize globe on mount and when dependencies are loaded
@@ -282,6 +281,7 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
   }, [initializeGlobe, dependenciesLoaded, globeLoaded]);
 
   // Throttled color update function
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const throttledUpdateColors = useCallback(
     throttle(() => {
       if (globeInstanceRef.current && globeLoaded) {
@@ -324,6 +324,7 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
   }, [throttledUpdateColors]);
 
   // Throttled country focus function to prevent rapid successive animations
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const throttledFocusCountry = useCallback(
     throttle((mapping: any, countryPolygon: any) => {
       if (globeInstanceRef.current && countryPolygon) {
@@ -381,13 +382,16 @@ const OptimizedGlobeVisualization: React.FC<OptimizedGlobeVisualizationProps> = 
         );
       }
     }
+    // geoJSONData.features is read inside but is stable for the component's lifetime
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCountry, throttledFocusCountry]);
 
   // Cleanup on unmount
   useEffect(() => {
+    const globeNode = globeRef.current;
     return () => {
-      if (globeRef.current) {
-        globeRef.current.innerHTML = '';
+      if (globeNode) {
+        globeNode.innerHTML = '';
       }
       globeInstanceRef.current = null;
       

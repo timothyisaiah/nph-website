@@ -169,7 +169,7 @@ const DataCanvas: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        let params: any = {
+        const params: Record<string, string | number> = {
           indicatorIds: selectedIndicator,
           countryIds: selectedCountries.join(','),
           surveyYearStart: yearRange.start,
@@ -209,12 +209,6 @@ const DataCanvas: React.FC = () => {
   const countryColors = [
     '#4F46E5', '#16A34A', '#F59E42', '#E11D48', '#6366F1', '#FBBF24', '#10B981', '#F472B6', '#0EA5E9', '#A21CAF',
   ];
-
-  // Helper: get color for a country
-  const getCountryColor = (country: string) => {
-    const idx = countries.findIndex((c) => c.CountryName === country);
-    return countryColors[idx % countryColors.length];
-  };
 
   // Prepare chart data: group by SurveyYear, then by country and breakdown
   const chartData = React.useMemo(() => {
@@ -301,7 +295,7 @@ const DataCanvas: React.FC = () => {
         );
 
       case 'table':
-      default:
+      default: {
         // Sort table rows by country, then by breakdown, then by year
         const sortedData = [...data].sort((a, b) => {
           if (a.CountryName !== b.CountryName) return a.CountryName.localeCompare(b.CountryName);
@@ -344,6 +338,7 @@ const DataCanvas: React.FC = () => {
             </table>
           </div>
         );
+      }
     }
   };
 

@@ -1,13 +1,10 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '../components/common/PageLayout';
 import OptimizedImage from '../components/common/OptimizedImage';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import SEOHead from '../components/seo/SEOHead';
 import { images } from '../assets/images';
-
-// Lazy load the ServiceCard component to reduce initial bundle size
-// const ServiceCard = lazy(() => import('../components/services/ServiceCard'));
 
 const services = [
   {

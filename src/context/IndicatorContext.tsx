@@ -8,6 +8,7 @@ interface IndicatorContextType {
 
 const IndicatorContext = createContext<IndicatorContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useIndicator = () => {
   const context = useContext(IndicatorContext);
   if (context === undefined) {
