@@ -8,7 +8,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'globe': ['globe.gl', 'three', 'd3-geo', 'topojson-client'],
+          'globe': ['globe.gl', 'd3-geo', 'topojson-client'],
           'charts': ['recharts'],
           'ui': ['framer-motion', 'react-select', 'classnames'],
           'utils': ['axios']
@@ -35,7 +35,6 @@ export default defineConfig({
       'react-dom', 
       'react-router-dom',
       'globe.gl',
-      'three',
       'd3-geo',
       'topojson-client'
     ]

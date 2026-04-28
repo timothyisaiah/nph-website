@@ -25,27 +25,6 @@ declare module '../data/topology.js' {
   export default topologyData;
 }
 
-declare module '../data/polygons.js' {
-  export interface PolygonFeature {
-    type: string;
-    properties: {
-      iso_3c: string;
-    };
-    geometry: {
-      type: string;
-      coordinates: number[] | number[][];
-    };
-  }
-
-  export interface PolygonsData {
-    type: string;
-    features: PolygonFeature[];
-  }
-
-  const polygonsData: PolygonsData;
-  export default polygonsData;
-}
-
 declare module '../data/shortcodes.js' {
   const shortcodesData: string[];
   export default shortcodesData;

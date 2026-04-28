@@ -1,7 +1,6 @@
 // Public domain images from Unsplash and other free sources
 import monitoringImage from './optimized/Monitoring and Evaluation Image.webp';
 import dataAnalyticsImage from './optimized/Data analytics and system.webp';
-import healthSystemsImage from './optimized/Health system .webp';
 import communityHealthImage from './optimized/Health promotion.webp';
 import healthAndEnvironmentImage from './optimized/Health and Environment.webp';
 import politicalEconomyImage from './optimized/Political Economy.webp';
@@ -72,7 +71,6 @@ export const images = {
     credit: 'Photo by National Cancer Institute on Unsplash'
   },
   healthSystems: {
-    // url: healthSystemsImage,
     url: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118',
     alt: 'Modern hospital facility',
     credit: 'Photo by National Cancer Institute on Unsplash'
