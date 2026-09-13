@@ -50,7 +50,7 @@ async function mapCountries() {
         'BD': 'BGD', // Bangladesh
         'BJ': 'BEN', // Benin
         'BO': 'BOL', // Bolivia
-        'BT': 'BTN', // Botswana (note: DHS uses BT for Botswana, but ISO3 is BWA)
+        'BT': 'BWA', // Botswana
         'BR': 'BRA', // Brazil
         'BF': 'BFA', // Burkina Faso
         'BU': 'BDI', // Burundi
@@ -67,46 +67,59 @@ async function mapCountries() {
         'DR': 'DOM', // Dominican Republic
         'EC': 'ECU', // Ecuador
         'EG': 'EGY', // Egypt
+        'ES': 'SLV', // El Salvador
+        'EK': 'GNQ', // Equatorial Guinea
+        'ER': 'ERI', // Eritrea
+        'SZ': 'SWZ', // Eswatini
         'ET': 'ETH', // Ethiopia
         'GA': 'GAB', // Gabon
         'GM': 'GMB', // Gambia
         'GH': 'GHA', // Ghana
+        'GU': 'GTM', // Guatemala
         'GN': 'GIN', // Guinea
+        'GY': 'GUY', // Guyana
         'GW': 'GNB', // Guinea-Bissau
         'HT': 'HTI', // Haiti
         'HN': 'HND', // Honduras
-        'IN': 'IND', // India
+        'IA': 'IND', // India
         'ID': 'IDN', // Indonesia
         'JO': 'JOR', // Jordan
-        'KZ': 'KAZ', // Kazakhstan
+        'KK': 'KAZ', // Kazakhstan
         'KE': 'KEN', // Kenya
-        'KG': 'KGZ', // Kyrgyzstan
+        'KY': 'KGZ', // Kyrgyz Republic
         'LA': 'LAO', // Laos
         'LS': 'LSO', // Lesotho
-        'LR': 'LBR', // Liberia
-        'MG': 'MDG', // Madagascar
+        'LB': 'LBR', // Liberia
+        'MD': 'MDG', // Madagascar
+        'MV': 'MDV', // Maldives
         'MW': 'MWI', // Malawi
         'ML': 'MLI', // Mali
         'MR': 'MRT', // Mauritania
         'MU': 'MUS', // Mauritius
         'MX': 'MEX', // Mexico
+        'MB': 'MDA', // Moldova
         'MA': 'MAR', // Morocco
         'MZ': 'MOZ', // Mozambique
-        'NA': 'NAM', // Namibia
+        'MM': 'MMR', // Myanmar
+        'NM': 'NAM', // Namibia
         'NP': 'NPL', // Nepal
-        'NI': 'NIC', // Nicaragua
-        'NE': 'NER', // Niger
+        'NC': 'NIC', // Nicaragua
+        'NI': 'NER', // Niger
         'NG': 'NGA', // Nigeria
         'PK': 'PAK', // Pakistan
+        'PG': 'PNG', // Papua New Guinea
         'PY': 'PRY', // Paraguay
         'PE': 'PER', // Peru
         'PH': 'PHL', // Philippines
         'RW': 'RWA', // Rwanda
+        'WS': 'WSM', // Samoa
+        'ST': 'STP', // Sao Tome and Principe
         'SN': 'SEN', // Senegal
         'SL': 'SLE', // Sierra Leone
         'ZA': 'ZAF', // South Africa
         'LK': 'LKA', // Sri Lanka
         'SD': 'SDN', // Sudan
+        'TJ': 'TJK', // Tajikistan
         'TZ': 'TZA', // Tanzania
         'TH': 'THA', // Thailand
         'TL': 'TLS', // Timor-Leste
