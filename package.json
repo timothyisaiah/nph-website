@@ -24,7 +24,6 @@
     "classnames": "^2.5.1",
     "d3-geo": "^3.1.1",
     "framer-motion": "^12.16.0",
-    "globe.gl": "^2.43.0",
     "postcss": "^8.4.32",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -33,6 +32,7 @@
     "react-select": "^5.10.2",
     "recharts": "^2.15.3",
     "tailwindcss": "^3.4.1",
+    "three": "^0.177.0",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
@@ -40,6 +40,7 @@
     "@types/d3-geo": "^3.1.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
+    "@types/three": "^0.177.0",
     "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.56.0",

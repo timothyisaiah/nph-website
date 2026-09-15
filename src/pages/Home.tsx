@@ -2,7 +2,7 @@
 // Main landing page for NPH Solutions website
 // Features: Globe visualization, responsive indicator lists, details panel, health tools, and more
 
-import React, { useState, useCallback, useEffect, Suspense, lazy, startTransition } from 'react';
+import React, { useState, useCallback, useEffect, useRef, Suspense, lazy, startTransition } from 'react';
 import { useNavigate } from "react-router-dom";
 import MobileCountrySelector from "../components/globe/MobileCountrySelector";
 import Footer from "../components/layout/Footer";
@@ -13,9 +13,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import "./Home.css";
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { calculateGrowthZScores } from '../utils/whoLMS';
+import { COUNTRY_OPTIONS, DEFAULT_COUNTRY, type CountryOption } from '../data/countryOptions';
 
 // Lazy load heavy components
-const GlobeVisualization = lazy(() => import("../components/globe/OptimizedGlobeVisualization"));
+const GlobeVisualization = lazy(() => import("../components/globe/AtlasGlobe"));
 const FeedingTipsCarousel = lazy(() => import("../components/carousel/FeedingTipsCarousel"));
 const Select = lazy(() => import('react-select'));
 const TrendChart = lazy(() => import("../components/data/TrendChart"));
@@ -245,16 +246,11 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   
-  // Screen size detection for responsive globe instances
-  const [screenSize, setScreenSize] = useState({ width: typeof window !== 'undefined' ? window.innerWidth : 0, height: typeof window !== 'undefined' ? window.innerHeight : 0 });
-  const [currentDeviceType, setCurrentDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
-
-  const [overlayCountry, setOverlayCountry] = useState<{ value: string; label: string } | null>(null);
+  const [overlayCountry, setOverlayCountry] = useState<CountryOption | null>(null);
   const [overlayData, setOverlayData] = useState<any[]>([]);
   const [overlayLoading, setOverlayLoading] = useState(false);
   const [overlayError, setOverlayError] = useState<string | null>(null);
   const [overlayChartMode, setOverlayChartMode] = useState<'latest' | 'chart'>('latest');
-  const [overlayAvailableCountries, setOverlayAvailableCountries] = useState<{ value: string; label: string }[]>([]);
   
   // Demographic data state
   const [demographicData, setDemographicData] = useState<{
@@ -276,39 +272,16 @@ const Home: React.FC = () => {
   // Tracks which demographic fields are still being fetched so each card
   // can render its own skeleton independently of the others.
   const [demographicLoadingFields, setDemographicLoadingFields] = useState<Set<string>>(new Set());
-  const [selectedGlobeCountry, setSelectedGlobeCountry] = useState<{ value: string; label: string } | null>(null);
+  const [selectedGlobeCountry, setSelectedGlobeCountry] = useState<CountryOption | null>(null);
+  const demographicRequestRef = useRef(0);
   const [showNutritionModal, setShowNutritionModal] = useState(false);
-
-  // Screen size detection and device type tracking
-  useEffect(() => {
-    const updateScreenSize = () => {
-      const width = window.innerWidth;
-      setScreenSize({ width, height: window.innerHeight });
-      
-      // Determine device type based on Tailwind breakpoints
-      if (width < 768) {
-        setCurrentDeviceType('mobile');
-      } else if (width >= 768 && width < 1024) {
-        setCurrentDeviceType('tablet');
-      } else {
-        setCurrentDeviceType('desktop');
-      }
-    };
-
-    // Set initial size
-    updateScreenSize();
-
-    // Add event listener
-    window.addEventListener('resize', updateScreenSize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', updateScreenSize);
-  }, []);
 
   // Function to fetch demographic data for a country.
   // Streams individual fields into state as each upstream request resolves
   // so the UI can swap skeletons for real cards independently.
   const fetchDemographicData = useCallback(async (countryCode: string) => {
+    const requestId = ++demographicRequestRef.current;
+    const isCurrentRequest = () => demographicRequestRef.current === requestId;
     const expectedFields = ['population', 'currency', 'gdpPerCapita', 'genderParity', 'residence', 'education'] as const;
     type DemographicField = typeof expectedFields[number];
 
@@ -321,7 +294,7 @@ const Home: React.FC = () => {
     const setFields = new Set<string>();
 
     const setField = (field: DemographicField, value: any) => {
-      if (value == null || setFields.has(field)) return;
+      if (!isCurrentRequest() || value == null || setFields.has(field)) return;
       setFields.add(field);
       setDemographicData(prev => ({ ...prev, [field]: value }));
       setDemographicLoadingFields(prev => {
@@ -336,7 +309,7 @@ const Home: React.FC = () => {
     // card visible as soon as any level lands but allow subsequent levels
     // to merge in.
     const setEducationPartial = (value: any) => {
-      if (value == null) return;
+      if (!isCurrentRequest() || value == null) return;
       setFields.add('education');
       setDemographicData(prev => ({ ...prev, education: { ...(prev.education || {}), ...value } }));
       setDemographicLoadingFields(prev => {
@@ -384,52 +357,44 @@ const Home: React.FC = () => {
         }
       });
     } finally {
-      setDemographicLoading(false);
-      setDemographicLoadingFields(new Set());
+      if (isCurrentRequest()) {
+        setDemographicLoading(false);
+        setDemographicLoadingFields(new Set());
+      }
     }
     // fetchFromWorldBank/getFallbackDemographicData/getCurrencyForCountry are stable module-level helpers
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Replace handleGlobeCountrySelect to update selectedCountry and selectedGlobeCountry
-  const handleGlobeCountrySelect = useCallback((country: { value: string; label: string }) => {
+  const handleCountrySelect = useCallback((country: CountryOption) => {
     startTransition(() => {
       setSelectedGlobeCountry(country);
-      
-      // Update overlay country if it matches
-      const foundCountry = overlayAvailableCountries.find(c => c.value === country.value);
-      
-      if (foundCountry) {
-        setOverlayCountry({ value: country.value, label: country.label });
-        
-        // If no indicator is selected, automatically select the first indicator and show overlay
-        if (selectedIdx === null) {
-          setSelectedIdx(0);
-        }
-        
-        // Fetch demographic data immediately when country is selected
-        fetchDemographicData(country.value);
+      setOverlayCountry(country);
+      if (selectedIdx === null) setSelectedIdx(0);
+    });
+  }, [selectedIdx]);
+
+  const handleCountryClear = useCallback(() => {
+    demographicRequestRef.current += 1;
+    setSelectedGlobeCountry(null);
+    setOverlayCountry(null);
+    setOverlayData([]);
+    setOverlayLoading(false);
+    setOverlayError(null);
+    setDemographicData({});
+    setDemographicLoading(false);
+    setDemographicLoadingFields(new Set());
+  }, []);
+
+  const handleIndicatorSelect = useCallback((index: number) => {
+    startTransition(() => {
+      setSelectedIdx(index);
+      if (!selectedGlobeCountry && DEFAULT_COUNTRY) {
+        setSelectedGlobeCountry(DEFAULT_COUNTRY);
+        setOverlayCountry(DEFAULT_COUNTRY);
       }
     });
-  }, [overlayAvailableCountries, selectedIdx, fetchDemographicData]);
-
-
-
-  // Fetch available countries for overlay on mount
-  useEffect(() => {
-    loadAxios().then(axiosInstance => {
-      axiosInstance.get('https://api.dhsprogram.com/rest/dhs/countries', { params: { f: 'json' } })
-        .then((res: any) => {
-          const opts = res.data.Data.map((c: any) => ({ value: c.DHS_CountryCode, label: c.CountryName }));
-          setOverlayAvailableCountries(opts);
-          const defaultCountry = opts.find((c: any) => c.value === 'UG') || opts[0];
-          setOverlayCountry(defaultCountry as { value: string; label: string } | null);
-        })
-        .catch(() => {
-          // Silently handle error
-        });
-    });
-  }, []);
+  }, [selectedGlobeCountry]);
 
   // World Bank API data fetcher.
   // When `onPartial` is provided, each demographic field is emitted as
@@ -637,49 +602,63 @@ const Home: React.FC = () => {
   // Helper function to get currency for a country
   const getCurrencyForCountry = (countryCode: string): string => {
     const currencyMap: { [key: string]: string } = {
-      'UG': 'UGX', // Uganda Shilling
-      'KE': 'KES', // Kenya Shilling
-      'TZ': 'TZS', // Tanzania Shilling
-      'RW': 'RWF', // Rwanda Franc
-      'BI': 'BIF', // Burundi Franc
-      'ET': 'ETB', // Ethiopian Birr
-      'SO': 'SOS', // Somali Shilling
-      'SS': 'SSP', // South Sudanese Pound
-      'DJ': 'DJF', // Djibouti Franc
-      'ER': 'ERN', // Eritrean Nakfa
-      'SD': 'SDG', // Sudanese Pound
-      'EG': 'EGP', // Egyptian Pound
-      'LY': 'LYD', // Libyan Dinar
-      'TN': 'TND', // Tunisian Dinar
-      'DZ': 'DZD', // Algerian Dinar
-      'MA': 'MAD', // Moroccan Dirham
-      'NG': 'NGN', // Nigerian Naira
-      'GH': 'GHS', // Ghanaian Cedi
-      'CI': 'XOF', // West African CFA Franc
-      'SN': 'XOF', // West African CFA Franc
-      'ML': 'XOF', // West African CFA Franc
-      'BF': 'XOF', // West African CFA Franc
-      'NE': 'XOF', // West African CFA Franc
-      'TD': 'XAF', // Central African CFA Franc
-      'CM': 'XAF', // Central African CFA Franc
-      'CF': 'XAF', // Central African CFA Franc
-      'CG': 'XAF', // Central African CFA Franc
-      'GA': 'XAF', // Central African CFA Franc
-      'GQ': 'XAF', // Central African CFA Franc
-      'CD': 'CDF', // Congolese Franc
-      'AO': 'AOA', // Angolan Kwanza
-      'ZM': 'ZMW', // Zambian Kwacha
-      'BW': 'BWP', // Botswana Pula
-      'NA': 'NAD', // Namibian Dollar
-      'ZA': 'ZAR', // South African Rand
-      'LS': 'LSL', // Lesotho Loti
-      'SZ': 'SZL', // Eswatini Lilangeni
-      'MG': 'MGA', // Malagasy Ariary
-      'MU': 'MUR', // Mauritian Rupee
-      'SC': 'SCR', // Seychellois Rupee
-      'KM': 'KMF', // Comorian Franc
-      'MW': 'MWK', // Malawian Kwacha
-      'MZ': 'MZN', // Mozambican Metical
+      // Africa
+      'UG': 'UGX', 'KE': 'KES', 'TZ': 'TZS', 'RW': 'RWF', 'BI': 'BIF',
+      'ET': 'ETB', 'SO': 'SOS', 'SS': 'SSP', 'DJ': 'DJF', 'ER': 'ERN',
+      'SD': 'SDG', 'EG': 'EGP', 'LY': 'LYD', 'TN': 'TND', 'DZ': 'DZD',
+      'MA': 'MAD', 'EH': 'MAD',
+      'NG': 'NGN',' GH': 'GHS',
+      'CI': 'XOF','SN': 'XOF', 'ML': 'XOF', 'BF': 'XOF', 'NE': 'XOF',
+      'BJ': 'XOF', 'TG': 'XOF', 'GW': 'XOF',
+      'TD': 'XAF', 'CM': 'XAF', 'CF': 'XAF', 'CG': 'XAF', 'GA': 'XAF', 'GQ': 'XAF',
+      'CD': 'CDF',
+      'AO': 'AOA', 'ZM': 'ZMW', 'BW': 'BWP', 'NA': 'NAD', 'ZA': 'ZAR',
+      'LS': 'LSL', 'SZ': 'SZL',
+      'MG': 'MGA', 'MU': 'MUR', 'SC': 'SCR', 'KM': 'KMF',
+      'MW': 'MWK', 'MZ': 'MZN',
+      'CV': 'CVE', 'ST': 'STN', 'SL': 'SLL', 'LR': 'LRD', 'GM': 'GMD',
+
+      // Americas
+      'US': 'USD', 'CA': 'CAD', 'MX': 'MXN',
+      'BR': 'BRL', 'AR': 'ARS', 'CL': 'CLP', 'CO': 'COP', 'PE': 'PEN',
+      'VE': 'VES', 'UY': 'UYU', 'PY': 'PYG', 'BO': 'BOB',
+      'EC': 'USD', 'SV': 'USD', 'PA': 'USD',
+      'GT': 'GTQ', 'HN': 'HNL', 'NI': 'NIO', 'CR': 'CRC',
+      'CU': 'CUP', 'DO': 'DOP', 'HT': 'HTG', 'JM': 'JMD',
+      'TT': 'TTD', 'BB': 'BBD', 'BS': 'BSD',
+      'AG': 'XCD', 'DM': 'XCD', 'GD': 'XCD', 'KN': 'XCD', 'LC': 'XCD', VC: 'XCD',
+
+      // Europe
+      'GB': 'GBP', 'IE': 'EUR', 'FR': 'EUR', 'DE': 'EUR', 'IT': 'EUR',
+      'ES': 'EUR', 'PT': 'EUR', 'NL': 'EUR', 'BE': 'EUR', 'LU': 'EUR',
+      'AT': 'EUR', 'FI': 'EUR', 'GR': 'EUR', 'CY': 'EUR', 'MT': 'EUR',
+      'SK': 'EUR', 'SI': 'EUR', 'EE': 'EUR', 'LV': 'EUR', 'LT': 'EUR',
+      'PL': 'PLN', 'CZ': 'CZK', 'HU': 'HUF', 'RO': 'RON', 'BG': 'BGN',
+      'DK': 'DKK', 'SE': 'SEK', 'NO': 'NOK', 'IS': 'ISK',
+      'CH': 'CHF', 'LI': 'CHF',
+      'UA': 'UAH', 'RU': 'RUB', 'BY': 'BYN',
+      'RS': 'RSD', 'BA': 'BAM', 'MK': 'MKD', 'AL': 'ALL',
+      'HR': 'EUR', 'MD': 'MDL', 'ME': 'EUR',
+
+      //' Middle E'ast'
+      'SA': 'SAR', 'AE': 'AED', 'QA': 'QAR', 'KW': 'KWD', 'BH': 'BHD', OM: 'OMR',
+      'IL': 'ILS', 'JO': 'JOD', 'LB': 'LBP', 'SY': 'SYP',
+      'IQ': 'IQD', 'IR': 'IRR', 'YE': 'YER',
+
+      //' Asia
+      'CN': 'CNY', 'JP': 'JPY', 'KR': 'KRW', 'KP': 'KPW',
+      'IN': 'INR', 'PK': 'PKR', 'BD': 'BDT', 'LK': 'LKR', 'NP': 'NPR',
+      'AF': 'AFN',
+      'TH': 'THB', 'VN': 'VND', 'KH': 'KHR', 'LA': 'LAK', 'MM': 'MMK',
+      'MY': 'MYR', 'SG': 'SGD', 'ID': 'IDR', 'PH': 'PHP', 'BN': 'BND',
+      'TL': 'USD',
+      'KZ': 'KZT', 'UZ': 'UZS', 'TM': 'TMT', 'KG': 'KGS', 'TJ': 'TJS',
+      'MN': 'MNT',
+
+      // Oceania
+      'AU': 'AUD', 'NZ': 'NZD',
+      'PG': 'PGK', 'FJ': 'FJD', 'SB': 'SBD', 'VU': 'VUV',
+      'WS': 'WST', 'TO': 'TOP', 'KI': 'AUD', 'TV': 'AUD', 'NR': 'AUD'
     };
     return currencyMap[countryCode] || 'USD';
   };
@@ -689,6 +668,8 @@ const Home: React.FC = () => {
     if (selectedIdx === null || !overlayCountry) {
       return;
     }
+    const requestController = new AbortController();
+    let isCurrentRequest = true;
     const indicator = localIndicators[selectedIdx];
     setOverlayLoading(true);
     setOverlayError(null);
@@ -705,6 +686,7 @@ const Home: React.FC = () => {
         const axiosInstance = await loadAxios();
 
         const indicatorResponse = await axiosInstance.get('https://api.dhsprogram.com/rest/dhs/data', {
+          signal: requestController.signal,
           params: {
             indicatorIds: indicator.indicatorId,
             countryIds: overlayCountry.value,
@@ -715,15 +697,21 @@ const Home: React.FC = () => {
           },
         });
 
-        setOverlayData(indicatorResponse.data.Data || []);
+        if (isCurrentRequest) setOverlayData(indicatorResponse.data.Data || []);
       } catch (error) {
-        setOverlayError('Failed to load data from DHS.');
+        if (isCurrentRequest && !requestController.signal.aborted) {
+          setOverlayError('Failed to load data from DHS.');
+        }
       } finally {
-        setOverlayLoading(false);
+        if (isCurrentRequest) setOverlayLoading(false);
       }
     };
 
     fetchIndicatorData();
+    return () => {
+      isCurrentRequest = false;
+      requestController.abort();
+    };
   }, [selectedIdx, overlayCountry, fetchDemographicData]);
 
   // Calculator input change handler
@@ -1032,45 +1020,42 @@ const Home: React.FC = () => {
           </div>
         )} */}
         {/* Globe and Arc Overlay Section */}
-        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{ 
-          background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)" 
+        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{
+          background: "#fbfaf7"
         }}>
                                {/* Desktop Layout: Globe and Indicator List Side by Side */}
-          <div className="hidden lg:flex w-full max-w-7xl mx-auto gap-8 items-start">
+          <div className="flex w-full max-w-7xl mx-auto flex-col gap-8 px-4 lg:flex-row lg:items-start">
             {/* Globe Visualization (left) with floating country selector */}
-            <div className="flex-1 flex justify-center">
-              <div className="w-full max-w-md h-[700px] rounded-lg overflow-visible relative flex items-center justify-center" style={{ top: "50px" }}>
+            <div className="min-w-0 flex-1 flex justify-center lg:justify-end">
+              <div className="w-full max-w-xl lg:max-w-2xl rounded-lg overflow-visible relative flex items-center justify-center">
                 <Suspense fallback={
                   <div className="flex items-center justify-center w-full h-full">
                     <LoadingSpinner />
                   </div>
                 }>
                   <GlobeVisualization 
-                    key="desktop-globe"
-                    onCountrySelect={handleGlobeCountrySelect}
-                    selectedCountry={selectedGlobeCountry} // Pass selected country for highlighting
-                    width={800}
-                    height={700}
-                    className="w-full h-full"
+                    onCountrySelect={handleCountrySelect}
+                    onCountryClear={handleCountryClear}
+                    selectedCountry={selectedGlobeCountry}
+                    className="w-full h-[430px] sm:h-[520px] lg:h-[650px]"
                   />
                 </Suspense>
                 
                 {/* Floating Country Selector Dialog */}
                 <div className="absolute top-4 left-4 z-10">
                   <MobileCountrySelector
-                    onCountrySelect={handleGlobeCountrySelect}
-                    onCountryClear={() => {
-                      setSelectedGlobeCountry(null);
-                    }}
+                    compact
+                    onCountrySelect={handleCountrySelect}
+                    onCountryClear={handleCountryClear}
                     selectedCountry={selectedGlobeCountry}
                   />
                 </div>
               </div>
             </div>
             {/* Desktop Indicator List (right) */}
-            <div className="flex-2 flex justify-center">
+            <div className="hidden flex-2 justify-center lg:flex">
               <div className="w-full max-w-2xl">
-                <h2 className="text-lg font-bold mb-3 text-gray-800 text-left" style={{ transform: "translatex(-300px)", textDecoration: "underline" }}>
+                <h2 className="text-lg font-bold mb-3 text-gray-800 text-left underline">
                   Health Indicators
                 </h2>
                 <div className="space-y-0">
@@ -1098,7 +1083,7 @@ const Home: React.FC = () => {
                           padding: "0",
                           "--indicator-color": color,
                         } as React.CSSProperties}
-                        onClick={() => startTransition(() => setSelectedIdx(idx))}
+                        onClick={() => handleIndicatorSelect(idx)}
                       >
                         <div className="home-arc-number" style={{ borderColor: color }}>{idx + 1}</div>
                         <div className="home-arc-content flex-1 min-w-0">
@@ -1117,78 +1102,6 @@ const Home: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-          {/* Mobile/Tablet Layout: Country Selector + Globe (stacked) */}
-          <div className="lg:hidden w-full flex flex-col items-center space-y-8 px-4">
-            
-            {/* Mobile Country Selector */}
-            <MobileCountrySelector
-              onCountrySelect={handleGlobeCountrySelect}
-              onCountryClear={() => {
-                setSelectedGlobeCountry(null);
-              }}
-              selectedCountry={selectedGlobeCountry}
-            />
-            
-            {/* Mobile Globe (< 768px) */}
-            {currentDeviceType === 'mobile' && (
-              <div className="w-full h-[400px] rounded-xl overflow-hidden relative flex items-center justify-center">
-                <Suspense fallback={
-                  <div className="flex items-center justify-center w-full h-full">
-                    <LoadingSpinner />
-                  </div>
-                }>
-                  <GlobeVisualization 
-                    key="mobile-globe"
-                    onCountrySelect={handleGlobeCountrySelect}
-                    selectedCountry={selectedGlobeCountry}
-                    width={330}
-                    height={300}
-                    className="w-full h-full"
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Tablet Globe (768px - 1024px) */}
-            {currentDeviceType === 'tablet' && (
-              <div className="w-full h-[500px] rounded-xl overflow-hidden relative flex items-center justify-center">
-                <Suspense fallback={
-                  <div className="flex items-center justify-center w-full h-full">
-                    <LoadingSpinner />
-                  </div>
-                }>
-                  <GlobeVisualization 
-                    key="tablet-globe"
-                    onCountrySelect={handleGlobeCountrySelect}
-                    selectedCountry={selectedGlobeCountry}
-                    width={Math.min(600, screenSize.width - 32)}
-                    height={450}
-                    className="w-full h-full"
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Desktop Globe (≥ 1024px) - Fallback for lg:hidden */}
-            {currentDeviceType === 'desktop' && (
-              <div className="w-full h-[500px] rounded-xl overflow-hidden relative flex items-center justify-center">
-                <Suspense fallback={
-                  <div className="flex items-center justify-center w-full h-full">
-                    <LoadingSpinner />
-                  </div>
-                }>
-                  <GlobeVisualization 
-                    key="desktop-mobile-view-globe"
-                    onCountrySelect={handleGlobeCountrySelect}
-                    selectedCountry={selectedGlobeCountry}
-                    width={600}
-                    height={500}
-                    className="w-full h-full"
-                  />
-                </Suspense>
-              </div>
-            )}
           </div>
         </div>
         {/* Details/Story Panel: Shows indicator details on all screen sizes */}
@@ -1216,9 +1129,12 @@ const Home: React.FC = () => {
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                   <Select
-                    options={overlayAvailableCountries}
+                    options={COUNTRY_OPTIONS}
                     value={overlayCountry}
-                    onChange={(opt: any) => setOverlayCountry(opt)}
+                    onChange={(opt: CountryOption | null) => {
+                      if (opt) handleCountrySelect(opt);
+                      else handleCountryClear();
+                    }}
                     classNamePrefix="react-select"
                     placeholder="Select country..."
                     isSearchable
@@ -1242,7 +1158,11 @@ const Home: React.FC = () => {
                   </button>
                 </div>
                 {/* Data Display */}
-                {overlayLoading ? (
+                {!overlayCountry ? (
+                  <div className="rounded-lg bg-slate-50 px-4 py-6 text-sm text-slate-600">
+                    Select a country on the globe or from the country search to view this indicator.
+                  </div>
+                ) : overlayLoading ? (
                   <div className="py-8 flex justify-center items-center"><LoadingSpinner /></div>
                 ) : overlayError ? (
                   <div className="py-8 text-center text-red-600">{overlayError}</div>
@@ -1477,7 +1397,7 @@ const Home: React.FC = () => {
 
       </div>
       {/* Mobile Indicator List: Single column below globe */}
-      <div className="block md:hidden w-full mt-8">
+      <div className="block lg:hidden w-full mt-8">
         <h2 className="text-lg font-bold mb-3 text-gray-800 text-center">Health Indicators</h2>
         <div className="grid grid-cols-1 gap-4 px-2">
           {localIndicators.map((indicator, idx) => {
@@ -1495,7 +1415,7 @@ const Home: React.FC = () => {
                   selectedIdx === idx && "selected"
                 )}
                 style={{ borderColor: color }}
-                                  onClick={() => startTransition(() => setSelectedIdx(idx))}
+                onClick={() => handleIndicatorSelect(idx)}
               >
                 <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
                 <div className="home-tablet-content">
@@ -1532,7 +1452,7 @@ const Home: React.FC = () => {
                     selectedIdx === idx && "selected"
                   )}
                   style={{ borderColor: color }}
-                  onClick={() => startTransition(() => setSelectedIdx(idx))}
+                  onClick={() => handleIndicatorSelect(idx)}
                 >
                   <div className="home-tablet-number" style={{ borderColor: color }}>{idx + 1}</div>
                   <div className="home-tablet-content">
@@ -2001,4 +1921,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-      

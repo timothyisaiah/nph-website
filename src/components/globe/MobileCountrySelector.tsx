@@ -1,90 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
-import Select from 'react-select';
+import { COUNTRY_OPTIONS, type CountryOption } from '../../data/countryOptions';
 
-interface Country {
-  value: string;
-  label: string;
-  flag?: string;
-}
+const Select = lazy(() => import('react-select'));
 
 interface MobileCountrySelectorProps {
-  onCountrySelect: (country: Country) => void;
+  onCountrySelect: (country: CountryOption) => void;
   onCountryClear?: () => void;
-  selectedCountry?: Country | null;
+  selectedCountry?: CountryOption | null;
+  compact?: boolean;
 }
 
 const MobileCountrySelector: React.FC<MobileCountrySelectorProps> = ({
   onCountrySelect,
   onCountryClear,
-  selectedCountry
+  selectedCountry,
+  compact = false,
 }) => {
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Fetch countries from DHS API
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const response = await fetch('https://api.dhsprogram.com/rest/dhs/countries?f=json');
-        const data = await response.json();
-        const countryOptions = data.Data.map((country: any) => ({
-          value: country.DHS_CountryCode,
-          label: country.CountryName,
-          flag: country.DHS_CountryCode.toLowerCase()
-        }));
-        setCountries(countryOptions);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Failed to fetch countries:', error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchCountries();
-  }, []);
-
-  const handleCountryChange = (selectedOption: Country | null) => {
-    if (selectedOption) {
-      onCountrySelect(selectedOption);
-    } else {
-      onCountryClear?.();
-    }
+  const handleCountryChange = (selectedOption: CountryOption | null) => {
+    if (selectedOption) onCountrySelect(selectedOption);
+    else onCountryClear?.();
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-sm mx-auto mb-6 bg-white rounded-xl shadow-xl p-6 border border-gray-100"
+      className={`w-full max-w-sm mx-auto bg-white rounded-xl shadow-xl border border-gray-100 ${compact ? 'p-4' : 'mb-6 p-6'}`}
     >
-      {/* Header */}
       <div className="mb-3">
-        <h2 className="text-lg font-bold text-blue-600 leading-tight mb-1">
-          Select Your Country
+        <h2 className={`${compact ? 'text-base' : 'text-lg'} font-bold text-blue-600 leading-tight mb-1`}>
+          Which country interests you most?
         </h2>
         <p className="text-sm text-gray-600">
-          Choose your country to see personalized health data
+          Choose a country to focus the globe and explore its health data.
         </p>
       </div>
 
-      {/* Country Selection */}
-      <div className="mb-3">
-        <Select
-          options={countries}
+      <Suspense fallback={<div className="h-12 animate-pulse rounded-lg bg-slate-100" aria-label="Loading country search" />}>
+        <Select<CountryOption, false>
+          options={COUNTRY_OPTIONS}
           value={selectedCountry}
           onChange={handleCountryChange}
           placeholder="Search for a country..."
           isSearchable
-          isLoading={isLoading}
-          isClearable={true}
+          isClearable
           className="react-select-container"
           classNamePrefix="react-select"
-          formatOptionLabel={(option: Country) => (
-            <div className="flex items-center">
-              <span className="mr-2 text-sm">
-                {option.flag ? `🏳️` : '🌍'}
-              </span>
+          formatOptionLabel={(option) => (
+            <div className="flex items-center gap-2">
+              <span aria-hidden="true">🌍</span>
               <span className="text-sm">{option.label}</span>
             </div>
           )}
@@ -96,52 +61,27 @@ const MobileCountrySelector: React.FC<MobileCountrySelectorProps> = ({
               borderRadius: '8px',
               minHeight: '48px',
               fontSize: '14px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             }),
             option: (provided, state) => ({
               ...provided,
               backgroundColor: state.isSelected ? '#3B82F6' : state.isFocused ? '#EFF6FF' : 'white',
               color: state.isSelected ? 'white' : 'black',
               fontSize: '14px',
-              padding: '8px 12px'
+              padding: '8px 12px',
             }),
-            menu: (provided) => ({
-              ...provided,
-              fontSize: '14px',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-            }),
-            placeholder: (provided) => ({
-              ...provided,
-              fontSize: '14px',
-              color: '#6B7280'
-            }),
-            singleValue: (provided) => ({
-              ...provided,
-              fontSize: '14px',
-              fontWeight: '500'
-            }),
-            clearIndicator: (provided) => ({
-              ...provided,
-              color: '#6B7280',
-              '&:hover': {
-                color: '#374151'
-              }
-            })
+            menu: (provided) => ({ ...provided, fontSize: '14px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }),
           }}
         />
-      </div>
+      </Suspense>
 
-      {/* Description */}
-      <div className="text-xs text-gray-500 leading-relaxed">
-        <p className="mb-2">
-          Your selected country will be highlighted in the globe visualization below and used as a reference point in health data comparisons.
+      {!compact && (
+        <p className="mt-3 text-xs leading-relaxed text-gray-500">
+          Your selection is highlighted on the globe and used in the health-data drawer. You can change it at any time.
         </p>
-        <p className="text-blue-600 font-medium">
-          💡 Tip: You can change your selection anytime to explore data from different countries.
-        </p>
-      </div>
+      )}
     </motion.div>
   );
 };
 
-export default MobileCountrySelector; 
+export default MobileCountrySelector;
