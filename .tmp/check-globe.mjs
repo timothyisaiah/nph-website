@@ -10,6 +10,80 @@ try {
   await svg.waitFor();
   await svg.scrollIntoViewIfNeeded();
   await page.getByRole('button', { name: 'Pause rotation', exact: true }).click();
+  if (process.argv.includes('--pointer')) {
+    const hitPoint = (targetPage, code) => targetPage.locator(`[data-country-code="${code}"]`).evaluate(el => {
+      const r = el.getBoundingClientRect();
+      for (const fy of [0.5, 0.4, 0.6, 0.3, 0.7, 0.2, 0.8]) {
+        for (const fx of [0.5, 0.4, 0.6, 0.3, 0.7, 0.2, 0.8]) {
+          const x = r.left + r.width * fx, y = r.top + r.height * fy;
+          if (document.elementFromPoint(x, y) === el) return { x, y };
+        }
+      }
+      throw new Error('No visible country hit area: ' + el.getAttribute('data-country-code'));
+    });
+    const target = await hitPoint(page, 'GHA');
+    await svg.evaluate(el => {
+      window.globeEvents = [];
+      for (const type of ['pointerdown', 'pointerup', 'click']) el.addEventListener(type, e => window.globeEvents.push({ type, target: e.target.tagName, country: e.target.getAttribute('data-country-code') }));
+    });
+    await page.mouse.click(target.x, target.y);
+    await page.waitForTimeout(300);
+    console.log('Mouse events:', await page.evaluate(() => window.globeEvents));
+    assert.equal(await page.getByRole('button', { name: 'Reset view', exact: true }).count(), 1, 'Mouse click selects Ghana');
+    assert.equal(await page.locator('[data-country-code="GHA"]').getAttribute('fill'), 'rgba(239, 68, 68, 0.58)');
+    await page.getByRole('button', { name: '×', exact: true }).click();
+    await page.waitForTimeout(1000);
+    const nigeria = await hitPoint(page, 'NGA');
+    await page.mouse.click(nigeria.x, nigeria.y, { button: 'right' });
+    assert.equal(await page.getByRole('button', { name: '×', exact: true }).count(), 0, 'Right click does not select');
+    await page.mouse.move(nigeria.x, nigeria.y);
+    await page.mouse.down();
+    await page.mouse.move(nigeria.x + 70, nigeria.y + 25, { steps: 15 });
+    await page.mouse.up();
+    await page.mouse.move(10, 10);
+    await page.waitForTimeout(150);
+    assert.equal(await page.getByRole('button', { name: '×', exact: true }).count(), 0, 'Drag does not select');
+    const nextNigeria = await hitPoint(page, 'NGA');
+    await page.mouse.click(nextNigeria.x, nextNigeria.y);
+    await page.waitForTimeout(150);
+    assert.equal(await page.locator('[data-country-code="NGA"]').getAttribute('fill'), 'rgba(239, 68, 68, 0.58)', 'Mouse click after drag selects Nigeria');
+    await page.getByRole('button', { name: '×', exact: true }).click();
+    await page.waitForTimeout(1000);
+    await svg.locator('..').locator('..').locator('..').locator('..').screenshot({ path: '.tmp/globe-desktop-layout.png' });
+    for (const width of [1024, 1920]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await svg.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(150);
+      console.log('Desktop canvas', width, await svg.boundingBox());
+      await svg.locator('..').locator('..').locator('..').locator('..').screenshot({ path: `.tmp/globe-layout-${width}.png` });
+    }
+    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    await mobile.goto('http://127.0.0.1:5174/', { waitUntil: 'domcontentloaded' });
+    const mobileSvg = mobile.locator('svg[aria-label^="Interactive globe"]');
+    await mobileSvg.scrollIntoViewIfNeeded();
+    await mobile.getByRole('button', { name: 'Pause rotation', exact: true }).click();
+    const ghanaTouch = await hitPoint(mobile, 'GHA');
+    await mobile.touchscreen.tap(ghanaTouch.x, ghanaTouch.y);
+    await mobile.waitForTimeout(150);
+    assert.equal(await mobile.locator('[data-country-code="GHA"]').getAttribute('fill'), 'rgba(239, 68, 68, 0.58)', 'Touch tap selects Ghana');
+    await mobile.getByRole('button', { name: '×', exact: true }).click();
+    await mobile.waitForTimeout(1000);
+    const nigeriaTouch = await hitPoint(mobile, 'NGA');
+    const cdp = await mobile.context().newCDPSession(mobile);
+    const fingers = [{ x: nigeriaTouch.x, y: nigeriaTouch.y, id: 1 }, { x: nigeriaTouch.x + 40, y: nigeriaTouch.y + 30, id: 2 }];
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: fingers });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [fingers[0], { ...fingers[1], x: fingers[1].x + 35 }] });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await mobile.waitForTimeout(150);
+    assert.equal(await mobile.getByRole('button', { name: '×', exact: true }).count(), 0, 'Pinch does not select');
+    const postPinch = await hitPoint(mobile, 'NGA');
+    await mobile.touchscreen.tap(postPinch.x, postPinch.y);
+    await mobile.waitForTimeout(150);
+    assert.equal(await mobile.locator('[data-country-code="NGA"]').getAttribute('fill'), 'rgba(239, 68, 68, 0.58)', 'Tap after pinch selects Nigeria');
+    await mobile.close();
+    console.log('PASS: mouse and touch selection, drag/right-click/pinch suppression, selection after drag/pinch, desktop layout');
+    process.exitCode = 0;
+  } else {
   const input = page.getByRole('combobox').first();
   await input.fill('Brazil');
   await page.getByRole('option', { name: 'Brazil', exact: true }).click();
@@ -57,6 +131,7 @@ try {
   await page.getByRole('button', { name: 'Reset view', exact: true }).click();
   assert.equal(await page.getByRole('button', { name: 'Reset view', exact: true }).count(), 0);
   console.log('PASS: proportional zoom, drag without selection, mobile resize, country focus, rotation and reset');
+  }
 } finally {
   await browser.close();
 }

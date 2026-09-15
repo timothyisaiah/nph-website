@@ -1026,8 +1026,8 @@ const Home: React.FC = () => {
                                {/* Desktop Layout: Globe and Indicator List Side by Side */}
           <div className="flex w-full max-w-7xl mx-auto flex-col gap-8 px-4 lg:flex-row lg:items-start">
             {/* Globe Visualization (left) with floating country selector */}
-            <div className="flex-1 flex justify-center">
-              <div className="w-full max-w-xl rounded-lg overflow-visible relative flex items-center justify-center">
+            <div className="min-w-0 flex-1 flex justify-center lg:justify-end">
+              <div className="w-full max-w-xl lg:max-w-2xl rounded-lg overflow-visible relative flex items-center justify-center">
                 <Suspense fallback={
                   <div className="flex items-center justify-center w-full h-full">
                     <LoadingSpinner />

@@ -127,7 +127,12 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
   const sceneRef = useRef<SceneState | null>(null);
   const onCountrySelectRef = useRef(onCountrySelect);
   const onErrorRef = useRef(onError);
-  const pointerOriginRef = useRef<{ x: number; y: number } | null>(null);
+  const pointerOriginRef = useRef<{
+    x: number;
+    y: number;
+    pointerId: number;
+    countryCode: string | null;
+  } | null>(null);
   const draggedRef = useRef(false);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [isReady, setIsReady] = useState(false);
@@ -492,17 +497,44 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
           role="img"
           aria-label="Interactive globe. Choose a country from the search box or select it on the globe."
           onPointerDown={(event) => {
-            pointerOriginRef.current = { x: event.clientX, y: event.clientY };
+            // A pinch or a secondary mouse button must never select a country.
+            if (!event.isPrimary || event.button !== 0) {
+              pointerOriginRef.current = null;
+              draggedRef.current = true;
+              return;
+            }
+            pointerOriginRef.current = {
+              x: event.clientX,
+              y: event.clientY,
+              pointerId: event.pointerId,
+              countryCode: (event.target as Element).getAttribute('data-country-code'),
+            };
             draggedRef.current = false;
           }}
           onPointerMove={(event) => {
             const origin = pointerOriginRef.current;
-            if (origin && Math.hypot(event.clientX - origin.x, event.clientY - origin.y) > 6) {
+            if (origin && origin.pointerId === event.pointerId
+              && Math.hypot(event.clientX - origin.x, event.clientY - origin.y) > 6) {
               draggedRef.current = true;
             }
           }}
-          onPointerUp={() => {
-            window.setTimeout(() => { draggedRef.current = false; }, 0);
+          onPointerUp={(event) => {
+            const origin = pointerOriginRef.current;
+            pointerOriginRef.current = null;
+            if (!origin || origin.pointerId !== event.pointerId || draggedRef.current
+              || Math.hypot(event.clientX - origin.x, event.clientY - origin.y) > 6) return;
+
+            // OrbitControls captures the pointer on this SVG, so pointerup and
+            // click target the SVG even when the press began on a country.
+            // Hit-test the release position instead of relying on that target.
+            const hit = document.elementFromPoint(event.clientX, event.clientY);
+            const countryCode = hit?.getAttribute('data-country-code');
+            if (hit && event.currentTarget.contains(hit)
+              && countryCode && countryCode === origin.countryCode) chooseCountry(countryCode);
+          }}
+          onPointerCancel={() => {
+            pointerOriginRef.current = null;
+            draggedRef.current = false;
           }}
         >
           <defs>
@@ -531,13 +563,12 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
                 className="cursor-pointer transition-colors"
                 onMouseEnter={() => setHoveredIso3(iso3Code)}
                 onMouseLeave={() => setHoveredIso3(null)}
-                onClick={() => chooseCountry(iso3Code)}
               />
             );
           })}
           </g>
         </svg>
-      <div className="absolute bottom-3 right-3 flex gap-2">
+      <div className="absolute bottom-3 right-3 flex gap-2 lg:right-1/2 lg:translate-x-1/2">
         <button
           type="button"
           onClick={toggleRotation}
