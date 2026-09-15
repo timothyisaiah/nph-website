@@ -1020,8 +1020,8 @@ const Home: React.FC = () => {
           </div>
         )} */}
         {/* Globe and Arc Overlay Section */}
-        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{ 
-          background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)" 
+        <div className="relative w-full h-auto mt-8 md:mt-0 flex flex-col items-center py-6 md:py-10" style={{
+          background: "#fbfaf7"
         }}>
                                {/* Desktop Layout: Globe and Indicator List Side by Side */}
           <div className="flex w-full max-w-7xl mx-auto flex-col gap-8 px-4 lg:flex-row lg:items-start">

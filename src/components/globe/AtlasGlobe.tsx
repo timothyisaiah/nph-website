@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as d3 from 'd3-geo';
@@ -35,9 +35,7 @@ type SceneState = {
 
 const CAMERA_DISTANCE = 3;
 const GLOBE_RADIUS = 1;
-// This is the camera's top/bottom extent at zoom 1. Keeping the SVG
-// projection derived from it makes both render layers share the same screen
-// radius at every responsive size.
+// Camera top/bottom extent at zoom 1; SVG scale is read from the live camera.
 const ORTHOGRAPHIC_FRAME = 1.28;
 const FOCUS_DURATION = 850;
 const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
@@ -101,6 +99,8 @@ const createAtlasTexture = (features: GlobeFeature[]) => {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.wrapS = THREE.RepeatWrapping;
+  // U increases eastward after the mesh's -PI/2 rotation. Keep the texture
+  // unmirrored: reversing U puts the surface and overlay on opposite meridians.
   texture.needsUpdate = true;
   return texture;
 };
@@ -115,18 +115,27 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasHostRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<SVGSVGElement>(null);
+  const outlineRef = useRef<SVGCircleElement>(null);
+  const clipCircleRef = useRef<SVGCircleElement>(null);
+  const countryPathsRef = useRef(new Map<string, SVGPathElement>());
+  const viewportRef = useRef(new THREE.Vector2());
+  const cameraDirectionRef = useRef(new THREE.Vector3());
+  const projectedCenterRef = useRef(new THREE.Vector3());
+  const projectedEdgeRef = useRef(new THREE.Vector3());
+  const cameraRightRef = useRef(new THREE.Vector3());
+  const clipId = useId();
   const sceneRef = useRef<SceneState | null>(null);
   const onCountrySelectRef = useRef(onCountrySelect);
   const onErrorRef = useRef(onError);
   const pointerOriginRef = useRef<{ x: number; y: number } | null>(null);
   const draggedRef = useRef(false);
-  const lastViewUpdateRef = useRef(0);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [hoveredIso3, setHoveredIso3] = useState<string | null>(null);
-  const [view, setView] = useState({ longitude: 0, latitude: 0, zoom: 1 });
+  const projection = useMemo(() => d3.geoOrthographic().clipAngle(90).precision(0.2), []);
+  const path = useMemo(() => d3.geoPath(projection).pointRadius(4), [projection]);
 
   useEffect(() => {
     onCountrySelectRef.current = onCountrySelect;
@@ -148,15 +157,44 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
     const state = sceneRef.current;
     if (!state) return;
 
-    const now = performance.now();
-    if (now - lastViewUpdateRef.current < 50) return;
-    lastViewUpdateRef.current = now;
+    const cameraDirection = cameraDirectionRef.current
+      .copy(state.camera.position)
+      .sub(state.controls.target)
+      .normalize();
+    const longitude = THREE.MathUtils.radToDeg(Math.atan2(cameraDirection.x, cameraDirection.z));
+    const latitude = THREE.MathUtils.radToDeg(Math.asin(cameraDirection.y));
+    const viewport = state.renderer.getSize(viewportRef.current);
 
-    const position = state.camera.position;
-    const longitude = THREE.MathUtils.radToDeg(Math.atan2(position.x, position.z));
-    const latitude = THREE.MathUtils.radToDeg(Math.asin(position.y / position.length()));
-    setView({ longitude, latitude, zoom: state.camera.zoom });
-  }, []);
+    // Project the sphere itself through Three's live camera instead of
+    // duplicating its zoom/aspect maths. This gives the SVG the exact same
+    // centre and silhouette radius at every viewport size and zoom level.
+    const projectedCenter = projectedCenterRef.current.set(0, 0, 0).project(state.camera);
+    const cameraRight = cameraRightRef.current
+      .setFromMatrixColumn(state.camera.matrixWorld, 0)
+      .normalize()
+      .multiplyScalar(GLOBE_RADIUS);
+    const projectedEdge = projectedEdgeRef.current.copy(cameraRight).project(state.camera);
+    const centerX = (projectedCenter.x + 1) * viewport.x / 2;
+    const centerY = (1 - projectedCenter.y) * viewport.y / 2;
+    const radius = Math.abs(projectedEdge.x - projectedCenter.x) * viewport.x / 2;
+
+    projection
+      .translate([centerX, centerY])
+      .scale(radius)
+      .rotate([-longitude, -latitude]);
+
+    // Update both render layers in the same frame. React owns country styles
+    // and events; the camera owns path geometry so it cannot lag during motion.
+    for (const circle of [outlineRef.current, clipCircleRef.current]) {
+      circle?.setAttribute('cx', String(centerX));
+      circle?.setAttribute('cy', String(centerY));
+      circle?.setAttribute('r', String(radius));
+    }
+    for (const feature of features) {
+      const element = countryPathsRef.current.get(feature.properties.ISO_A3 ?? '');
+      if (element) element.setAttribute('d', path(feature as any) ?? '');
+    }
+  }, [features, path, projection]);
 
   const renderScene = useCallback(() => {
     const state = sceneRef.current;
@@ -167,7 +205,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
 
   const stopAnimation = useCallback(() => {
     const state = sceneRef.current;
-    if (state?.requestId !== null) {
+    if (state && state.requestId !== null) {
       cancelAnimationFrame(state.requestId);
       state.requestId = null;
     }
@@ -196,9 +234,10 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
         const elapsed = Math.min((now - current.focus.startedAt) / FOCUS_DURATION, 1);
         const nextPosition = current.focus.from.clone().lerp(current.focus.to, easeOutCubic(elapsed));
         current.camera.position.copy(nextPosition.normalize().multiplyScalar(CAMERA_DISTANCE));
-        current.controls.update();
+        current.camera.lookAt(current.controls.target);
         if (elapsed === 1) current.focus = null;
       } else {
+        current.controls.autoRotate = !current.paused && !current.reducedMotion;
         current.controls.update();
       }
 
@@ -213,11 +252,24 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
     const state = sceneRef.current;
     if (!state) return;
 
+    // Flush drag damping before focus takes ownership of the camera. Otherwise
+    // OrbitControls adds its residual rotation to the requested destination.
+    const from = state.camera.position.clone();
+    state.controls.autoRotate = false;
+    state.controls.enableDamping = false;
+    state.controls.update();
+    state.controls.enableDamping = !state.reducedMotion;
+    state.camera.position.copy(from);
+    state.camera.lookAt(state.controls.target);
+
     if (!iso3Code) {
       state.focus = animate && !state.reducedMotion
         ? { from: state.camera.position.clone(), to: new THREE.Vector3(0, 0, CAMERA_DISTANCE), startedAt: performance.now() }
         : null;
       if (!state.focus) state.camera.position.set(0, 0, CAMERA_DISTANCE);
+      state.camera.lookAt(state.controls.target);
+      state.camera.zoom = 1;
+      state.camera.updateProjectionMatrix();
       state.paused = false;
       setIsPaused(false);
       renderScene();
@@ -233,6 +285,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
       ? { from: state.camera.position.clone(), to: destination, startedAt: performance.now() }
       : null;
     if (!state.focus) state.camera.position.copy(destination);
+    state.camera.lookAt(state.controls.target);
     state.paused = true;
     setIsPaused(true);
     renderScene();
@@ -255,18 +308,26 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
     return () => resizeObserver.disconnect();
   }, []);
 
-  useEffect(() => {
+  const applyViewport = useCallback((width: number, height: number) => {
     const state = sceneRef.current;
-    if (!state || size.width === 0 || size.height === 0) return;
-    const aspect = size.width / size.height;
+    if (!state || width <= 0 || height <= 0) return;
+
+    const aspect = width / height;
     state.camera.left = -ORTHOGRAPHIC_FRAME * aspect;
     state.camera.right = ORTHOGRAPHIC_FRAME * aspect;
     state.camera.top = ORTHOGRAPHIC_FRAME;
     state.camera.bottom = -ORTHOGRAPHIC_FRAME;
     state.camera.updateProjectionMatrix();
-    state.renderer.setSize(size.width, size.height, false);
+    // Keep the WebGL CSS viewport equal to the SVG viewport. Three still
+    // renders at the configured device-pixel ratio in its drawing buffer.
+    state.renderer.setSize(width, height);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (size.width === 0 || size.height === 0) return;
+    applyViewport(size.width, size.height);
     renderScene();
-  }, [renderScene, size]);
+  }, [applyViewport, renderScene, size]);
 
   useEffect(() => {
     const host = canvasHostRef.current;
@@ -280,11 +341,16 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
 
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-      renderer.setClearColor(0x000000, 0);
+      renderer.setClearColor(0xfbfaf7, 1);
+      // Drawing-buffer pixels include DPR; the displayed canvas must use the
+      // same CSS viewport as the SVG, including on high-density displays.
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.display = 'block';
       host.replaceChildren(renderer.domElement);
 
       const texture = createAtlasTexture(features);
-      const geometry = new THREE.SphereGeometry(GLOBE_RADIUS, 32, 32);
+      const geometry = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
       const material = new THREE.MeshPhongMaterial({ map: texture, shininess: 10, specular: new THREE.Color('#bfdfe0') });
       const globe = new THREE.Mesh(geometry, material);
       // Three's sphere UV origin differs from geographic longitude. This aligns
@@ -310,6 +376,8 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
       controls.autoRotateSpeed = 0.42;
 
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      controls.autoRotate = !mediaQuery.matches;
+      controls.enableDamping = !mediaQuery.matches;
       const state: SceneState = {
         camera,
         controls,
@@ -323,6 +391,10 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
         focus: null,
       };
       sceneRef.current = state;
+
+      const initialRect = host.getBoundingClientRect();
+      applyViewport(initialRect.width, initialRect.height);
+      setSize({ width: Math.max(initialRect.width, 1), height: Math.max(initialRect.height, 1) });
 
       const observer = new IntersectionObserver(([entry]) => {
         state.visible = entry.isIntersecting;
@@ -338,22 +410,30 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
       };
       const onMotionPreferenceChange = () => {
         state.reducedMotion = mediaQuery.matches;
-        if (state.reducedMotion) stopAnimation();
-        else startAnimation();
+        controls.autoRotate = !state.paused && !state.reducedMotion;
+        controls.enableDamping = !state.reducedMotion;
+        if (state.reducedMotion) {
+          stopAnimation();
+          if (state.focus) {
+            camera.position.copy(state.focus.to);
+            camera.lookAt(controls.target);
+            state.focus = null;
+          }
+          renderScene();
+        } else startAnimation();
       };
       const onControlsChange = () => {
-        // The regular view update is intentionally throttled while the globe
-        // rotates. Zoom must be synchronized immediately, however, because it
-        // changes the rendered sphere's screen radius.
-        setView((currentView) => (
-          Math.abs(currentView.zoom - state.camera.zoom) < 0.0001
-            ? currentView
-            : { ...currentView, zoom: state.camera.zoom }
-        ));
-        renderScene();
+        // An active animation frame renders both layers after controls.update;
+        // avoid regenerating every country path twice for the same camera.
+        if (state.requestId === null) renderScene();
         if (!state.reducedMotion) startAnimation();
       };
+      const onControlsStart = () => {
+        state.focus = null;
+        controls.autoRotate = !state.paused && !state.reducedMotion;
+      };
       controls.addEventListener('change', onControlsChange);
+      controls.addEventListener('start', onControlsStart);
       document.addEventListener('visibilitychange', onVisibilityChange);
       mediaQuery.addEventListener('change', onMotionPreferenceChange);
 
@@ -366,6 +446,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
         document.removeEventListener('visibilitychange', onVisibilityChange);
         mediaQuery.removeEventListener('change', onMotionPreferenceChange);
         controls.removeEventListener('change', onControlsChange);
+        controls.removeEventListener('start', onControlsStart);
         stopAnimation();
         controls.dispose();
         geometry.dispose();
@@ -382,15 +463,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
       console.error(initializationError);
       return undefined;
     }
-  }, [features, renderScene, startAnimation, stopAnimation]);
-
-  const globePixelRadius = (size.height * GLOBE_RADIUS * view.zoom) / (2 * ORTHOGRAPHIC_FRAME);
-  const projection = useMemo(() => d3.geoOrthographic()
-    .translate([size.width / 2, size.height / 2])
-    .scale(globePixelRadius)
-    .rotate([-view.longitude, -view.latitude])
-    .clipAngle(90), [globePixelRadius, size.height, size.width, view.latitude, view.longitude]);
-  const path = useMemo(() => d3.geoPath(projection).pointRadius(4), [projection]);
+  }, [applyViewport, features, renderScene, startAnimation, stopAnimation]);
 
   const chooseCountry = (iso3Code: string) => {
     if (draggedRef.current) return;
@@ -402,6 +475,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
     const state = sceneRef.current;
     if (!state) return;
     state.paused = !state.paused;
+    state.controls.autoRotate = !state.paused && !state.reducedMotion;
     setIsPaused(state.paused);
     if (state.paused) stopAnimation();
     else startAnimation();
@@ -409,7 +483,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
   };
 
   return (
-    <div ref={containerRef} className={`relative min-h-[330px] w-full overflow-hidden rounded-2xl bg-[#0b344c] shadow-xl ${className}`}>
+    <div ref={containerRef} className={`relative min-h-[330px] w-full overflow-hidden bg-[#fbfaf7] ${className}`}>
       <div ref={canvasHostRef} className="absolute inset-0" aria-hidden="true" />
       <svg
           ref={overlayRef}
@@ -431,18 +505,26 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
             window.setTimeout(() => { draggedRef.current = false; }, 0);
           }}
         >
-          <circle cx={size.width / 2} cy={size.height / 2} r={globePixelRadius} fill="none" stroke="rgba(231, 248, 243, 0.34)" strokeWidth="1.5" pointerEvents="none" />
+          <defs>
+            <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+              <circle ref={clipCircleRef} />
+            </clipPath>
+          </defs>
+          <circle ref={outlineRef} fill="none" stroke="rgba(231, 248, 243, 0.34)" strokeWidth="1.5" pointerEvents="none" />
+          <g clipPath={`url(#${clipId})`}>
           {features.map((feature) => {
             const iso3Code = feature.properties.ISO_A3;
             if (!iso3Code || !countryByIso3Code.has(iso3Code)) return null;
-            const d = path(feature as any);
-            if (!d) return null;
             const isSelected = iso3Code === selectedCode;
             const isHovered = iso3Code === hoveredIso3;
             return (
               <path
                 key={iso3Code}
-                d={d}
+                ref={(element) => {
+                  if (element) countryPathsRef.current.set(iso3Code, element);
+                  else countryPathsRef.current.delete(iso3Code);
+                }}
+                data-country-code={iso3Code}
                 fill={isSelected ? 'rgba(239, 68, 68, 0.58)' : isHovered ? 'rgba(245, 158, 11, 0.5)' : 'transparent'}
                 stroke={isSelected ? '#fff7ed' : isHovered ? '#fbbf24' : 'rgba(224, 244, 240, 0.2)'}
                 strokeWidth={isSelected ? 2.4 : isHovered ? 1.7 : 0.55}
@@ -453,6 +535,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
               />
             );
           })}
+          </g>
         </svg>
       <div className="absolute bottom-3 right-3 flex gap-2">
         <button
@@ -474,7 +557,7 @@ const AtlasGlobe: React.FC<AtlasGlobeProps> = ({
         )}
       </div>
       {!isReady && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0b344c]/80 text-sm font-medium text-white">
+        <div className="absolute inset-0 flex items-center justify-center bg-[#fbfaf7]/90 text-sm font-medium text-slate-700">
           Preparing the globe…
         </div>
       )}
