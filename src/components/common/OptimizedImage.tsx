@@ -1,119 +1,90 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import type { ResponsiveImageAsset } from '../../assets/image-types';
+import { createSrcSet } from '../../assets/image-types';
 
 interface OptimizedImageProps {
-  src: string;
-  alt: string;
+  asset: ResponsiveImageAsset;
+  alt?: string;
   className?: string;
-  sizes?: string;
-  priority?: boolean;
-  placeholder?: string;
+  imageClassName?: string;
+  sizes: string;
+  loading?: 'eager' | 'lazy';
+  fetchPriority?: 'high' | 'low' | 'auto';
+  fit?: 'cover' | 'contain';
+  decorative?: boolean;
+  onLoad?: () => void;
 }
 
-const OptimizedImage: React.FC<OptimizedImageProps> = ({
-  src,
+const OptimizedImage = ({
+  asset,
   alt,
-  className = "",
-  sizes = "100vw",
-  priority = false,
-  placeholder
-}) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [isInView, setIsInView] = useState(priority);
-  const imageRef = useRef<HTMLDivElement>(null);
+  className = '',
+  imageClassName = '',
+  sizes,
+  loading = 'lazy',
+  fetchPriority = 'auto',
+  fit = asset.role === 'chart' || asset.role === 'logo' ? 'contain' : 'cover',
+  decorative = false,
+  onLoad,
+}: OptimizedImageProps) => {
+  const [useFallback, setUseFallback] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (priority) return; // Skip intersection observer for priority images
+    setUseFallback(false);
+    setFailed(false);
+  }, [asset.id, asset.fallback.src]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect();
-        }
-      },
-      {
-        rootMargin: '50px 0px', // Start loading 50px before the image comes into view
-        threshold: 0.01
-      }
-    );
-
-    if (imageRef.current) {
-      observer.observe(imageRef.current);
+  const resolvedAlt = decorative ? '' : (alt ?? asset.alt);
+  const objectFitClass = fit === 'contain' ? 'object-contain' : 'object-cover';
+  const handleError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const selectedSource = event.currentTarget.currentSrc;
+    const fallbackUrl = new URL(asset.fallback.src, window.location.href).href;
+    if (!useFallback && selectedSource !== fallbackUrl) {
+      setUseFallback(true);
+      return;
     }
-
-    return () => observer.disconnect();
-  }, [priority]);
-
-  const handleLoad = () => {
-    setIsLoaded(true);
+    setFailed(true);
   };
 
-  const handleError = () => {
-    setHasError(true);
-  };
-
-  // Generate WebP src if the original is not already WebP
-  const generateWebPSrc = (originalSrc: string) => {
-    if (originalSrc.includes('.webp')) return originalSrc;
-    if (originalSrc.includes('http')) return originalSrc; // Don't modify external URLs
-    
-    const lastDotIndex = originalSrc.lastIndexOf('.');
-    if (lastDotIndex === -1) return originalSrc;
-    
-    return originalSrc.substring(0, lastDotIndex) + '.webp';
-  };
-
-  const webpSrc = generateWebPSrc(src);
+  if (failed) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-gray-100 text-sm text-gray-500 ${className}`}
+        role={decorative ? undefined : 'img'}
+        aria-label={decorative ? undefined : `${resolvedAlt} (image unavailable)`}
+      >
+        {!decorative && 'Image unavailable'}
+      </div>
+    );
+  }
 
   return (
-    <div ref={imageRef} className={`relative overflow-hidden ${className}`}>
-      {/* Loading placeholder */}
-      {!isLoaded && !hasError && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-          {placeholder ? (
-            <img 
-              src={placeholder} 
-              alt="" 
-              className="w-full h-full object-cover opacity-50"
-            />
-          ) : (
-            <div className="text-gray-400 text-sm">Loading...</div>
-          )}
-        </div>
-      )}
-
-      {/* Error state */}
-      {hasError && (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <div className="text-gray-400 text-sm">Image unavailable</div>
-        </div>
-      )}
-
-      {/* Main image */}
-      {isInView && (
-        <picture>
-          {/* WebP format for modern browsers */}
-          <source
-            srcSet={webpSrc}
-            type="image/webp"
-          />
-          {/* Fallback to original format */}
-          <img
-            src={src}
-            alt={alt}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            loading={priority ? 'eager' : 'lazy'}
-            sizes={sizes}
-            onLoad={handleLoad}
-            onError={handleError}
-            decoding="async"
-          />
-        </picture>
-      )}
-    </div>
+    <picture className={`block overflow-hidden ${className}`}>
+      {!useFallback && asset.sources.map((source) => (
+        <source
+          key={source.type}
+          type={source.type}
+          srcSet={createSrcSet(source.candidates)}
+          sizes={sizes}
+        />
+      ))}
+      <img
+        src={asset.fallback.src}
+        srcSet={createSrcSet(asset.fallbackCandidates)}
+        alt={resolvedAlt}
+        width={asset.width}
+        height={asset.height}
+        className={`block h-full w-full ${objectFitClass} ${imageClassName}`}
+        style={{ objectPosition: asset.objectPosition }}
+        loading={loading}
+        fetchPriority={fetchPriority}
+        decoding="async"
+        sizes={sizes}
+        onLoad={onLoad}
+        onError={handleError}
+      />
+    </picture>
   );
 };
 

@@ -1,10 +1,12 @@
 import React from 'react';
+import type { ResponsiveImageAsset } from '../../assets/image-types';
+import OptimizedImage from './OptimizedImage';
 
 interface PageLayoutProps {
   title: string;
   intro: string;
   children: React.ReactNode;
-  bgImage?: string;
+  bgImage?: ResponsiveImageAsset;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ title, intro, children, bgImage }) => {
@@ -13,9 +15,14 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, intro, children, bgImage
       {/* Hero Section with Background Image */}
       <div className="relative py-16 md:py-24 mb-12">
         {bgImage && (
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-10"
-            style={{ backgroundImage: `url(${bgImage})` }}
+          <OptimizedImage
+            asset={bgImage}
+            decorative
+            className="absolute inset-0 h-full w-full opacity-10"
+            imageClassName="h-full w-full"
+            sizes="100vw"
+            loading="lazy"
+            fetchPriority="low"
           />
         )}
         <div className="container mx-auto px-4 relative">
@@ -36,4 +43,4 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, intro, children, bgImage
   );
 };
 
-export default PageLayout; 
+export default PageLayout;

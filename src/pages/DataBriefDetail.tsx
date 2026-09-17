@@ -4,6 +4,8 @@ import PageLayout from '../components/common/PageLayout';
 import SEOHead from '../components/seo/SEOHead';
 import { images } from '../assets/images';
 import { dataBriefs, type DataBrief } from '../data/dataBriefs';
+import type { ResponsiveImageAsset } from '../assets/image-types';
+import OptimizedImage from '../components/common/OptimizedImage';
 
 const SITE_ORIGIN = 'https://nph-solutions.com';
 
@@ -28,11 +30,10 @@ const extractKeywordsFromTitle = (title: string): string[] => {
   ));
 };
 
-const toAbsoluteImage = (image: string): string => {
-  if (!image) return `${SITE_ORIGIN}/src/assets/Company-logo.jpg`;
-  if (/^https?:\/\//i.test(image)) return image;
-  if (image.startsWith('/')) return `${SITE_ORIGIN}${image}`;
-  return `${SITE_ORIGIN}/${image}`;
+const toAbsoluteImage = (image: ResponsiveImageAsset): string => {
+  const value = image.fallback.src;
+  if (/^https?:\/\//i.test(value)) return value;
+  return `${SITE_ORIGIN}${value.startsWith('/') ? value : `/${value}`}`;
 };
 
 const safeISODate = (dateStr: string): string | undefined => {
@@ -96,7 +97,7 @@ const DataBriefDetail: React.FC = () => {
         'name': 'NPH Solutions',
         'logo': {
           '@type': 'ImageObject',
-          'url': `${SITE_ORIGIN}/src/assets/Company-logo.jpg`
+          'url': `${SITE_ORIGIN}/images/brand/icon-512.png`
         }
       },
       'mainEntityOfPage': {
@@ -128,7 +129,7 @@ const DataBriefDetail: React.FC = () => {
       <PageLayout
         title="Loading..."
         intro=""
-        bgImage={images.dataAnalysis.url}
+        bgImage={images.dataAnalysis}
       >
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
@@ -145,7 +146,7 @@ const DataBriefDetail: React.FC = () => {
       <PageLayout
         title="Brief Not Found"
         intro="The requested data brief could not be found."
-        bgImage={images.dataAnalysis.url}
+        bgImage={images.dataAnalysis}
       >
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
@@ -183,7 +184,7 @@ const DataBriefDetail: React.FC = () => {
     <PageLayout
       title={brief.title}
       intro={`${brief.category} • ${brief.date} • by ${brief.author}`}
-      bgImage={images.dataAnalysis.url}
+      bgImage={images.dataAnalysis}
     >
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
@@ -219,10 +220,13 @@ const DataBriefDetail: React.FC = () => {
           <div className="mb-8">
             {/* <h2 className="text-xl font-semibold text-gray-800 mb-4">Data Visualization</h2> */}
             <div className="flex justify-center">
-              <img 
-                src={brief.chartImage} 
+              <OptimizedImage
+                asset={brief.chartImage}
                 alt={brief.title}
-                className="max-w-full max-h-96 object-contain rounded-lg"
+                className="max-h-96 max-w-full rounded-lg"
+                sizes="(max-width: 896px) calc(100vw - 6rem), 768px"
+                fit="contain"
+                loading="eager"
               />
             </div>
           </div>

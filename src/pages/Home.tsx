@@ -943,7 +943,7 @@ const Home: React.FC = () => {
             "@type": "Organization",
             "name": "NPH Solutions",
             "url": "https://nph-solutions.com",
-            "logo": "https://nph-solutions.com/src/assets/Company-logo.jpg",
+            "logo": "https://nph-solutions.com/images/brand/icon-512.png",
             "description": "Public health research and data analytics organization serving Africa",
             "service": [
               "Public Health Research",

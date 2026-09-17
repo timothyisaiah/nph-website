@@ -1,0 +1,3022 @@
+{
+  "generatedAt": "deterministic",
+  "pipelineVersion": "3",
+  "assets": [
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 2466,
+      "file": "src/assets/generated/photos/hero-320.avif"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 3706,
+      "file": "src/assets/generated/photos/hero-480.avif"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 4736,
+      "file": "src/assets/generated/photos/hero-640.avif"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 5857,
+      "file": "src/assets/generated/photos/hero-800.avif"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 7093,
+      "file": "src/assets/generated/photos/hero-960.avif"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 9486,
+      "file": "src/assets/generated/photos/hero-1280.avif"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "avif",
+      "width": 1600,
+      "bytes": 11763,
+      "file": "src/assets/generated/photos/hero-1600.avif"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 3254,
+      "file": "src/assets/generated/photos/hero-320.webp"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 5352,
+      "file": "src/assets/generated/photos/hero-480.webp"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 7534,
+      "file": "src/assets/generated/photos/hero-640.webp"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 10484,
+      "file": "src/assets/generated/photos/hero-800.webp"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 12660,
+      "file": "src/assets/generated/photos/hero-960.webp"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 18944,
+      "file": "src/assets/generated/photos/hero-1280.webp"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "webp",
+      "width": 1600,
+      "bytes": 25054,
+      "file": "src/assets/generated/photos/hero-1600.webp"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 5258,
+      "file": "src/assets/generated/photos/hero-320.jpg"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 9105,
+      "file": "src/assets/generated/photos/hero-480.jpg"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 13175,
+      "file": "src/assets/generated/photos/hero-640.jpg"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 17628,
+      "file": "src/assets/generated/photos/hero-800.jpg"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 22588,
+      "file": "src/assets/generated/photos/hero-960.jpg"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 33922,
+      "file": "src/assets/generated/photos/hero-1280.jpg"
+    },
+    {
+      "id": "hero",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1600,
+      "bytes": 47570,
+      "file": "src/assets/generated/photos/hero-1600.jpg"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 4555,
+      "file": "src/assets/generated/photos/about-320.avif"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 7047,
+      "file": "src/assets/generated/photos/about-480.avif"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 9282,
+      "file": "src/assets/generated/photos/about-640.avif"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 11967,
+      "file": "src/assets/generated/photos/about-800.avif"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 14534,
+      "file": "src/assets/generated/photos/about-960.avif"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 19637,
+      "file": "src/assets/generated/photos/about-1280.avif"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "avif",
+      "width": 1600,
+      "bytes": 25162,
+      "file": "src/assets/generated/photos/about-1600.avif"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 6492,
+      "file": "src/assets/generated/photos/about-320.webp"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 10864,
+      "file": "src/assets/generated/photos/about-480.webp"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 15748,
+      "file": "src/assets/generated/photos/about-640.webp"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 21144,
+      "file": "src/assets/generated/photos/about-800.webp"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 26596,
+      "file": "src/assets/generated/photos/about-960.webp"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 39634,
+      "file": "src/assets/generated/photos/about-1280.webp"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "webp",
+      "width": 1600,
+      "bytes": 52714,
+      "file": "src/assets/generated/photos/about-1600.webp"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 10023,
+      "file": "src/assets/generated/photos/about-320.jpg"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 17525,
+      "file": "src/assets/generated/photos/about-480.jpg"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 26553,
+      "file": "src/assets/generated/photos/about-640.jpg"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 36455,
+      "file": "src/assets/generated/photos/about-800.jpg"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 47249,
+      "file": "src/assets/generated/photos/about-960.jpg"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 72140,
+      "file": "src/assets/generated/photos/about-1280.jpg"
+    },
+    {
+      "id": "about",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1600,
+      "bytes": 101673,
+      "file": "src/assets/generated/photos/about-1600.jpg"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 11681,
+      "file": "src/assets/generated/photos/healthcareTeam-320.avif"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 19679,
+      "file": "src/assets/generated/photos/healthcareTeam-480.avif"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 27551,
+      "file": "src/assets/generated/photos/healthcareTeam-640.avif"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 37433,
+      "file": "src/assets/generated/photos/healthcareTeam-800.avif"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 47925,
+      "file": "src/assets/generated/photos/healthcareTeam-960.avif"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 71205,
+      "file": "src/assets/generated/photos/healthcareTeam-1280.avif"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "avif",
+      "width": 1600,
+      "bytes": 96615,
+      "file": "src/assets/generated/photos/healthcareTeam-1600.avif"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 14052,
+      "file": "src/assets/generated/photos/healthcareTeam-320.webp"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 24750,
+      "file": "src/assets/generated/photos/healthcareTeam-480.webp"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 35708,
+      "file": "src/assets/generated/photos/healthcareTeam-640.webp"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 50776,
+      "file": "src/assets/generated/photos/healthcareTeam-800.webp"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 68822,
+      "file": "src/assets/generated/photos/healthcareTeam-960.webp"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 112486,
+      "file": "src/assets/generated/photos/healthcareTeam-1280.webp"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "webp",
+      "width": 1600,
+      "bytes": 161732,
+      "file": "src/assets/generated/photos/healthcareTeam-1600.webp"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 18900,
+      "file": "src/assets/generated/photos/healthcareTeam-320.jpg"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 35506,
+      "file": "src/assets/generated/photos/healthcareTeam-480.jpg"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 55052,
+      "file": "src/assets/generated/photos/healthcareTeam-640.jpg"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 78723,
+      "file": "src/assets/generated/photos/healthcareTeam-800.jpg"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 105359,
+      "file": "src/assets/generated/photos/healthcareTeam-960.jpg"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 174056,
+      "file": "src/assets/generated/photos/healthcareTeam-1280.jpg"
+    },
+    {
+      "id": "healthcareTeam",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1600,
+      "bytes": 261540,
+      "file": "src/assets/generated/photos/healthcareTeam-1600.jpg"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 6363,
+      "file": "src/assets/generated/photos/community-320.avif"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 11535,
+      "file": "src/assets/generated/photos/community-480.avif"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 16180,
+      "file": "src/assets/generated/photos/community-640.avif"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 21283,
+      "file": "src/assets/generated/photos/community-800.avif"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 24876,
+      "file": "src/assets/generated/photos/community-960.avif"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 32169,
+      "file": "src/assets/generated/photos/community-1280.avif"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "avif",
+      "width": 1600,
+      "bytes": 39479,
+      "file": "src/assets/generated/photos/community-1600.avif"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 7856,
+      "file": "src/assets/generated/photos/community-320.webp"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 15072,
+      "file": "src/assets/generated/photos/community-480.webp"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 21932,
+      "file": "src/assets/generated/photos/community-640.webp"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 29144,
+      "file": "src/assets/generated/photos/community-800.webp"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 36068,
+      "file": "src/assets/generated/photos/community-960.webp"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 48944,
+      "file": "src/assets/generated/photos/community-1280.webp"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "webp",
+      "width": 1600,
+      "bytes": 63466,
+      "file": "src/assets/generated/photos/community-1600.webp"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 10591,
+      "file": "src/assets/generated/photos/community-320.jpg"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 19907,
+      "file": "src/assets/generated/photos/community-480.jpg"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 30907,
+      "file": "src/assets/generated/photos/community-640.jpg"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 43802,
+      "file": "src/assets/generated/photos/community-800.jpg"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 56868,
+      "file": "src/assets/generated/photos/community-960.jpg"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 84951,
+      "file": "src/assets/generated/photos/community-1280.jpg"
+    },
+    {
+      "id": "community",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1600,
+      "bytes": 116434,
+      "file": "src/assets/generated/photos/community-1600.jpg"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 5513,
+      "file": "src/assets/generated/photos/laboratory-320.avif"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 8152,
+      "file": "src/assets/generated/photos/laboratory-480.avif"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 10915,
+      "file": "src/assets/generated/photos/laboratory-640.avif"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 14064,
+      "file": "src/assets/generated/photos/laboratory-800.avif"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 17336,
+      "file": "src/assets/generated/photos/laboratory-960.avif"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 24277,
+      "file": "src/assets/generated/photos/laboratory-1280.avif"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "avif",
+      "width": 1600,
+      "bytes": 31926,
+      "file": "src/assets/generated/photos/laboratory-1600.avif"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 7216,
+      "file": "src/assets/generated/photos/laboratory-320.webp"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 11688,
+      "file": "src/assets/generated/photos/laboratory-480.webp"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 16700,
+      "file": "src/assets/generated/photos/laboratory-640.webp"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 22570,
+      "file": "src/assets/generated/photos/laboratory-800.webp"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 28342,
+      "file": "src/assets/generated/photos/laboratory-960.webp"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 42618,
+      "file": "src/assets/generated/photos/laboratory-1280.webp"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "webp",
+      "width": 1600,
+      "bytes": 58442,
+      "file": "src/assets/generated/photos/laboratory-1600.webp"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 10950,
+      "file": "src/assets/generated/photos/laboratory-320.jpg"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 18954,
+      "file": "src/assets/generated/photos/laboratory-480.jpg"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 28265,
+      "file": "src/assets/generated/photos/laboratory-640.jpg"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 38909,
+      "file": "src/assets/generated/photos/laboratory-800.jpg"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 50397,
+      "file": "src/assets/generated/photos/laboratory-960.jpg"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 77279,
+      "file": "src/assets/generated/photos/laboratory-1280.jpg"
+    },
+    {
+      "id": "laboratory",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1600,
+      "bytes": 108991,
+      "file": "src/assets/generated/photos/laboratory-1600.jpg"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 8471,
+      "file": "src/assets/generated/photos/monitoring-320.avif"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 15116,
+      "file": "src/assets/generated/photos/monitoring-480.avif"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 22058,
+      "file": "src/assets/generated/photos/monitoring-640.avif"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 29789,
+      "file": "src/assets/generated/photos/monitoring-800.avif"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 37682,
+      "file": "src/assets/generated/photos/monitoring-960.avif"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 49712,
+      "file": "src/assets/generated/photos/monitoring-1280.avif"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "avif",
+      "width": 1536,
+      "bytes": 57497,
+      "file": "src/assets/generated/photos/monitoring-1536.avif"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 11098,
+      "file": "src/assets/generated/photos/monitoring-320.webp"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 19362,
+      "file": "src/assets/generated/photos/monitoring-480.webp"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 28876,
+      "file": "src/assets/generated/photos/monitoring-640.webp"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 38570,
+      "file": "src/assets/generated/photos/monitoring-800.webp"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 48656,
+      "file": "src/assets/generated/photos/monitoring-960.webp"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 70458,
+      "file": "src/assets/generated/photos/monitoring-1280.webp"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "webp",
+      "width": 1536,
+      "bytes": 93234,
+      "file": "src/assets/generated/photos/monitoring-1536.webp"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 15896,
+      "file": "src/assets/generated/photos/monitoring-320.jpg"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 30950,
+      "file": "src/assets/generated/photos/monitoring-480.jpg"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 49362,
+      "file": "src/assets/generated/photos/monitoring-640.jpg"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 67526,
+      "file": "src/assets/generated/photos/monitoring-800.jpg"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 88987,
+      "file": "src/assets/generated/photos/monitoring-960.jpg"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 130478,
+      "file": "src/assets/generated/photos/monitoring-1280.jpg"
+    },
+    {
+      "id": "monitoring",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1536,
+      "bytes": 174906,
+      "file": "src/assets/generated/photos/monitoring-1536.jpg"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 9224,
+      "file": "src/assets/generated/photos/dataAnalysis-320.avif"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 14990,
+      "file": "src/assets/generated/photos/dataAnalysis-480.avif"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 20554,
+      "file": "src/assets/generated/photos/dataAnalysis-640.avif"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 26668,
+      "file": "src/assets/generated/photos/dataAnalysis-800.avif"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 32717,
+      "file": "src/assets/generated/photos/dataAnalysis-960.avif"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "avif",
+      "width": 1223,
+      "bytes": 55406,
+      "file": "src/assets/generated/photos/dataAnalysis-1223.avif"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 12626,
+      "file": "src/assets/generated/photos/dataAnalysis-320.webp"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 21800,
+      "file": "src/assets/generated/photos/dataAnalysis-480.webp"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 31448,
+      "file": "src/assets/generated/photos/dataAnalysis-640.webp"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 41942,
+      "file": "src/assets/generated/photos/dataAnalysis-800.webp"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 52384,
+      "file": "src/assets/generated/photos/dataAnalysis-960.webp"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "webp",
+      "width": 1223,
+      "bytes": 86290,
+      "file": "src/assets/generated/photos/dataAnalysis-1223.webp"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 16244,
+      "file": "src/assets/generated/photos/dataAnalysis-320.jpg"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 29832,
+      "file": "src/assets/generated/photos/dataAnalysis-480.jpg"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 45742,
+      "file": "src/assets/generated/photos/dataAnalysis-640.jpg"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 63452,
+      "file": "src/assets/generated/photos/dataAnalysis-800.jpg"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 81549,
+      "file": "src/assets/generated/photos/dataAnalysis-960.jpg"
+    },
+    {
+      "id": "dataAnalysis",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1223,
+      "bytes": 124382,
+      "file": "src/assets/generated/photos/dataAnalysis-1223.jpg"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 11806,
+      "file": "src/assets/generated/photos/communityHealth-320.avif"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 18590,
+      "file": "src/assets/generated/photos/communityHealth-480.avif"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 24599,
+      "file": "src/assets/generated/photos/communityHealth-640.avif"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 36013,
+      "file": "src/assets/generated/photos/communityHealth-800.avif"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 15756,
+      "file": "src/assets/generated/photos/communityHealth-320.webp"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 26732,
+      "file": "src/assets/generated/photos/communityHealth-480.webp"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 37284,
+      "file": "src/assets/generated/photos/communityHealth-640.webp"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 57282,
+      "file": "src/assets/generated/photos/communityHealth-800.webp"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 22049,
+      "file": "src/assets/generated/photos/communityHealth-320.jpg"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 40139,
+      "file": "src/assets/generated/photos/communityHealth-480.jpg"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 59555,
+      "file": "src/assets/generated/photos/communityHealth-640.jpg"
+    },
+    {
+      "id": "communityHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 86974,
+      "file": "src/assets/generated/photos/communityHealth-800.jpg"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 15962,
+      "file": "src/assets/generated/photos/healthAndEnvironment-320.avif"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 38158,
+      "file": "src/assets/generated/photos/healthAndEnvironment-480.avif"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 73502,
+      "file": "src/assets/generated/photos/healthAndEnvironment-640.avif"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 116325,
+      "file": "src/assets/generated/photos/healthAndEnvironment-800.avif"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 168953,
+      "file": "src/assets/generated/photos/healthAndEnvironment-960.avif"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 280097,
+      "file": "src/assets/generated/photos/healthAndEnvironment-1280.avif"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 15518,
+      "file": "src/assets/generated/photos/healthAndEnvironment-320.webp"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 38318,
+      "file": "src/assets/generated/photos/healthAndEnvironment-480.webp"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 72794,
+      "file": "src/assets/generated/photos/healthAndEnvironment-640.webp"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 118056,
+      "file": "src/assets/generated/photos/healthAndEnvironment-800.webp"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 171772,
+      "file": "src/assets/generated/photos/healthAndEnvironment-960.webp"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 295478,
+      "file": "src/assets/generated/photos/healthAndEnvironment-1280.webp"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 16558,
+      "file": "src/assets/generated/photos/healthAndEnvironment-320.jpg"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 38333,
+      "file": "src/assets/generated/photos/healthAndEnvironment-480.jpg"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 69774,
+      "file": "src/assets/generated/photos/healthAndEnvironment-640.jpg"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 112029,
+      "file": "src/assets/generated/photos/healthAndEnvironment-800.jpg"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 165045,
+      "file": "src/assets/generated/photos/healthAndEnvironment-960.jpg"
+    },
+    {
+      "id": "healthAndEnvironment",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 293605,
+      "file": "src/assets/generated/photos/healthAndEnvironment-1280.jpg"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 15239,
+      "file": "src/assets/generated/photos/politicalEconomy-320.avif"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 31468,
+      "file": "src/assets/generated/photos/politicalEconomy-480.avif"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 52315,
+      "file": "src/assets/generated/photos/politicalEconomy-640.avif"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 77301,
+      "file": "src/assets/generated/photos/politicalEconomy-800.avif"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 106291,
+      "file": "src/assets/generated/photos/politicalEconomy-960.avif"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 176745,
+      "file": "src/assets/generated/photos/politicalEconomy-1280.avif"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "avif",
+      "width": 1600,
+      "bytes": 253558,
+      "file": "src/assets/generated/photos/politicalEconomy-1600.avif"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 16526,
+      "file": "src/assets/generated/photos/politicalEconomy-320.webp"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 34450,
+      "file": "src/assets/generated/photos/politicalEconomy-480.webp"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 57690,
+      "file": "src/assets/generated/photos/politicalEconomy-640.webp"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 85192,
+      "file": "src/assets/generated/photos/politicalEconomy-800.webp"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 116804,
+      "file": "src/assets/generated/photos/politicalEconomy-960.webp"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 194706,
+      "file": "src/assets/generated/photos/politicalEconomy-1280.webp"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "webp",
+      "width": 1600,
+      "bytes": 282482,
+      "file": "src/assets/generated/photos/politicalEconomy-1600.webp"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 15073,
+      "file": "src/assets/generated/photos/politicalEconomy-320.jpg"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 31880,
+      "file": "src/assets/generated/photos/politicalEconomy-480.jpg"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 54023,
+      "file": "src/assets/generated/photos/politicalEconomy-640.jpg"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 81869,
+      "file": "src/assets/generated/photos/politicalEconomy-800.jpg"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 113722,
+      "file": "src/assets/generated/photos/politicalEconomy-960.jpg"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 193774,
+      "file": "src/assets/generated/photos/politicalEconomy-1280.jpg"
+    },
+    {
+      "id": "politicalEconomy",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1600,
+      "bytes": 288818,
+      "file": "src/assets/generated/photos/politicalEconomy-1600.jpg"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 320,
+      "bytes": 7084,
+      "file": "src/assets/generated/photos/publicHealth-320.avif"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 480,
+      "bytes": 14950,
+      "file": "src/assets/generated/photos/publicHealth-480.avif"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 640,
+      "bytes": 26292,
+      "file": "src/assets/generated/photos/publicHealth-640.avif"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 800,
+      "bytes": 41149,
+      "file": "src/assets/generated/photos/publicHealth-800.avif"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 960,
+      "bytes": 60152,
+      "file": "src/assets/generated/photos/publicHealth-960.avif"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 1280,
+      "bytes": 113461,
+      "file": "src/assets/generated/photos/publicHealth-1280.avif"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "avif",
+      "width": 1600,
+      "bytes": 175708,
+      "file": "src/assets/generated/photos/publicHealth-1600.avif"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 320,
+      "bytes": 8454,
+      "file": "src/assets/generated/photos/publicHealth-320.webp"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 480,
+      "bytes": 18146,
+      "file": "src/assets/generated/photos/publicHealth-480.webp"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 640,
+      "bytes": 31436,
+      "file": "src/assets/generated/photos/publicHealth-640.webp"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 800,
+      "bytes": 50226,
+      "file": "src/assets/generated/photos/publicHealth-800.webp"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 960,
+      "bytes": 71904,
+      "file": "src/assets/generated/photos/publicHealth-960.webp"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 130158,
+      "file": "src/assets/generated/photos/publicHealth-1280.webp"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "webp",
+      "width": 1600,
+      "bytes": 203384,
+      "file": "src/assets/generated/photos/publicHealth-1600.webp"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 320,
+      "bytes": 9580,
+      "file": "src/assets/generated/photos/publicHealth-320.jpg"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 480,
+      "bytes": 20066,
+      "file": "src/assets/generated/photos/publicHealth-480.jpg"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 640,
+      "bytes": 34085,
+      "file": "src/assets/generated/photos/publicHealth-640.jpg"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 800,
+      "bytes": 52477,
+      "file": "src/assets/generated/photos/publicHealth-800.jpg"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 960,
+      "bytes": 74876,
+      "file": "src/assets/generated/photos/publicHealth-960.jpg"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1280,
+      "bytes": 135003,
+      "file": "src/assets/generated/photos/publicHealth-1280.jpg"
+    },
+    {
+      "id": "publicHealth",
+      "role": "photo",
+      "format": "jpeg",
+      "width": 1600,
+      "bytes": 210948,
+      "file": "src/assets/generated/photos/publicHealth-1600.jpg"
+    },
+    {
+      "id": "mddEastAfrica",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 14766,
+      "file": "src/assets/generated/charts/mddEastAfrica-320.webp"
+    },
+    {
+      "id": "mddEastAfrica",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 34952,
+      "file": "src/assets/generated/charts/mddEastAfrica-640.webp"
+    },
+    {
+      "id": "mddEastAfrica",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 57858,
+      "file": "src/assets/generated/charts/mddEastAfrica-960.webp"
+    },
+    {
+      "id": "mddEastAfrica",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 92422,
+      "file": "src/assets/generated/charts/mddEastAfrica-1280.webp"
+    },
+    {
+      "id": "mddEastAfrica",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 102084,
+      "file": "src/assets/generated/charts/mddEastAfrica-1920.webp"
+    },
+    {
+      "id": "mddEastAfrica",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 193880,
+      "file": "src/assets/generated/charts/mddEastAfrica-1920.png"
+    },
+    {
+      "id": "violenceAgainstWomen",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 35808,
+      "file": "src/assets/generated/charts/violenceAgainstWomen-320.webp"
+    },
+    {
+      "id": "violenceAgainstWomen",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 85262,
+      "file": "src/assets/generated/charts/violenceAgainstWomen-640.webp"
+    },
+    {
+      "id": "violenceAgainstWomen",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 159006,
+      "file": "src/assets/generated/charts/violenceAgainstWomen-960.webp"
+    },
+    {
+      "id": "violenceAgainstWomen",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 254178,
+      "file": "src/assets/generated/charts/violenceAgainstWomen-1280.webp"
+    },
+    {
+      "id": "violenceAgainstWomen",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 164182,
+      "file": "src/assets/generated/charts/violenceAgainstWomen-1920.webp"
+    },
+    {
+      "id": "violenceAgainstWomen",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 331718,
+      "file": "src/assets/generated/charts/violenceAgainstWomen-1920.png"
+    },
+    {
+      "id": "under5Mortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17662,
+      "file": "src/assets/generated/charts/under5Mortality-320.webp"
+    },
+    {
+      "id": "under5Mortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 37512,
+      "file": "src/assets/generated/charts/under5Mortality-640.webp"
+    },
+    {
+      "id": "under5Mortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 57240,
+      "file": "src/assets/generated/charts/under5Mortality-960.webp"
+    },
+    {
+      "id": "under5Mortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 88654,
+      "file": "src/assets/generated/charts/under5Mortality-1280.webp"
+    },
+    {
+      "id": "under5Mortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 85090,
+      "file": "src/assets/generated/charts/under5Mortality-1920.webp"
+    },
+    {
+      "id": "under5Mortality",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 175057,
+      "file": "src/assets/generated/charts/under5Mortality-1920.png"
+    },
+    {
+      "id": "fertilityRate",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17438,
+      "file": "src/assets/generated/charts/fertilityRate-320.webp"
+    },
+    {
+      "id": "fertilityRate",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 41950,
+      "file": "src/assets/generated/charts/fertilityRate-640.webp"
+    },
+    {
+      "id": "fertilityRate",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 65916,
+      "file": "src/assets/generated/charts/fertilityRate-960.webp"
+    },
+    {
+      "id": "fertilityRate",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 101494,
+      "file": "src/assets/generated/charts/fertilityRate-1280.webp"
+    },
+    {
+      "id": "fertilityRate",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 97802,
+      "file": "src/assets/generated/charts/fertilityRate-1920.webp"
+    },
+    {
+      "id": "fertilityRate",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 193095,
+      "file": "src/assets/generated/charts/fertilityRate-1920.png"
+    },
+    {
+      "id": "severeWastingMaternalEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 20662,
+      "file": "src/assets/generated/charts/severeWastingMaternalEducation-320.webp"
+    },
+    {
+      "id": "severeWastingMaternalEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 47780,
+      "file": "src/assets/generated/charts/severeWastingMaternalEducation-640.webp"
+    },
+    {
+      "id": "severeWastingMaternalEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 76270,
+      "file": "src/assets/generated/charts/severeWastingMaternalEducation-960.webp"
+    },
+    {
+      "id": "severeWastingMaternalEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 114218,
+      "file": "src/assets/generated/charts/severeWastingMaternalEducation-1280.webp"
+    },
+    {
+      "id": "severeWastingMaternalEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 114210,
+      "file": "src/assets/generated/charts/severeWastingMaternalEducation-1920.webp"
+    },
+    {
+      "id": "severeWastingMaternalEducation",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 226549,
+      "file": "src/assets/generated/charts/severeWastingMaternalEducation-1920.png"
+    },
+    {
+      "id": "severeWastingChildren",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 20106,
+      "file": "src/assets/generated/charts/severeWastingChildren-320.webp"
+    },
+    {
+      "id": "severeWastingChildren",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 42102,
+      "file": "src/assets/generated/charts/severeWastingChildren-640.webp"
+    },
+    {
+      "id": "severeWastingChildren",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 63794,
+      "file": "src/assets/generated/charts/severeWastingChildren-960.webp"
+    },
+    {
+      "id": "severeWastingChildren",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 109460,
+      "file": "src/assets/generated/charts/severeWastingChildren-1280.webp"
+    },
+    {
+      "id": "severeWastingChildren",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 96904,
+      "file": "src/assets/generated/charts/severeWastingChildren-1920.webp"
+    },
+    {
+      "id": "severeWastingChildren",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 187166,
+      "file": "src/assets/generated/charts/severeWastingChildren-1920.png"
+    },
+    {
+      "id": "severeWastingInfants",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 19764,
+      "file": "src/assets/generated/charts/severeWastingInfants-320.webp"
+    },
+    {
+      "id": "severeWastingInfants",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 46752,
+      "file": "src/assets/generated/charts/severeWastingInfants-640.webp"
+    },
+    {
+      "id": "severeWastingInfants",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 72156,
+      "file": "src/assets/generated/charts/severeWastingInfants-960.webp"
+    },
+    {
+      "id": "severeWastingInfants",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 122094,
+      "file": "src/assets/generated/charts/severeWastingInfants-1280.webp"
+    },
+    {
+      "id": "severeWastingInfants",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 113270,
+      "file": "src/assets/generated/charts/severeWastingInfants-1920.webp"
+    },
+    {
+      "id": "severeWastingInfants",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 248238,
+      "file": "src/assets/generated/charts/severeWastingInfants-1920.png"
+    },
+    {
+      "id": "severeAnaemia",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17398,
+      "file": "src/assets/generated/charts/severeAnaemia-320.webp"
+    },
+    {
+      "id": "severeAnaemia",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 40616,
+      "file": "src/assets/generated/charts/severeAnaemia-640.webp"
+    },
+    {
+      "id": "severeAnaemia",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 62634,
+      "file": "src/assets/generated/charts/severeAnaemia-960.webp"
+    },
+    {
+      "id": "severeAnaemia",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 104732,
+      "file": "src/assets/generated/charts/severeAnaemia-1280.webp"
+    },
+    {
+      "id": "severeAnaemia",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 97006,
+      "file": "src/assets/generated/charts/severeAnaemia-1920.webp"
+    },
+    {
+      "id": "severeAnaemia",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 186534,
+      "file": "src/assets/generated/charts/severeAnaemia-1920.png"
+    },
+    {
+      "id": "openDefecation",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17122,
+      "file": "src/assets/generated/charts/openDefecation-320.webp"
+    },
+    {
+      "id": "openDefecation",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 38208,
+      "file": "src/assets/generated/charts/openDefecation-640.webp"
+    },
+    {
+      "id": "openDefecation",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 57592,
+      "file": "src/assets/generated/charts/openDefecation-960.webp"
+    },
+    {
+      "id": "openDefecation",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 100804,
+      "file": "src/assets/generated/charts/openDefecation-1280.webp"
+    },
+    {
+      "id": "openDefecation",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 86086,
+      "file": "src/assets/generated/charts/openDefecation-1920.webp"
+    },
+    {
+      "id": "openDefecation",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 178631,
+      "file": "src/assets/generated/charts/openDefecation-1920.png"
+    },
+    {
+      "id": "obesity",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 15408,
+      "file": "src/assets/generated/charts/obesity-320.webp"
+    },
+    {
+      "id": "obesity",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 37200,
+      "file": "src/assets/generated/charts/obesity-640.webp"
+    },
+    {
+      "id": "obesity",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 60338,
+      "file": "src/assets/generated/charts/obesity-960.webp"
+    },
+    {
+      "id": "obesity",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 92266,
+      "file": "src/assets/generated/charts/obesity-1280.webp"
+    },
+    {
+      "id": "obesity",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 85548,
+      "file": "src/assets/generated/charts/obesity-1920.webp"
+    },
+    {
+      "id": "obesity",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 157637,
+      "file": "src/assets/generated/charts/obesity-1920.png"
+    },
+    {
+      "id": "neonatalMortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17976,
+      "file": "src/assets/generated/charts/neonatalMortality-320.webp"
+    },
+    {
+      "id": "neonatalMortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 41490,
+      "file": "src/assets/generated/charts/neonatalMortality-640.webp"
+    },
+    {
+      "id": "neonatalMortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 62586,
+      "file": "src/assets/generated/charts/neonatalMortality-960.webp"
+    },
+    {
+      "id": "neonatalMortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 102358,
+      "file": "src/assets/generated/charts/neonatalMortality-1280.webp"
+    },
+    {
+      "id": "neonatalMortality",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 96388,
+      "file": "src/assets/generated/charts/neonatalMortality-1920.webp"
+    },
+    {
+      "id": "neonatalMortality",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 192096,
+      "file": "src/assets/generated/charts/neonatalMortality-1920.png"
+    },
+    {
+      "id": "mtct",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 20774,
+      "file": "src/assets/generated/charts/mtct-320.webp"
+    },
+    {
+      "id": "mtct",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 48916,
+      "file": "src/assets/generated/charts/mtct-640.webp"
+    },
+    {
+      "id": "mtct",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 80798,
+      "file": "src/assets/generated/charts/mtct-960.webp"
+    },
+    {
+      "id": "mtct",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 121548,
+      "file": "src/assets/generated/charts/mtct-1280.webp"
+    },
+    {
+      "id": "mtct",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 111896,
+      "file": "src/assets/generated/charts/mtct-1920.webp"
+    },
+    {
+      "id": "mtct",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 213080,
+      "file": "src/assets/generated/charts/mtct-1920.png"
+    },
+    {
+      "id": "medianAgeSexualIntercourse",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 13438,
+      "file": "src/assets/generated/charts/medianAgeSexualIntercourse-320.webp"
+    },
+    {
+      "id": "medianAgeSexualIntercourse",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 30700,
+      "file": "src/assets/generated/charts/medianAgeSexualIntercourse-640.webp"
+    },
+    {
+      "id": "medianAgeSexualIntercourse",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 48694,
+      "file": "src/assets/generated/charts/medianAgeSexualIntercourse-960.webp"
+    },
+    {
+      "id": "medianAgeSexualIntercourse",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 75850,
+      "file": "src/assets/generated/charts/medianAgeSexualIntercourse-1280.webp"
+    },
+    {
+      "id": "medianAgeSexualIntercourse",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 73158,
+      "file": "src/assets/generated/charts/medianAgeSexualIntercourse-1920.webp"
+    },
+    {
+      "id": "medianAgeSexualIntercourse",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 160921,
+      "file": "src/assets/generated/charts/medianAgeSexualIntercourse-1920.png"
+    },
+    {
+      "id": "itn",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 20958,
+      "file": "src/assets/generated/charts/itn-320.webp"
+    },
+    {
+      "id": "itn",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 53984,
+      "file": "src/assets/generated/charts/itn-640.webp"
+    },
+    {
+      "id": "itn",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 88550,
+      "file": "src/assets/generated/charts/itn-960.webp"
+    },
+    {
+      "id": "itn",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 134290,
+      "file": "src/assets/generated/charts/itn-1280.webp"
+    },
+    {
+      "id": "itn",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 125878,
+      "file": "src/assets/generated/charts/itn-1920.webp"
+    },
+    {
+      "id": "itn",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 247428,
+      "file": "src/assets/generated/charts/itn-1920.png"
+    },
+    {
+      "id": "fgm",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 24802,
+      "file": "src/assets/generated/charts/fgm-320.webp"
+    },
+    {
+      "id": "fgm",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 61990,
+      "file": "src/assets/generated/charts/fgm-640.webp"
+    },
+    {
+      "id": "fgm",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 100264,
+      "file": "src/assets/generated/charts/fgm-960.webp"
+    },
+    {
+      "id": "fgm",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 148962,
+      "file": "src/assets/generated/charts/fgm-1280.webp"
+    },
+    {
+      "id": "fgm",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 135826,
+      "file": "src/assets/generated/charts/fgm-1920.webp"
+    },
+    {
+      "id": "fgm",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 243510,
+      "file": "src/assets/generated/charts/fgm-1920.png"
+    },
+    {
+      "id": "facilityBirths",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17770,
+      "file": "src/assets/generated/charts/facilityBirths-320.webp"
+    },
+    {
+      "id": "facilityBirths",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 43410,
+      "file": "src/assets/generated/charts/facilityBirths-640.webp"
+    },
+    {
+      "id": "facilityBirths",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 70278,
+      "file": "src/assets/generated/charts/facilityBirths-960.webp"
+    },
+    {
+      "id": "facilityBirths",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 111086,
+      "file": "src/assets/generated/charts/facilityBirths-1280.webp"
+    },
+    {
+      "id": "facilityBirths",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 106918,
+      "file": "src/assets/generated/charts/facilityBirths-1920.webp"
+    },
+    {
+      "id": "facilityBirths",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 225510,
+      "file": "src/assets/generated/charts/facilityBirths-1920.png"
+    },
+    {
+      "id": "exclusiveBreastfeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 15704,
+      "file": "src/assets/generated/charts/exclusiveBreastfeeding-320.webp"
+    },
+    {
+      "id": "exclusiveBreastfeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 37618,
+      "file": "src/assets/generated/charts/exclusiveBreastfeeding-640.webp"
+    },
+    {
+      "id": "exclusiveBreastfeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 58784,
+      "file": "src/assets/generated/charts/exclusiveBreastfeeding-960.webp"
+    },
+    {
+      "id": "exclusiveBreastfeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 92688,
+      "file": "src/assets/generated/charts/exclusiveBreastfeeding-1280.webp"
+    },
+    {
+      "id": "exclusiveBreastfeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 98434,
+      "file": "src/assets/generated/charts/exclusiveBreastfeeding-1920.webp"
+    },
+    {
+      "id": "exclusiveBreastfeeding",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 195540,
+      "file": "src/assets/generated/charts/exclusiveBreastfeeding-1920.png"
+    },
+    {
+      "id": "electricity",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 15268,
+      "file": "src/assets/generated/charts/electricity-320.webp"
+    },
+    {
+      "id": "electricity",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 33240,
+      "file": "src/assets/generated/charts/electricity-640.webp"
+    },
+    {
+      "id": "electricity",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 51396,
+      "file": "src/assets/generated/charts/electricity-960.webp"
+    },
+    {
+      "id": "electricity",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 90928,
+      "file": "src/assets/generated/charts/electricity-1280.webp"
+    },
+    {
+      "id": "electricity",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 75040,
+      "file": "src/assets/generated/charts/electricity-1920.webp"
+    },
+    {
+      "id": "electricity",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 146949,
+      "file": "src/assets/generated/charts/electricity-1920.png"
+    },
+    {
+      "id": "womenEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 19460,
+      "file": "src/assets/generated/charts/womenEducation-320.webp"
+    },
+    {
+      "id": "womenEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 46702,
+      "file": "src/assets/generated/charts/womenEducation-640.webp"
+    },
+    {
+      "id": "womenEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 77824,
+      "file": "src/assets/generated/charts/womenEducation-960.webp"
+    },
+    {
+      "id": "womenEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 123126,
+      "file": "src/assets/generated/charts/womenEducation-1280.webp"
+    },
+    {
+      "id": "womenEducation",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 127384,
+      "file": "src/assets/generated/charts/womenEducation-1920.webp"
+    },
+    {
+      "id": "womenEducation",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 234000,
+      "file": "src/assets/generated/charts/womenEducation-1920.png"
+    },
+    {
+      "id": "pregnancyDeath",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 18900,
+      "file": "src/assets/generated/charts/pregnancyDeath-320.webp"
+    },
+    {
+      "id": "pregnancyDeath",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 41296,
+      "file": "src/assets/generated/charts/pregnancyDeath-640.webp"
+    },
+    {
+      "id": "pregnancyDeath",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 62348,
+      "file": "src/assets/generated/charts/pregnancyDeath-960.webp"
+    },
+    {
+      "id": "pregnancyDeath",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 97700,
+      "file": "src/assets/generated/charts/pregnancyDeath-1280.webp"
+    },
+    {
+      "id": "pregnancyDeath",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 97502,
+      "file": "src/assets/generated/charts/pregnancyDeath-1920.webp"
+    },
+    {
+      "id": "pregnancyDeath",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 202816,
+      "file": "src/assets/generated/charts/pregnancyDeath-1920.png"
+    },
+    {
+      "id": "csUganda",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 15412,
+      "file": "src/assets/generated/charts/csUganda-320.webp"
+    },
+    {
+      "id": "csUganda",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 30322,
+      "file": "src/assets/generated/charts/csUganda-640.webp"
+    },
+    {
+      "id": "csUganda",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 41598,
+      "file": "src/assets/generated/charts/csUganda-960.webp"
+    },
+    {
+      "id": "csUganda",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 71246,
+      "file": "src/assets/generated/charts/csUganda-1280.webp"
+    },
+    {
+      "id": "csUganda",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 64766,
+      "file": "src/assets/generated/charts/csUganda-1920.webp"
+    },
+    {
+      "id": "csUganda",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 141312,
+      "file": "src/assets/generated/charts/csUganda-1920.png"
+    },
+    {
+      "id": "csSsa",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 16434,
+      "file": "src/assets/generated/charts/csSsa-320.webp"
+    },
+    {
+      "id": "csSsa",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 39694,
+      "file": "src/assets/generated/charts/csSsa-640.webp"
+    },
+    {
+      "id": "csSsa",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 65406,
+      "file": "src/assets/generated/charts/csSsa-960.webp"
+    },
+    {
+      "id": "csSsa",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 100788,
+      "file": "src/assets/generated/charts/csSsa-1280.webp"
+    },
+    {
+      "id": "csSsa",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 96492,
+      "file": "src/assets/generated/charts/csSsa-1920.webp"
+    },
+    {
+      "id": "csSsa",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 178864,
+      "file": "src/assets/generated/charts/csSsa-1920.png"
+    },
+    {
+      "id": "contraceptiveMethods",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17090,
+      "file": "src/assets/generated/charts/contraceptiveMethods-320.webp"
+    },
+    {
+      "id": "contraceptiveMethods",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 39724,
+      "file": "src/assets/generated/charts/contraceptiveMethods-640.webp"
+    },
+    {
+      "id": "contraceptiveMethods",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 61244,
+      "file": "src/assets/generated/charts/contraceptiveMethods-960.webp"
+    },
+    {
+      "id": "contraceptiveMethods",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 105242,
+      "file": "src/assets/generated/charts/contraceptiveMethods-1280.webp"
+    },
+    {
+      "id": "contraceptiveMethods",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 93574,
+      "file": "src/assets/generated/charts/contraceptiveMethods-1920.webp"
+    },
+    {
+      "id": "contraceptiveMethods",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 191352,
+      "file": "src/assets/generated/charts/contraceptiveMethods-1920.png"
+    },
+    {
+      "id": "bottleFeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17910,
+      "file": "src/assets/generated/charts/bottleFeeding-320.webp"
+    },
+    {
+      "id": "bottleFeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 44160,
+      "file": "src/assets/generated/charts/bottleFeeding-640.webp"
+    },
+    {
+      "id": "bottleFeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 75058,
+      "file": "src/assets/generated/charts/bottleFeeding-960.webp"
+    },
+    {
+      "id": "bottleFeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 110532,
+      "file": "src/assets/generated/charts/bottleFeeding-1280.webp"
+    },
+    {
+      "id": "bottleFeeding",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 117810,
+      "file": "src/assets/generated/charts/bottleFeeding-1920.webp"
+    },
+    {
+      "id": "bottleFeeding",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 224086,
+      "file": "src/assets/generated/charts/bottleFeeding-1920.png"
+    },
+    {
+      "id": "basicAntigens",
+      "role": "chart",
+      "format": "webp",
+      "width": 320,
+      "bytes": 17024,
+      "file": "src/assets/generated/charts/basicAntigens-320.webp"
+    },
+    {
+      "id": "basicAntigens",
+      "role": "chart",
+      "format": "webp",
+      "width": 640,
+      "bytes": 42498,
+      "file": "src/assets/generated/charts/basicAntigens-640.webp"
+    },
+    {
+      "id": "basicAntigens",
+      "role": "chart",
+      "format": "webp",
+      "width": 960,
+      "bytes": 69432,
+      "file": "src/assets/generated/charts/basicAntigens-960.webp"
+    },
+    {
+      "id": "basicAntigens",
+      "role": "chart",
+      "format": "webp",
+      "width": 1280,
+      "bytes": 107980,
+      "file": "src/assets/generated/charts/basicAntigens-1280.webp"
+    },
+    {
+      "id": "basicAntigens",
+      "role": "chart",
+      "format": "webp",
+      "width": 1920,
+      "bytes": 108874,
+      "file": "src/assets/generated/charts/basicAntigens-1920.webp"
+    },
+    {
+      "id": "basicAntigens",
+      "role": "chart",
+      "format": "png",
+      "width": 1920,
+      "bytes": 223756,
+      "file": "src/assets/generated/charts/basicAntigens-1920.png"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "webp",
+      "width": 64,
+      "bytes": 1074,
+      "file": "src/assets/generated/logos/companyLogo-64.webp"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "webp",
+      "width": 128,
+      "bytes": 2496,
+      "file": "src/assets/generated/logos/companyLogo-128.webp"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "webp",
+      "width": 256,
+      "bytes": 5542,
+      "file": "src/assets/generated/logos/companyLogo-256.webp"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "webp",
+      "width": 512,
+      "bytes": 11690,
+      "file": "src/assets/generated/logos/companyLogo-512.webp"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "png",
+      "width": 64,
+      "bytes": 5701,
+      "file": "src/assets/generated/logos/companyLogo-64.png"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "png",
+      "width": 128,
+      "bytes": 17579,
+      "file": "src/assets/generated/logos/companyLogo-128.png"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "png",
+      "width": 256,
+      "bytes": 58474,
+      "file": "src/assets/generated/logos/companyLogo-256.png"
+    },
+    {
+      "id": "companyLogo",
+      "role": "logo",
+      "format": "png",
+      "width": 512,
+      "bytes": 209647,
+      "file": "src/assets/generated/logos/companyLogo-512.png"
+    },
+    {
+      "id": "icon-192",
+      "role": "logo",
+      "format": "png",
+      "width": 192,
+      "bytes": 37969,
+      "file": "public/images/brand/icon-192.png"
+    },
+    {
+      "id": "icon-512",
+      "role": "logo",
+      "format": "png",
+      "width": 512,
+      "bytes": 238031,
+      "file": "public/images/brand/icon-512.png"
+    },
+    {
+      "id": "social-preview",
+      "role": "logo",
+      "format": "jpeg",
+      "width": 1200,
+      "bytes": 25649,
+      "file": "public/images/brand/social-preview.jpg"
+    }
+  ]
+}

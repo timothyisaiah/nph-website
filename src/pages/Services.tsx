@@ -16,8 +16,7 @@ const services = [
       'Impact Evaluation Methodologies: Randomized trials, difference-in-differences, propensity-score matching and mixed-methods to assess intervention impact.',
       'Data Analysis & Reporting: Performing advanced quantitative and qualitative analyses, and translating results into clear, decision-oriented reports.'
     ],
-    image: images.publicHealth.url,
-    imageAlt: images.publicHealth.alt,
+    image: images.publicHealth,
     link: '/thematic-areas'
   },
   {
@@ -29,8 +28,7 @@ const services = [
       'Logframe.',
       'Theory of change.'
     ],
-    image: images.monitoring.url,
-    imageAlt: images.monitoring.alt,
+    image: images.monitoring,
     link: '/contact'
   },
   {
@@ -40,8 +38,7 @@ const services = [
       'Geospatial mapping, early-warning and forecasting algorithms.',
       'Development of dashboards and Visualizations to support near real-time decision making.'
     ],
-    image: images.dataAnalysis.url,
-    imageAlt: images.dataAnalysis.alt,
+    image: images.dataAnalysis,
     link: '/data'
   },
   {
@@ -54,8 +51,7 @@ const services = [
       'Policy advocacy and social accountability to influence public health policy while enhancing citizen voice and accountability in health service delivery.',
       'Health promotion materials development such as toolkits and multimedia content to support campaigns and outreach efforts.'
     ],
-    image: images.communityHealth.url,
-    imageAlt: images.communityHealth.alt,
+    image: images.communityHealth,
     link: '/contact'
   }
 ];
@@ -68,12 +64,10 @@ const ServiceItem: React.FC<{ service: typeof services[0]; index: number }> = ({
         {/* Image Section with optimized loading */}
         <div className="relative h-64 lg:h-full">
           <OptimizedImage
-            src={service.image}
-            alt={service.imageAlt}
+            asset={service.image}
             className="w-full h-full"
             sizes="(max-width: 1024px) 100vw, 50vw"
-            priority={index === 0} // Only load first image immediately
-            placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
+            loading={index === 0 ? 'eager' : 'lazy'}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
         </div>
@@ -176,7 +170,7 @@ const Services: React.FC = () => {
       <PageLayout
         title="Our Services"
         intro="We provide specialized public health services that combine research excellence, data-driven insights, and community engagement to address complex health challenges and improve population health outcomes across Africa."
-        bgImage={images.services.url}
+        bgImage={images.services}
       >
       <div className="space-y-8 lg:space-y-12">
         {services.map((service, index) => (
@@ -190,4 +184,4 @@ const Services: React.FC = () => {
   );
 };
 
-export default Services; 
+export default Services;

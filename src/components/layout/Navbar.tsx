@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import companyLogo from '../../assets/Company-logo.jpg';
+import { images } from '../../assets/images';
+import OptimizedImage from '../common/OptimizedImage';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,10 +63,12 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center space-x-3">
-              <img 
-                src={companyLogo}
-                alt="NPH Solutions Logo" 
-                className="h-10 w-auto object-contain"
+              <OptimizedImage
+                asset={images.companyLogo}
+                alt="NPH Solutions logo"
+                className="h-10 w-11"
+                sizes="44px"
+                loading="eager"
               />
               <span className="text-xl font-bold text-white">NPH Solutions</span>
             </Link>
@@ -189,4 +192,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

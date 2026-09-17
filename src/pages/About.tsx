@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { images } from '../assets/images';
-import companyLogo from '../assets/Company-logo.jpg';
 import SEOHead from '../components/seo/SEOHead';
+import OptimizedImage from '../components/common/OptimizedImage';
 
 const About = () => {
   return (
@@ -42,10 +42,12 @@ const About = () => {
             <div className="space-y-8">
               {/* Company Logo */}
               <div className="flex items-center gap-4 mb-6">
-                <img 
-                  src={companyLogo}
-                  alt="NPH Solutions Logo" 
-                  className="w-16 h-16 object-contain rounded-lg shadow-md"
+                <OptimizedImage
+                  asset={images.companyLogo}
+                  alt="NPH Solutions logo"
+                  className="w-16 h-16 rounded-lg shadow-md"
+                  sizes="64px"
+                  loading="eager"
                 />
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
                   About NPH Solutions Ltd
@@ -84,10 +86,11 @@ const About = () => {
             {/* Right Column - Visual Element */}
             <div className="relative">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src={`${images.about.url}?w=800&h=600&fit=crop&crop=center`}
-                  alt={images.about.alt}
-                  className="w-full h-96 md:h-[500px] object-cover"
+                <OptimizedImage
+                  asset={images.about}
+                  className="w-full h-96 md:h-[500px]"
+                  sizes="(max-width: 1023px) calc(100vw - 2rem), 50vw"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 right-6">
