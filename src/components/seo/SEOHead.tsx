@@ -20,7 +20,7 @@ interface SEOHeadProps {
 }
 
 const SITE_ORIGIN = 'https://nph-solutions.com';
-const DEFAULT_IMAGE = `${SITE_ORIGIN}/src/assets/Company-logo.jpg`;
+const DEFAULT_IMAGE = `${SITE_ORIGIN}/images/brand/social-preview.jpg`;
 
 const toAbsoluteUrl = (value: string | undefined, fallback: string): string => {
   if (!value) return fallback;

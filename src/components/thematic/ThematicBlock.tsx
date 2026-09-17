@@ -1,27 +1,30 @@
 import React from 'react';
+import type { ResponsiveImageAsset } from '../../assets/image-types';
+import OptimizedImage from '../common/OptimizedImage';
 
 interface ThematicBlockProps {
   title: string;
   description: string;
-  image?: string;
-  imageAlt?: string;
+  image?: ResponsiveImageAsset;
 }
 
 const ThematicBlock: React.FC<ThematicBlockProps> = ({ 
   title, 
   description, 
-  image, 
-  imageAlt
+  image
 }) => {
   return (
     <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100 h-full">
       <div className="flex flex-col lg:flex-row h-full">
         {image && (
-          <div className="lg:w-1/3 lg:h-full overflow-hidden">
-            <img 
-              src={image} 
-              alt={imageAlt || title} 
-              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300" 
+          <div className="h-56 overflow-hidden lg:h-full lg:min-h-72 lg:w-1/3">
+            <OptimizedImage
+              asset={image}
+              alt={image.alt || title}
+              className="h-full w-full"
+              imageClassName="transform transition-transform duration-300 hover:scale-105"
+              sizes="(max-width: 1023px) calc(100vw - 2rem), 17vw"
+              loading="lazy"
             />
           </div>
         )}
@@ -34,4 +37,4 @@ const ThematicBlock: React.FC<ThematicBlockProps> = ({
   );
 };
 
-export default ThematicBlock; 
+export default ThematicBlock;

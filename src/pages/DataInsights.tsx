@@ -4,6 +4,7 @@ import PageLayout from '../components/common/PageLayout';
 import SEOHead from '../components/seo/SEOHead';
 import { images } from '../assets/images';
 import { dataBriefs, type DataBrief } from '../data/dataBriefs';
+import OptimizedImage from '../components/common/OptimizedImage';
 
 const DataInsights: React.FC = () => {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ const DataInsights: React.FC = () => {
     <PageLayout
       title="Data Insights"
       intro="Health data enhances the ability to advocate for or enact needed changes to health policies and services. Explore our data briefs and interactive visualizations to gain insights into public health trends and patterns."
-      bgImage={images.dataAnalysis.url}
+      bgImage={images.dataAnalysis}
     >
       <div className="max-w-6xl mx-auto">
         {/* Tab Navigation */}
@@ -111,10 +112,13 @@ const DataInsights: React.FC = () => {
                   <div className="flex flex-col h-full">
                     {/* Chart Image Section - Full width, corner to corner */}
                     <div className="w-full h-48 overflow-hidden">
-                      <img 
-                        src={brief.chartImage} 
+                      <OptimizedImage
+                        asset={brief.chartImage}
                         alt={brief.title}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full"
+                        fit={brief.chartImage.role === 'chart' ? 'contain' : 'cover'}
+                        sizes="(max-width: 1023px) calc(100vw - 2rem), 36rem"
+                        loading="lazy"
                       />
                     </div>
                     
@@ -225,4 +229,4 @@ const DataInsights: React.FC = () => {
   );
 };
 
-export default DataInsights; 
+export default DataInsights;
